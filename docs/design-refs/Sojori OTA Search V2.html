@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sojori · Recherche · Marrakech · 142 biens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f1011;--ink2:#3a3a3c;--ink3:#6e6e73;--ink4:#a8a7a4;
+  --paper:#faf7f0;--paper2:#f3eee2;--card:#ffffff;
+  --b:#e9e3d3;--bs:#d4ccb5;
+  --gold:#c89b3c;--goldD:#9b7626;--goldS:#e8c87a;--goldT:rgba(200,155,60,0.10);
+  --ai:#a855f7;--aiD:#7e22ce;--aiT:rgba(168,85,247,0.10);
+  --rose:#e11d48;--roseT:rgba(225,29,72,0.10);
+  --emerald:#059669;--emT:rgba(5,150,105,0.10);
+  --sans:Geist,system-ui,sans-serif;--serif:'Instrument Serif',Georgia,serif;--mono:'Geist Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+html,body{margin:0;background:var(--paper);font-family:var(--sans);color:var(--ink);font-size:14px;line-height:1.5}
+button{cursor:pointer;border:0;background:transparent;font:inherit;color:inherit;padding:0}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+input,select,textarea{font:inherit;color:inherit}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pulseAI{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,0.40)}50%{box-shadow:0 0 0 10px rgba(168,85,247,0)}}
+@keyframes pulseGold{0%,100%{box-shadow:0 0 0 0 rgba(200,155,60,0.45)}50%{box-shadow:0 0 0 10px rgba(200,155,60,0)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes spinR{to{transform:rotate(360deg)}}
+
+/* ─── NAV ─── */
+.nav{position:sticky;top:0;z-index:50;padding:14px 32px;display:flex;align-items:center;gap:18px;background:rgba(250,247,240,0.92);backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--b);height:68px}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--serif);font-size:24px;font-weight:400;letter-spacing:-0.025em;font-style:italic;flex-shrink:0}
+.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
+
+/* SEARCH PILLS in header */
+.search-pills{display:flex;align-items:stretch;background:var(--card);border:1px solid var(--b);border-radius:99px;padding:5px;box-shadow:0 1px 2px rgba(15,16,17,0.04);max-width:540px;flex:1;margin:0 12px}
+.search-pills:hover{box-shadow:0 4px 12px rgba(15,16,17,0.08)}
+.sp-cell{padding:5px 14px;cursor:pointer;border-right:1px solid var(--b);min-width:0;flex:1;border-radius:99px;transition:background .15s}
+.sp-cell:hover{background:var(--paper2)}
+.sp-cell:last-of-type{border-right:0}
+.sp-cell .l{font-size:9.5px;font-weight:700;color:var(--ink3);letter-spacing:0.06em;text-transform:uppercase;font-family:var(--mono)}
+.sp-cell .v{font-size:13px;font-weight:600;letter-spacing:-0.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.search-pills .go{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--goldS),var(--gold));color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;align-self:center;margin:0 2px;box-shadow:0 2px 8px rgba(200,155,60,0.30)}
+
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.lang-pill{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--ink2);padding:6px 10px;border:1px solid var(--b);border-radius:99px;letter-spacing:0.04em}
+.icon-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--b);background:var(--card);font-size:14px}
+.icon-btn:hover{border-color:var(--ink2)}
+.nav-cta{padding:9px 16px;background:var(--ink);color:var(--paper);font-size:12.5px;font-weight:600;border-radius:99px}
+
+/* ─── AI PROMPT TRANSLATION BAR ─── */
+.ai-bar{padding:18px 32px;background:linear-gradient(135deg,rgba(168,85,247,0.06),rgba(200,155,60,0.04) 60%,transparent);border-bottom:1px solid var(--b);position:sticky;top:68px;z-index:40;backdrop-filter:blur(12px)}
+.ai-bar-inner{display:flex;align-items:center;gap:14px;max-width:1500px;margin:0 auto}
+.ai-bar .ic{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#c084fc,var(--ai));color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;animation:pulseAI 3s infinite}
+.ai-bar .ic.spinner{background:var(--card);color:var(--ai);border:2px dashed var(--ai);animation:spinR 2s linear infinite}
+.ai-bar .copy{flex:1;min-width:0}
+.ai-bar .copy .pretitle{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--ai);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px}
+.ai-bar .copy .prompt{font-size:15px;font-weight:500;color:var(--ink);letter-spacing:-0.005em;font-style:italic;font-family:var(--serif);font-size:19px;line-height:1.3}
+.ai-bar .copy .prompt .quoted{background:var(--aiT);padding:1px 6px;border-radius:5px;color:var(--ai);font-style:normal;font-family:var(--sans);font-size:14px;font-weight:600}
+.ai-bar .copy .applied{font-size:11.5px;color:var(--ink3);margin-top:6px;font-family:var(--mono);font-weight:600;letter-spacing:0.02em;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ai-bar .copy .applied b{color:var(--ai);font-weight:700}
+.ai-bar .copy .applied .dot{width:3px;height:3px;border-radius:50%;background:var(--ink4)}
+.ai-bar .edit-prompt{padding:8px 14px;background:var(--card);border:1px solid var(--b);border-radius:99px;font-size:12px;font-weight:600;color:var(--ink2);display:inline-flex;align-items:center;gap:6px}
+.ai-bar .edit-prompt:hover{border-color:var(--ai);color:var(--ai)}
+.ai-bar .new-search{padding:8px 14px;background:var(--ink);color:var(--paper);border-radius:99px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+
+/* ─── LAYOUT ─── */
+.layout{display:grid;grid-template-columns:300px 1fr 380px;gap:0;align-items:start}
+
+/* ─── SIDEBAR FILTERS ─── */
+.filters{padding:24px 24px 60px;border-right:1px solid var(--b);position:sticky;top:172px;align-self:start;max-height:calc(100vh - 172px);overflow-y:auto;background:rgba(250,247,240,0.50)}
+.filters::-webkit-scrollbar{width:6px}
+.filters::-webkit-scrollbar-thumb{background:var(--bs);border-radius:99px}
+.f-h{display:flex;align-items:baseline;gap:8px;margin-bottom:14px}
+.f-h h2{margin:0;font-family:var(--serif);font-size:24px;font-weight:400;letter-spacing:-0.025em}
+.f-h h2 .it{font-style:italic;color:var(--goldD)}
+.f-h .count{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--ai);background:var(--aiT);padding:3px 8px;border-radius:99px;letter-spacing:0.06em}
+
+.f-group{padding:16px 0;border-bottom:1px solid var(--b)}
+.f-group:last-child{border-bottom:0}
+.f-group .h{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--ink3);letter-spacing:0.10em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.f-group .h .em{font-size:12px;letter-spacing:0}
+.f-group .h .ai-tag{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:800;background:var(--aiT);color:var(--ai);padding:2px 6px;border-radius:4px;letter-spacing:0.04em;animation:pulseAI 3s infinite}
+
+/* Price histogram */
+.price-block{margin-top:4px}
+.price-hist{display:flex;align-items:flex-end;gap:1.5px;height:38px;margin-bottom:4px;cursor:pointer}
+.ph-bar{flex:1;background:var(--paper2);border-radius:2px 2px 0 0;transition:background .15s}
+.ph-bar.on{background:linear-gradient(180deg,var(--goldS),var(--gold))}
+.price-track{position:relative;height:5px;background:var(--paper2);border-radius:99px}
+.price-fill{position:absolute;left:18%;right:30%;top:0;bottom:0;background:linear-gradient(90deg,var(--goldS),var(--gold));border-radius:99px}
+.price-knob{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:#fff;border:2.5px solid var(--goldD);transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(155,118,38,0.30);cursor:grab}
+.price-vals{display:flex;justify-content:space-between;margin-top:10px;font-family:var(--mono);font-size:12px;font-weight:700}
+.price-vals .lo{color:var(--goldD)}
+.price-vals .median{margin-top:6px;text-align:center;font-size:10px;color:var(--ink3);font-weight:600;letter-spacing:0.02em}
+
+/* Source pills (UNIQUE selling point) */
+.source-grid{display:flex;flex-direction:column;gap:6px}
+.source-row{display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--card);border:1.5px solid var(--b);border-radius:10px;cursor:pointer;transition:all .12s}
+.source-row:hover{border-color:var(--bs)}
+.source-row.on{border-color:var(--ink);background:var(--paper2)}
+.source-row input{width:16px;height:16px;accent-color:var(--ink);cursor:pointer}
+.source-row .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:5px;font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:0.04em;color:#fff}
+.source-row .badge.exclusive{background:linear-gradient(135deg,#1c4f3a,#0a3526)}
+.source-row .badge.airbnb{background:#FF385C}
+.source-row .badge.booking{background:#003580}
+.source-row .nm{font-size:12.5px;font-weight:600;flex:1}
+.source-row .ct{font-family:var(--mono);font-size:10.5px;color:var(--ink3);font-weight:700;letter-spacing:0.04em}
+
+/* Type pills */
+.type-pills{display:flex;flex-wrap:wrap;gap:5px}
+.type-pill{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:99px;font-size:12px;font-weight:600;background:var(--card);border:1.5px solid var(--b);color:var(--ink2);cursor:pointer;letter-spacing:-0.005em}
+.type-pill.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.type-pill .em{font-size:13px}
+.type-pill .ct{font-family:var(--mono);font-size:9.5px;color:var(--ink3);font-weight:700;letter-spacing:0.04em}
+.type-pill.on .ct{color:rgba(250,247,240,0.6)}
+
+/* Amenities checklist */
+.am-list{display:flex;flex-direction:column;gap:6px}
+.am-row{display:flex;align-items:center;gap:9px;padding:5px 0;cursor:pointer;font-size:13px}
+.am-row input{width:16px;height:16px;accent-color:var(--goldD);cursor:pointer}
+.am-row .em{font-size:13px;margin-right:-2px}
+.am-row .ct{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink3);font-weight:700;letter-spacing:0.04em}
+.am-more{font-size:11.5px;color:var(--goldD);font-weight:700;margin-top:6px;cursor:pointer;letter-spacing:-0.005em}
+
+/* PM multi */
+.pm-multi{display:flex;flex-direction:column;gap:5px}
+.pm-row{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:9px;cursor:pointer;background:var(--card);border:1px solid var(--b);transition:all .12s}
+.pm-row:hover{border-color:var(--bs)}
+.pm-row.on{border-color:var(--goldD);background:linear-gradient(135deg,var(--goldT),var(--card))}
+.pm-row input{width:14px;height:14px;accent-color:var(--goldD)}
+.pm-row .lg{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--goldS),var(--goldD));color:var(--ink);font-family:var(--mono);font-size:9.5px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:-0.02em;flex-shrink:0}
+.pm-row .lg.c2{background:linear-gradient(135deg,#c4b5fd,#7c3aed);color:#fff}
+.pm-row .lg.c3{background:linear-gradient(135deg,#86efac,#15803d);color:#fff}
+.pm-row .lg.c4{background:linear-gradient(135deg,#fda4af,#dc2626);color:#fff}
+.pm-row .nm{font-size:12.5px;font-weight:700;letter-spacing:-0.005em;flex:1}
+.pm-row .ct{font-family:var(--mono);font-size:10px;color:var(--ink3);font-weight:700;letter-spacing:0.04em}
+
+/* Star pills */
+.star-pills{display:flex;gap:5px}
+.star-pill{padding:7px 12px;border-radius:99px;font-family:var(--mono);font-size:11.5px;font-weight:700;background:var(--card);border:1.5px solid var(--b);color:var(--ink2);cursor:pointer;letter-spacing:0.02em;display:inline-flex;align-items:center;gap:4px}
+.star-pill.on{background:linear-gradient(135deg,var(--goldS),var(--gold));border-color:var(--goldD);color:var(--ink)}
+.star-pill .s{color:var(--goldD)}
+.star-pill.on .s{color:var(--ink)}
+
+/* Sticky reset */
+.f-actions{position:sticky;bottom:-24px;margin:24px -24px -60px;padding:16px 24px;background:rgba(250,247,240,0.96);backdrop-filter:blur(12px);border-top:1px solid var(--b);display:flex;gap:8px;z-index:5}
+.f-reset{flex:1;padding:11px;background:var(--card);border:1px solid var(--b);border-radius:11px;font-size:12.5px;font-weight:700;color:var(--ink2)}
+.f-apply{flex:2;padding:11px;background:var(--ink);color:var(--paper);border-radius:11px;font-size:12.5px;font-weight:700}
+
+/* ─── MAIN RESULTS ─── */
+.main{padding:24px 28px 80px;min-width:0}
+.main-toolbar{display:flex;align-items:center;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.main-toolbar h1{margin:0;font-family:var(--serif);font-size:30px;font-weight:400;letter-spacing:-0.025em;line-height:1}
+.main-toolbar h1 b{color:var(--goldD);font-weight:400;font-style:italic}
+.main-toolbar .delta{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--emerald);background:var(--emT);padding:3px 8px;border-radius:99px;letter-spacing:0.06em;display:inline-flex;align-items:center;gap:5px}
+.main-toolbar .sort{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;background:var(--card);border:1px solid var(--b);border-radius:10px;font-size:12.5px;font-weight:600}
+.main-toolbar .sort select{border:0;outline:0;background:transparent;font:inherit;color:var(--ink);font-weight:600;cursor:pointer;padding-right:2px}
+.main-toolbar .layout-toggle{display:inline-flex;background:var(--card);border:1px solid var(--b);border-radius:10px;padding:3px;gap:2px}
+.main-toolbar .layout-toggle button{padding:6px 10px;border-radius:7px;font-size:13px;color:var(--ink3)}
+.main-toolbar .layout-toggle button.on{background:var(--ink);color:var(--paper)}
+
+/* Active chips */
+.active-chips{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.ac{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;background:var(--card);border:1px solid var(--bs);border-radius:99px;font-size:11.5px;font-weight:700;color:var(--ink2);font-family:var(--mono);letter-spacing:-0.005em}
+.ac.gold{background:var(--goldT);border-color:rgba(155,118,38,0.30);color:var(--goldD)}
+.ac.ai{background:var(--aiT);border-color:rgba(168,85,247,0.30);color:var(--ai)}
+.ac .em{font-size:12px}
+.ac .x{font-size:12px;cursor:pointer;opacity:0.6}
+.ac .x:hover{opacity:1}
+.clear-all{font-size:11.5px;color:var(--ink3);font-weight:700;cursor:pointer;padding:6px 11px;text-decoration:underline;letter-spacing:-0.005em}
+
+/* Cards grid */
+.results-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px 18px}
+.lc{cursor:pointer;transition:transform .22s,opacity .22s}
+.lc:hover{transform:translateY(-3px)}
+.lc.dimmed{opacity:0.30;pointer-events:none}
+.lc-photo{position:relative;aspect-ratio:4/3;border-radius:18px;overflow:hidden;margin-bottom:12px;background:linear-gradient(135deg,#fde68a,#d97706)}
+.lc-photo.b{background:linear-gradient(135deg,#a5f3fc,#0e7490)}
+.lc-photo.c{background:linear-gradient(135deg,#c4b5fd,#7c3aed)}
+.lc-photo.d{background:linear-gradient(135deg,#fda4af,#dc2626)}
+.lc-photo.e{background:linear-gradient(135deg,#86efac,#15803d)}
+.lc-photo.f{background:linear-gradient(135deg,#fcd34d,#a16207)}
+.lc-photo.g{background:linear-gradient(135deg,#93c5fd,#1d4ed8)}
+.lc-photo.h{background:linear-gradient(135deg,#f0abfc,#a21caf)}
+.lc-photo .grain{position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.20),transparent 50%);mix-blend-mode:overlay}
+.lc-photo .wish{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--ink2);transition:transform .15s}
+.lc-photo .wish:hover{transform:scale(1.1)}
+.lc-photo .wish.on{color:var(--rose)}
+.lc-photo .source-badge{position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:5px;padding:4px 9px;background:linear-gradient(135deg,#1c4f3a,#0a3526);color:#fff;border-radius:99px;font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:0.06em}
+.lc-photo .source-badge.airbnb{background:#FF385C}
+.lc-photo .source-badge.booking{background:#003580}
+.lc-photo .pm-badge{position:absolute;bottom:12px;left:12px;display:inline-flex;align-items:center;gap:5px;padding:4px 9px 4px 4px;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);border-radius:99px;font-size:10.5px;font-weight:700;letter-spacing:-0.005em;color:var(--ink)}
+.lc-photo .pm-badge .pml{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--goldS),var(--goldD));color:var(--ink);font-family:var(--mono);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:-0.02em}
+.lc-photo .pages{position:absolute;bottom:12px;right:12px;font-family:var(--mono);font-size:10px;font-weight:700;background:rgba(15,16,17,0.65);color:#fff;padding:3px 8px;border-radius:99px;letter-spacing:0.04em;backdrop-filter:blur(6px)}
+.lc-photo .ai-highlight{position:absolute;left:12px;top:50px;display:inline-flex;align-items:center;gap:5px;padding:4px 9px;background:var(--aiT);border:1px solid rgba(168,85,247,0.30);color:var(--aiD);border-radius:99px;font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:0.04em;backdrop-filter:blur(8px)}
+.lc-info .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:2px}
+.lc-info .nm{font-size:15px;font-weight:700;letter-spacing:-0.01em;line-height:1.3;flex:1}
+.lc-info .rating{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:12.5px;font-weight:700;flex-shrink:0}
+.lc-info .rating .star{color:var(--gold)}
+.lc-info .loc{font-size:12.5px;color:var(--ink3);margin-bottom:3px;letter-spacing:-0.005em}
+.lc-info .meta-row{display:flex;align-items:center;gap:8px;margin-top:4px;font-family:var(--mono);font-size:10.5px;color:var(--ink3);font-weight:600;letter-spacing:0.02em}
+.lc-info .meta-row .d{width:3px;height:3px;border-radius:50%;background:var(--ink4)}
+.lc-info .price{margin-top:10px;display:flex;align-items:baseline;gap:8px}
+.lc-info .price b{font-size:16px;font-weight:700;letter-spacing:-0.01em}
+.lc-info .price .per{color:var(--ink3);font-size:13px;font-weight:500}
+.lc-info .price .total{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink3);font-weight:600}
+.lc-info .ai-pick{margin-top:6px;display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:linear-gradient(135deg,var(--aiT),rgba(168,85,247,0.04));border:1px solid rgba(168,85,247,0.20);border-radius:99px;font-size:10px;font-weight:800;color:var(--ai);font-family:var(--mono);letter-spacing:0.04em}
+
+/* Load more */
+.load-more{margin-top:36px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.load-more .info{font-family:var(--mono);font-size:11px;color:var(--ink3);font-weight:600;letter-spacing:0.04em}
+.load-more .info b{color:var(--ink)}
+.load-more button{padding:12px 24px;background:var(--card);border:1px solid var(--ink2);color:var(--ink);font-size:13px;font-weight:600;border-radius:99px;letter-spacing:-0.005em}
+.load-more button:hover{background:var(--ink);color:var(--paper)}
+
+/* ─── RIGHT · AI ASSISTANT ─── */
+.ai-side{padding:24px 24px 60px;border-left:1px solid var(--b);position:sticky;top:172px;align-self:start;max-height:calc(100vh - 172px);overflow-y:auto;background:linear-gradient(180deg,var(--paper),rgba(243,238,226,0.50))}
+.ai-side::-webkit-scrollbar{width:6px}
+.ai-side::-webkit-scrollbar-thumb{background:var(--bs);border-radius:99px}
+.ai-side .h{display:flex;align-items:center;gap:9px;margin-bottom:18px}
+.ai-side .h .ic{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#c084fc,var(--ai));color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;animation:pulseAI 3s infinite}
+.ai-side .h .nm{font-family:var(--serif);font-style:italic;font-size:22px;font-weight:400;letter-spacing:-0.025em;line-height:1.1}
+.ai-side .h .nm small{display:block;font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--ai);letter-spacing:0.06em;margin-top:2px;text-transform:uppercase;font-style:normal}
+
+.ai-insight{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:14px 16px;margin-bottom:10px;animation:fadeIn .4s both}
+.ai-insight .ih{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ai-insight .ih .em{width:24px;height:24px;border-radius:7px;background:var(--aiT);color:var(--ai);display:flex;align-items:center;justify-content:center;font-size:12px}
+.ai-insight .ih .ti{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--ink3);letter-spacing:0.08em;text-transform:uppercase}
+.ai-insight .txt{font-size:13px;color:var(--ink);line-height:1.55}
+.ai-insight .txt b{color:var(--ai);font-weight:700}
+.ai-insight .actions{display:flex;gap:6px;margin-top:10px}
+.ai-insight .actions button{padding:5px 11px;font-size:11px;font-weight:700;border-radius:99px;border:1px solid var(--b);background:var(--paper2);color:var(--ink2)}
+.ai-insight .actions button.prim{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* AI Compare card */
+.ai-compare{background:linear-gradient(135deg,var(--aiT),transparent 70%);border:1px solid rgba(168,85,247,0.25);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.ai-compare .ih{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ai-compare .ih .em{font-size:14px}
+.ai-compare .ih .ti{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--ai);letter-spacing:0.08em;text-transform:uppercase}
+.ai-compare .ih .ct{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ai);background:var(--card);padding:2px 7px;border-radius:99px;letter-spacing:0.04em}
+.ai-compare .sel-thumbs{display:flex;gap:4px;margin-bottom:10px}
+.ai-compare .ph{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#fde68a,#d97706);position:relative}
+.ai-compare .ph.b{background:linear-gradient(135deg,#a5f3fc,#0e7490)}
+.ai-compare .ph.c{background:linear-gradient(135deg,#c4b5fd,#7c3aed)}
+.ai-compare .add-ph{width:32px;height:32px;border-radius:8px;background:var(--card);border:1.5px dashed var(--bs);display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:13px;cursor:pointer}
+.ai-compare button{width:100%;padding:9px;background:var(--ai);color:#fff;border-radius:10px;font-size:12px;font-weight:700;letter-spacing:-0.005em;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.ai-compare button:hover{background:var(--aiD)}
+
+/* Chat preview */
+.ai-chat-stub{margin-top:14px;background:var(--card);border:1px solid var(--b);border-radius:14px;overflow:hidden}
+.ai-chat-stub .head{padding:11px 14px;border-bottom:1px solid var(--b);font-family:var(--mono);font-size:10px;font-weight:800;color:var(--ink3);letter-spacing:0.08em;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.ai-chat-stub .head .em{font-size:13px}
+.ai-chat-stub .input{padding:11px 14px;display:flex;align-items:center;gap:10px}
+.ai-chat-stub .input input{flex:1;padding:8px 12px;border:1px solid var(--b);border-radius:99px;background:var(--paper);font-size:12.5px}
+.ai-chat-stub .input input:focus{outline:0;border-color:var(--ai);box-shadow:0 0 0 3px var(--aiT)}
+.ai-chat-stub .input .send{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#c084fc,var(--ai));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+.ai-chat-stub .suggestions{padding:0 14px 12px;display:flex;flex-direction:column;gap:5px}
+.ai-chat-stub .sug{padding:7px 10px;background:var(--paper2);border-radius:9px;font-size:11.5px;color:var(--ink2);cursor:pointer;font-weight:500;display:flex;align-items:center;gap:7px;letter-spacing:-0.005em}
+.ai-chat-stub .sug:hover{background:var(--aiT);color:var(--ai)}
+.ai-chat-stub .sug .em{font-size:12px}
+.ai-chat-stub .sug .ar{margin-left:auto;color:var(--ink4);font-size:10px}
+
+/* Map mini preview */
+.map-mini{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:#e6f0e6;background-image:linear-gradient(135deg,#dde9d4,#e8edd9 50%,#ddd6b8);margin-top:14px;cursor:pointer}
+.map-mini .label{position:absolute;top:10px;left:10px;font-family:var(--mono);font-size:10px;font-weight:800;color:var(--ink);background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);padding:5px 10px;border-radius:99px;letter-spacing:0.06em}
+.map-mini .pin{position:absolute;background:var(--card);border:1.5px solid var(--bs);border-radius:99px;padding:3px 8px;font-family:var(--mono);font-size:10px;font-weight:800;box-shadow:0 4px 10px rgba(15,16,17,0.15)}
+.map-mini .pin.gold{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.map-mini .expand{position:absolute;bottom:10px;right:10px;padding:6px 11px;background:var(--ink);color:var(--paper);border-radius:99px;font-size:11px;font-weight:700;letter-spacing:-0.005em}
+
+@media (max-width:1200px){
+  .layout{grid-template-columns:280px 1fr 0}
+  .ai-side{display:none}
+  .results-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .filters{position:relative;max-height:none;top:0;display:none}
+  .results-grid{grid-template-columns:1fr}
+}
+</style></head><body>
+
+<!-- ─── NAV ─── -->
+<nav class="nav">
+  <a class="brand"><span class="dot"></span>sojori</a>
+  <div class="search-pills">
+    <div class="sp-cell">
+      <div class="l">Où</div>
+      <div class="v">Marrakech</div>
+    </div>
+    <div class="sp-cell">
+      <div class="l">Quand</div>
+      <div class="v">15 → 22 juil</div>
+    </div>
+    <div class="sp-cell">
+      <div class="l">Voyageurs</div>
+      <div class="v">4 ad · 1 enf</div>
+    </div>
+    <button class="go">🔍</button>
+  </div>
+  <div class="nav-right">
+    <button class="lang-pill">FR · EN · AR</button>
+    <button class="icon-btn">♡</button>
+    <button class="nav-cta">Se connecter</button>
+  </div>
+</nav>
+
+<!-- ─── AI BAR ─── -->
+<div class="ai-bar">
+  <div class="ai-bar-inner">
+    <div class="ic">✨</div>
+    <div class="copy">
+      <div class="pretitle">Sojori AI · votre prompt traduit en filtres</div>
+      <div class="prompt">« Un <span class="quoted">riad calme</span> à <span class="quoted">Marrakech</span> avec <span class="quoted">piscine</span> et <span class="quoted">hammam</span> pour <span class="quoted">5 voyageurs</span>, fin juillet, budget <span class="quoted">~250€/nuit</span>. »</div>
+      <div class="applied">
+        <span>Filtres appliqués :</span>
+        <b>type riad</b><span class="dot"></span>
+        <b>piscine</b><span class="dot"></span>
+        <b>hammam privé</b><span class="dot"></span>
+        <b>5+ voyageurs</b><span class="dot"></span>
+        <b>200-300€</b><span class="dot"></span>
+        <b>note 4.7+</b>
+      </div>
+    </div>
+    <button class="edit-prompt">✎ Affiner</button>
+    <button class="new-search">+ Nouvelle</button>
+  </div>
+</div>
+
+<!-- ─── LAYOUT ─── -->
+<div class="layout">
+
+  <!-- ─── FILTERS ─── -->
+  <aside class="filters">
+    <div class="f-h">
+      <h2>Filtres <span class="it">affinés</span></h2>
+      <span class="count">7 ACTIFS</span>
+    </div>
+
+    <div class="f-group">
+      <div class="h"><span class="em">🏛</span>Hôtes vérifiés<span class="ai-tag">SOJORI SELECT</span></div>
+      <div class="source-grid">
+        <label class="source-row on"><input type="checkbox" checked><span class="badge" style="background:linear-gradient(135deg,#c89b3c,#9b7626)">RL</span><span class="nm">Riad Luxe</span><span class="ct">42</span></label>
+        <label class="source-row on"><input type="checkbox" checked><span class="badge" style="background:linear-gradient(135deg,#c4b5fd,#7c3aed)">AS</span><span class="nm">Atlas Stays</span><span class="ct">38</span></label>
+        <label class="source-row"><input type="checkbox"><span class="badge" style="background:linear-gradient(135deg,#fda4af,#dc2626)">CM</span><span class="nm">Casa Med</span><span class="ct">28</span></label>
+        <label class="source-row"><input type="checkbox"><span class="badge" style="background:linear-gradient(135deg,#a5f3fc,#0e7490)">DH</span><span class="nm">Dar Hassan</span><span class="ct">22</span></label>
+        <label class="source-row"><input type="checkbox"><span class="badge" style="background:linear-gradient(135deg,#86efac,#15803d)">OB</span><span class="nm">Océan Berbère</span><span class="ct">12</span></label>
+      </div>
+    </div>
+
+    <div class="f-group">
+      <div class="h"><span class="em">💶</span>Prix par nuit</div>
+      <div class="price-block">
+        <div class="price-hist">
+          <div class="ph-bar" style="height:25%"></div>
+          <div class="ph-bar" style="height:42%"></div>
+          <div class="ph-bar on" style="height:68%"></div>
+          <div class="ph-bar on" style="height:88%"></div>
+          <div class="ph-bar on" style="height:95%"></div>
+          <div class="ph-bar on" style="height:82%"></div>
+          <div class="ph-bar on" style="height:62%"></div>
+          <div class="ph-bar" style="height:48%"></div>
+          <div class="ph-bar" style="height:38%"></div>
+          <div class="ph-bar" style="height:28%"></div>
+          <div class="ph-bar" style="height:18%"></div>
+          <div class="ph-bar" style="height:12%"></div>
+        </div>
+        <div class="price-track">
+          <div class="price-fill"></div>
+          <div class="price-knob" style="left:18%"></div>
+          <div class="price-knob" style="left:70%"></div>
+        </div>
+        <div class="price-vals"><span class="lo">200€</span><span class="lo">300€</span></div>
+        <div class="median">Prix médian Marrakech · 170€</div>
+      </div>
+    </div>
+
+    <div class="f-group">
+      <div class="h"><span class="em">🏛</span>Type de bien</div>
+      <div class="type-pills">
+        <button class="type-pill on"><span class="em">🕌</span>Riad <span class="ct">52</span></button>
+        <button class="type-pill"><span class="em">🏠</span>Villa <span class="ct">38</span></button>
+        <button class="type-pill"><span class="em">🏢</span>Appart <span class="ct">42</span></button>
+        <button class="type-pill"><span class="em">🏛</span>Maison <span class="ct">12</span></button>
+      </div>
+    </div>
+
+    <div class="f-group">
+      <div class="h"><span class="em">🛏</span>Chambres</div>
+      <div class="type-pills">
+        <button class="type-pill">Studio</button>
+        <button class="type-pill">1</button>
+        <button class="type-pill">2</button>
+        <button class="type-pill on">3+</button>
+        <button class="type-pill">4+</button>
+      </div>
+    </div>
+
+    <div class="f-group">
+      <div class="h"><span class="em">✨</span>Équipements<span class="ai-tag">3 SUGG.</span></div>
+      <div class="am-list">
+        <label class="am-row"><input type="checkbox" checked><span class="em">🏊</span>Piscine<span class="ct">42</span></label>
+        <label class="am-row"><input type="checkbox" checked><span class="em">🧖</span>Hammam privé<span class="ct">22</span></label>
+        <label class="am-row"><input type="checkbox"><span class="em">👨‍🍳</span>Chef à la carte<span class="ct">38</span></label>
+        <label class="am-row"><input type="checkbox"><span class="em">🛎</span>Concierge 24/7<span class="ct">68</span></label>
+        <label class="am-row"><input type="checkbox"><span class="em">🚗</span>Parking<span class="ct">52</span></label>
+        <label class="am-row"><input type="checkbox"><span class="em">🌿</span>Jardin<span class="ct">48</span></label>
+      </div>
+      <div class="am-more">Voir 18 équipements de plus →</div>
+    </div>
+
+    <div class="f-group">
+      <div class="h"><span class="em">🏷</span>Hôtes vérifiés</div>
+      <div class="pm-multi">
+        <label class="pm-row on"><input type="checkbox" checked><div class="lg">RL</div><span class="nm">Riad Luxe</span><span class="ct">12</span></label>
+        <label class="pm-row"><input type="checkbox"><div class="lg c2">AS</div><span class="nm">Atlas Stays</span><span class="ct">23</span></label>
+        <label class="pm-row"><input type="checkbox"><div class="lg c3">DH</div><span class="nm">Dar Hassan</span><span class="ct">8</span></label>
+        <label class="pm-row"><input type="checkbox"><div class="lg c4">CM</div><span class="nm">Casa Med</span><span class="ct">17</span></label>
+      </div>
+      <div class="am-more">Voir tous les hôtes →</div>
+    </div>
+
+    <div class="f-group">
+      <div class="h"><span class="em">⭐</span>Note minimum</div>
+      <div class="star-pills">
+        <button class="star-pill"><span class="s">★</span>3+</button>
+        <button class="star-pill"><span class="s">★</span>4+</button>
+        <button class="star-pill on"><span class="s">★</span>4.7+</button>
+        <button class="star-pill"><span class="s">★</span>4.9+</button>
+      </div>
+    </div>
+
+    <div class="f-actions">
+      <button class="f-reset">Réinitialiser</button>
+      <button class="f-apply">Voir 142 biens →</button>
+    </div>
+  </aside>
+
+  <!-- ─── MAIN ─── -->
+  <main class="main">
+    <div class="main-toolbar">
+      <h1><b>142</b> biens à Marrakech</h1>
+      <span class="delta">↘ 412 → 142 affinés</span>
+      <div class="sort">Trier · <select><option>Pertinence IA</option><option>Prix croissant</option><option>Prix décroissant</option><option>Note ★</option><option>Nouveauté</option></select></div>
+      <div class="layout-toggle">
+        <button class="on">▦</button>
+        <button>≡</button>
+        <button>🗺</button>
+      </div>
+    </div>
+
+    <div class="active-chips">
+      <span class="ac ai"><span class="em">✨</span>Prompt IA <span class="x">×</span></span>
+      <span class="ac"><span class="em">🕌</span>Type · Riad <span class="x">×</span></span>
+      <span class="ac"><span class="em">🛏</span>3+ chambres <span class="x">×</span></span>
+      <span class="ac gold"><span class="em">🏊</span>Piscine <span class="x">×</span></span>
+      <span class="ac gold"><span class="em">🧖</span>Hammam privé <span class="x">×</span></span>
+      <span class="ac"><span class="em">🏷</span>Riad Luxe <span class="x">×</span></span>
+      <span class="ac"><span class="em">💶</span>200-300€ <span class="x">×</span></span>
+      <span class="ac"><span class="em">⭐</span>4.7+ <span class="x">×</span></span>
+      <span class="clear-all">Tout effacer</span>
+    </div>
+
+    <div class="results-grid">
+      <div class="lc">
+        <div class="lc-photo">
+          <div class="grain"></div>
+          <span class="source-badge">SOJORI EXCLUSIF</span>
+          <span class="ai-highlight">✨ TOP MATCH IA · 98%</span>
+          <button class="wish">♡</button>
+          <span class="pm-badge"><span class="pml">RL</span>Riad Luxe</span>
+          <span class="pages">1/24</span>
+        </div>
+        <div class="lc-info">
+          <div class="top">
+            <div class="nm">Riad de la Bahia · Médina</div>
+            <div class="rating"><span class="star">★</span>4.92</div>
+          </div>
+          <div class="loc">Marrakech · Médina · Mellah</div>
+          <div class="meta-row"><span>6 voyageurs</span><span class="d"></span><span>3 chambres</span><span class="d"></span><span>Hammam · Piscine</span></div>
+          <div class="price"><b>185€</b><span class="per">/ nuit</span><span class="total">1 295€ · 7 nuits</span></div>
+          <div class="ai-pick">✨ Recommandé pour vous</div>
+        </div>
+      </div>
+
+      <div class="lc">
+        <div class="lc-photo b">
+          <div class="grain"></div>
+          <span class="source-badge airbnb">VIA AIRBNB</span>
+          <button class="wish on">♥</button>
+          <span class="pm-badge"><span class="pml" style="background:linear-gradient(135deg,#c4b5fd,#7c3aed);color:#fff">AS</span>Atlas Stays</span>
+          <span class="pages">1/32</span>
+        </div>
+        <div class="lc-info">
+          <div class="top">
+            <div class="nm">Villa contemporaine · Gueliz</div>
+            <div class="rating"><span class="star">★</span>4.86</div>
+          </div>
+          <div class="loc">Marrakech · Gueliz</div>
+          <div class="meta-row"><span>8 voyageurs</span><span class="d"></span><span>4 chambres</span><span class="d"></span><span>Piscine · Jardin</span></div>
+          <div class="price"><b>240€</b><span class="per">/ nuit</span><span class="total">1 680€ · 7 nuits</span></div>
+        </div>
+      </div>
+
+      <div class="lc">
+        <div class="lc-photo c">
+          <div class="grain"></div>
+          <span class="source-badge">SOJORI EXCLUSIF</span>
+          <span class="ai-highlight">✨ 95% MATCH</span>
+          <button class="wish">♡</button>
+          <span class="pm-badge"><span class="pml">RL</span>Riad Luxe</span>
+          <span class="pages">1/28</span>
+        </div>
+        <div class="lc-info">
+          <div class="top">
+            <div class="nm">Riad Palmeraie · piscine</div>
+            <div class="rating"><span class="star">★</span>4.88</div>
+          </div>
+          <div class="loc">Marrakech · Palmeraie</div>
+          <div class="meta-row"><span>10 voyageurs</span><span class="d"></span><span>5 chambres</span><span class="d"></span><span>Hammam · Piscine · Chef</span></div>
+          <div class="price"><b>295€</b><span class="per">/ nuit</span><span class="total">2 065€ · 7 nuits</span></div>
+        </div>
+      </div>
+
+      <div class="lc">
+        <div class="lc-photo e">
+          <div class="grain"></div>
+          <span class="source-badge">SOJORI EXCLUSIF</span>
+          <button class="wish">♡</button>
+          <span class="pm-badge"><span class="pml">RL</span>Riad Luxe</span>
+          <span class="pages">1/30</span>
+        </div>
+        <div class="lc-info">
+          <div class="top">
+            <div class="nm">Riad Royal · suite hammam</div>
+            <div class="rating"><span class="star">★</span>4.97</div>
+          </div>
+          <div class="loc">Marrakech · Kasbah</div>
+          <div class="meta-row"><span>6 voyageurs</span><span class="d"></span><span>3 chambres</span><span class="d"></span><span>Hammam · Spa · Chef</span></div>
+          <div class="price"><b>340€</b><span class="per">/ nuit</span><span class="total">2 380€ · 7 nuits</span></div>
+        </div>
+      </div>
+
+      <div class="lc">
+        <div class="lc-photo f">
+          <div class="grain"></div>
+          <span class="source-badge airbnb">VIA AIRBNB</span>
+          <button class="wish">♡</button>
+          <span class="pm-badge"><span class="pml" style="background:linear-gradient(135deg,#c4b5fd,#7c3aed);color:#fff">AS</span>Atlas Stays</span>
+          <span class="pages">1/21</span>
+        </div>
+        <div class="lc-info">
+          <div class="top">
+            <div class="nm">Riad Hivernage · 5⭐</div>
+            <div class="rating"><span class="star">★</span>4.74</div>
+          </div>
+          <div class="loc">Marrakech · Hivernage</div>
+          <div class="meta-row"><span>6 voyageurs</span><span class="d"></span><span>3 chambres</span><span class="d"></span><span>Piscine · Hammam</span></div>
+          <div class="price"><b>205€</b><span class="per">/ nuit</span><span class="total">1 435€ · 7 nuits</span></div>
+        </div>
+      </div>
+
+      <div class="lc">
+        <div class="lc-photo d">
+          <div class="grain"></div>
+          <span class="source-badge">SOJORI EXCLUSIF</span>
+          <button class="wish">♡</button>
+          <span class="pm-badge"><span class="pml" style="background:linear-gradient(135deg,#a5f3fc,#0e7490);color:#fff">DH</span>Dar Hassan</span>
+          <span class="pages">1/18</span>
+        </div>
+        <div class="lc-info">
+          <div class="top">
+            <div class="nm">Dar Salam · jardin secret</div>
+            <div class="rating"><span class="star">★</span>4.79</div>
+          </div>
+          <div class="loc">Marrakech · Médina</div>
+          <div class="meta-row"><span>5 voyageurs</span><span class="d"></span><span>3 chambres</span><span class="d"></span><span>Piscine · Patio</span></div>
+          <div class="price"><b>215€</b><span class="per">/ nuit</span><span class="total">1 505€ · 7 nuits</span></div>
+        </div>
+      </div>
+
+      <div class="lc dimmed">
+        <div class="lc-photo g">
+          <div class="grain"></div>
+          <span class="source-badge booking">VIA BOOKING</span>
+          <button class="wish">♡</button>
+          <span class="pm-badge"><span class="pml" style="background:linear-gradient(135deg,#fda4af,#dc2626);color:#fff">CM</span>Casa Med</span>
+          <span class="pages">1/15</span>
+        </div>
+        <div class="lc-info">
+          <div class="top">
+            <div class="nm">Apt Mouassine · 4ad</div>
+            <div class="rating"><span class="star">★</span>4.31</div>
+          </div>
+          <div class="loc">Marrakech · Médina</div>
+          <div class="meta-row"><span>4 voyageurs</span><span class="d"></span><span>2 chambres</span></div>
+          <div class="price"><b>118€</b><span class="per">/ nuit</span><span class="total">826€ · 7 nuits</span></div>
+        </div>
+      </div>
+
+      <div class="lc dimmed">
+        <div class="lc-photo h">
+          <div class="grain"></div>
+          <span class="source-badge airbnb">VIA AIRBNB</span>
+          <button class="wish">♡</button>
+          <span class="pm-badge"><span class="pml" style="background:linear-gradient(135deg,#fda4af,#dc2626);color:#fff">CM</span>Casa Med</span>
+          <span class="pages">1/19</span>
+        </div>
+        <div class="lc-info">
+          <div class="top">
+            <div class="nm">Riad Mouassine</div>
+            <div class="rating"><span class="star">★</span>4.65</div>
+          </div>
+          <div class="loc">Marrakech · Médina</div>
+          <div class="meta-row"><span>4 voyageurs</span><span class="d"></span><span>2 chambres</span></div>
+          <div class="price"><b>165€</b><span class="per">/ nuit</span><span class="total">1 155€ · 7 nuits</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="load-more">
+      <div class="info">Vous voyez <b>8 sur 142</b> · les meilleurs en haut grâce à l'IA</div>
+      <button>Voir 24 biens de plus →</button>
+    </div>
+  </main>
+
+  <!-- ─── AI SIDE ─── -->
+  <aside class="ai-side">
+    <div class="h">
+      <div class="ic">✨</div>
+      <div class="nm">Sojori <span style="font-style:italic">AI</span><small>EN LIGNE · CLAUDE</small></div>
+    </div>
+
+    <div class="ai-insight">
+      <div class="ih"><span class="em">💡</span><span class="ti">Suggestion</span></div>
+      <div class="txt">Sur vos critères, <b>3 biens</b> seraient idéaux mais légèrement au-dessus de votre budget (310-340€). Vous voulez que j'élargisse la fourchette ?</div>
+      <div class="actions">
+        <button>Pas maintenant</button>
+        <button class="prim">Voir les 3 biens →</button>
+      </div>
+    </div>
+
+    <div class="ai-insight">
+      <div class="ih"><span class="em">📈</span><span class="ti">Market intel</span></div>
+      <div class="txt">Les riads avec piscine + hammam à Marrakech ont une <b>occupation à 87%</b> mi-juillet. Réservez tôt — il reste <b>12 jours</b> pour vos dates.</div>
+    </div>
+
+    <div class="ai-compare">
+      <div class="ih"><span class="em">⚖️</span><span class="ti">Comparer en 1 clic</span><span class="ct">2 sélectionnés</span></div>
+      <div class="sel-thumbs">
+        <div class="ph"></div>
+        <div class="ph b"></div>
+        <div class="add-ph">+</div>
+      </div>
+      <button>Comparer Bahia × Villa Gueliz →</button>
+    </div>
+
+    <div class="ai-insight">
+      <div class="ih"><span class="em">🎯</span><span class="ti">Affiner</span></div>
+      <div class="txt">Vous cherchez du <b>calme</b>. <b>Bahia</b>, <b>Royal</b> et <b>Salam</b> sont notés "très silencieux" par les voyageurs. Riad Palmeraie est plus animé.</div>
+      <div class="actions">
+        <button class="prim">Filtrer calme uniquement</button>
+      </div>
+    </div>
+
+    <div class="ai-chat-stub">
+      <div class="head"><span class="em">💬</span>POSER UNE QUESTION</div>
+      <div class="input">
+        <input placeholder="Décrivez ce que vous cherchez…">
+        <button class="send">→</button>
+      </div>
+      <div class="suggestions">
+        <div class="sug"><span class="em">🌅</span>Lequel pour une lune de miel ?<span class="ar">→</span></div>
+        <div class="sug"><span class="em">👨‍👩‍👧</span>Idéal pour 2 enfants ?<span class="ar">→</span></div>
+        <div class="sug"><span class="em">🍽</span>Quels biens avec chef ?<span class="ar">→</span></div>
+        <div class="sug"><span class="em">📍</span>Plus proche de Jemaa el-Fna<span class="ar">→</span></div>
+      </div>
+    </div>
+
+    <div class="map-mini">
+      <span class="label">📍 142 BIENS</span>
+      <div class="pin gold" style="left:35%;top:42%">185€</div>
+      <div class="pin" style="left:65%;top:30%">240€</div>
+      <div class="pin" style="left:50%;top:60%">295€</div>
+      <div class="pin" style="left:25%;top:65%">340€</div>
+      <button class="expand">Ouvrir la carte →</button>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+document.querySelectorAll('.wish').forEach(w=>w.addEventListener('click',e=>{
+  e.stopPropagation();w.classList.toggle('on');w.textContent=w.classList.contains('on')?'♥':'♡';
+}));
+document.querySelectorAll('.type-pill, .star-pill').forEach(p=>p.addEventListener('click',()=>p.classList.toggle('on')));
+document.querySelectorAll('.source-row, .pm-row').forEach(r=>r.addEventListener('click',()=>r.classList.toggle('on')));
+</script>
+</body></html>

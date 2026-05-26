@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Finaliser · Riad de la Bahia · Sojori</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f1011;--ink2:#3a3a3c;--ink3:#6e6e73;--ink4:#a8a7a4;
+  --paper:#faf7f0;--paper2:#f3eee2;--card:#ffffff;
+  --b:#e9e3d3;--bs:#d4ccb5;
+  --gold:#c89b3c;--goldD:#9b7626;--goldS:#e8c87a;--goldT:rgba(200,155,60,0.10);
+  --ai:#a855f7;--aiD:#7e22ce;--aiT:rgba(168,85,247,0.10);
+  --rose:#e11d48;--roseT:rgba(225,29,72,0.10);
+  --emerald:#059669;--emT:rgba(5,150,105,0.10);
+  --sans:Geist,system-ui,sans-serif;--serif:'Instrument Serif',Georgia,serif;--mono:'Geist Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+html,body{margin:0;background:var(--paper);font-family:var(--sans);color:var(--ink);font-size:14px;line-height:1.5}
+button{cursor:pointer;border:0;background:transparent;font:inherit;color:inherit;padding:0}
+a{color:inherit;text-decoration:none}
+input,select,textarea{font:inherit;color:inherit}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pulseGold{0%,100%{box-shadow:0 0 0 0 rgba(200,155,60,0.45)}50%{box-shadow:0 0 0 10px rgba(200,155,60,0)}}
+@keyframes pulseAI{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,0.40)}50%{box-shadow:0 0 0 10px rgba(168,85,247,0)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:50;padding:14px 32px;display:flex;align-items:center;gap:18px;background:rgba(250,247,240,0.92);backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--b);height:68px}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--serif);font-size:24px;font-weight:400;font-style:italic;letter-spacing:-0.025em}
+.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
+.nav-back{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink2);border-radius:99px;border:1px solid var(--b);background:var(--card);margin-left:14px}
+.nav-back:hover{border-color:var(--ink2)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.secure-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border:1px solid var(--b);background:var(--card);border-radius:99px;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--emerald);letter-spacing:0.04em}
+.icon-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--b);background:var(--card);font-size:14px}
+
+/* STEPPER */
+.stepper{max-width:1240px;margin:32px auto 24px;padding:0 32px;display:flex;align-items:center;gap:0}
+.step{display:flex;align-items:center;gap:11px;font-size:13.5px;font-weight:600;color:var(--ink3)}
+.step.done{color:var(--emerald)}
+.step.on{color:var(--ink)}
+.step .n{width:30px;height:30px;border-radius:50%;background:var(--paper2);color:var(--ink3);font-family:var(--mono);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:0.02em;flex-shrink:0;border:1px solid var(--b)}
+.step.done .n{background:var(--emT);color:var(--emerald);border-color:transparent}
+.step.done .n::after{content:'✓';font-size:14px}
+.step.done .n .num{display:none}
+.step.on .n{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.step-line{flex:1;height:1px;background:var(--b);margin:0 14px}
+.step-line.done{background:var(--emerald)}
+
+/* LAYOUT */
+.content{max-width:1240px;margin:0 auto 80px;padding:0 32px;display:grid;grid-template-columns:1fr 420px;gap:48px}
+
+/* HEADER section */
+.co-hdr{margin-bottom:36px}
+.co-hdr h1{margin:0 0 8px;font-family:var(--serif);font-size:48px;font-weight:400;letter-spacing:-0.03em;line-height:1.05}
+.co-hdr h1 .it{font-style:italic;color:var(--goldD)}
+.co-hdr .sub{font-size:15px;color:var(--ink3);line-height:1.55}
+
+/* AI hint card */
+.ai-hint{display:flex;align-items:flex-start;gap:13px;padding:16px 20px;background:linear-gradient(135deg,rgba(168,85,247,0.06),transparent 60%),var(--card);border:1px solid var(--b);border-radius:18px;margin-bottom:32px;position:relative;overflow:hidden}
+.ai-hint::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#c084fc,var(--ai))}
+.ai-hint .av{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#c084fc,var(--ai));color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ai-hint .body{flex:1}
+.ai-hint .pretitle{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--aiD);letter-spacing:0.10em;text-transform:uppercase;margin-bottom:3px}
+.ai-hint .txt{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--ink);line-height:1.45}
+
+/* SECTIONS */
+.sec{background:var(--card);border:1px solid var(--b);border-radius:24px;padding:30px 32px;margin-bottom:18px;animation:fadeIn .35s}
+.sec h2{margin:0 0 4px;font-family:var(--serif);font-size:28px;font-weight:400;letter-spacing:-0.025em}
+.sec h2 .it{font-style:italic;color:var(--goldD)}
+.sec .h-sub{font-size:13px;color:var(--ink3);margin-bottom:24px}
+.sec.locked{opacity:0.55;pointer-events:none}
+.sec.locked .form-row,.sec.locked .pay-tabs{filter:grayscale(1)}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row.full{grid-template-columns:1fr}
+.form-row.split-3{grid-template-columns:2fr 1fr 1fr}
+.field label{display:block;font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--ink2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:7px}
+.field label .req{color:var(--rose);margin-left:2px}
+.field input,.field select,.field textarea{width:100%;padding:13px 15px;border:1.5px solid var(--b);border-radius:12px;font-size:14.5px;color:var(--ink);background:var(--card);transition:all .12s}
+.field input:focus,.field textarea:focus,.field select:focus{outline:0;border-color:var(--ink);box-shadow:0 0 0 3px rgba(15,16,17,0.06)}
+.field input.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0.02em;font-weight:600}
+.field .hint{font-family:var(--mono);font-size:10.5px;color:var(--ink3);margin-top:5px;letter-spacing:0.02em}
+
+/* PHONE input */
+.phone-input{display:flex;border:1.5px solid var(--b);border-radius:12px;overflow:hidden;background:var(--card);transition:all .12s}
+.phone-input:focus-within{border-color:var(--ink);box-shadow:0 0 0 3px rgba(15,16,17,0.06)}
+.phone-prefix{padding:13px 14px;background:var(--paper2);border-right:1.5px solid var(--b);display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink)}
+.phone-input input{border:0;flex:1;padding:13px 15px;outline:0;background:transparent}
+
+/* PAYMENT METHODS TABS */
+.pay-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.pay-tab{padding:14px 18px;border:1.5px solid var(--b);border-radius:14px;background:var(--card);font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:10px;cursor:pointer;transition:all .15s;color:var(--ink2)}
+.pay-tab:hover{border-color:var(--bs)}
+.pay-tab.on{border-color:var(--ink);background:var(--ink);color:var(--paper);box-shadow:0 4px 12px rgba(15,16,17,0.20)}
+.pay-tab .ic{font-size:16px}
+.pay-tab .brand-cards{display:inline-flex;gap:3px;margin-left:auto}
+.brand-card{font-family:var(--mono);font-size:8.5px;font-weight:800;padding:3px 5px;border-radius:3px;background:var(--paper2);color:var(--ink2);letter-spacing:0.04em}
+.pay-tab.on .brand-card{background:rgba(255,255,255,0.15);color:var(--paper)}
+
+/* CARD INPUT BLOCK */
+.card-block{background:linear-gradient(135deg,var(--paper2) 0%,#ede5d0 100%);border-radius:18px;padding:24px;position:relative;overflow:hidden;margin-bottom:18px}
+.card-block::before{content:'';position:absolute;top:-30px;right:-30px;width:200px;height:200px;background:radial-gradient(circle,rgba(200,155,60,0.18),transparent 70%);pointer-events:none}
+.card-mock{position:absolute;top:18px;right:24px;display:flex;align-items:center;gap:8px;z-index:1}
+.card-brand{padding:6px 12px;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;font-weight:800;letter-spacing:0.08em;border-radius:99px}
+.card-brand .ic{margin-right:5px}
+
+.card-number{margin-bottom:14px;position:relative;z-index:1}
+.card-number label{display:block;font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--ink2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px}
+.card-number .input-wrap{position:relative;background:#fff;border:1.5px solid var(--b);border-radius:12px;display:flex;align-items:center;transition:all .12s}
+.card-number .input-wrap:focus-within{border-color:var(--ink);box-shadow:0 0 0 3px rgba(15,16,17,0.06)}
+.card-number input{flex:1;padding:14px 16px;border:0;outline:0;font-family:var(--mono);font-size:17px;font-weight:600;letter-spacing:0.08em;background:transparent}
+.card-number .brand-detected{margin-right:14px;display:flex;align-items:center;gap:4px}
+.card-number .brand-detected .ic{font-size:22px}
+.card-number .brand-detected .nm{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--ink2);letter-spacing:0.06em}
+.card-number .check{margin-right:14px;width:24px;height:24px;border-radius:50%;background:var(--emT);color:var(--emerald);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+
+.card-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;position:relative;z-index:1;margin-bottom:14px}
+.card-cell label{display:block;font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--ink2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px}
+.card-cell input{width:100%;padding:14px 16px;background:#fff;border:1.5px solid var(--b);border-radius:12px;font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:0.04em;text-align:center}
+.card-cell input:focus{outline:0;border-color:var(--ink);box-shadow:0 0 0 3px rgba(15,16,17,0.06)}
+.card-cell .cvc-wrap{position:relative}
+.card-cell .cvc-tip{position:absolute;top:50%;right:14px;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:var(--paper2);color:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:help;border:1px solid var(--b)}
+
+.card-name{margin-bottom:18px;position:relative;z-index:1}
+.card-name label{display:block;font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--ink2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px}
+.card-name input{width:100%;padding:14px 16px;background:#fff;border:1.5px solid var(--b);border-radius:12px;font-size:14.5px;font-weight:600;letter-spacing:0.01em}
+.card-name input:focus{outline:0;border-color:var(--ink);box-shadow:0 0 0 3px rgba(15,16,17,0.06)}
+
+.save-card{display:flex;align-items:center;gap:10px;padding:10px 0;position:relative;z-index:1}
+.save-card input{width:18px;height:18px;accent-color:var(--ink);cursor:pointer}
+.save-card label{font-size:13px;font-weight:500;color:var(--ink2);cursor:pointer}
+
+.pci-row{margin-top:10px;display:flex;align-items:center;gap:14px;padding:11px 14px;background:var(--card);border:1px solid var(--b);border-radius:11px;position:relative;z-index:1}
+.pci-row .ic{width:32px;height:32px;border-radius:9px;background:var(--emT);color:var(--emerald);display:flex;align-items:center;justify-content:center;font-size:14px}
+.pci-row .info{flex:1;line-height:1.4}
+.pci-row .nm{font-size:12.5px;font-weight:700;letter-spacing:-0.005em}
+.pci-row .ds{font-size:11px;color:var(--ink3);font-family:var(--mono);letter-spacing:0.02em;font-weight:600;margin-top:1px}
+.pci-row .badges{display:flex;gap:5px}
+.pci-row .badges span{font-family:var(--mono);font-size:9px;font-weight:800;padding:3px 7px;background:var(--paper2);border-radius:5px;color:var(--ink2);letter-spacing:0.06em}
+
+/* ALT PAYMENT (Apple/Google Pay) */
+.alt-pay{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.alt-pay-btn{padding:14px;border-radius:14px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:var(--paper);transition:all .15s}
+.alt-pay-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px -6px rgba(15,16,17,0.30)}
+.alt-pay-btn.gpay{background:var(--card);color:var(--ink);border-color:var(--b)}
+.alt-pay-btn .ic{font-size:18px}
+
+.divider{display:flex;align-items:center;gap:14px;margin:18px 0;color:var(--ink3);font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--b)}
+
+/* COUNTRY select */
+.country-flag{display:inline-flex;align-items:center;gap:8px}
+
+/* CGU */
+.cgu{display:flex;align-items:flex-start;gap:11px;padding:16px 18px;background:linear-gradient(135deg,var(--paper2) 0%,var(--paper) 100%);border:1px solid var(--b);border-radius:14px;font-size:12.5px;color:var(--ink2);line-height:1.55;margin-top:20px}
+.cgu input{width:18px;height:18px;margin-top:1px;accent-color:var(--ink);cursor:pointer;flex-shrink:0}
+.cgu label{cursor:pointer}
+.cgu label a{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+
+/* PAY BUTTON */
+.pay-btn{display:block;width:100%;margin-top:24px;padding:18px;background:var(--ink);color:var(--paper);font-size:16px;font-weight:700;text-align:center;border-radius:16px;letter-spacing:-0.005em;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px}
+.pay-btn:hover{background:#1a1a1c;transform:translateY(-1px);box-shadow:0 16px 36px -8px rgba(15,16,17,0.30)}
+.pay-btn .lock{font-size:14px}
+.pay-btn .amount{font-family:var(--serif);font-style:italic;font-size:22px;font-weight:400;color:var(--goldS);margin-left:6px}
+
+.pay-foot{margin-top:12px;text-align:center;font-size:11.5px;color:var(--ink3);font-family:var(--mono);letter-spacing:0.04em;font-weight:600}
+
+/* RECAP SIDE */
+.recap-side{position:sticky;top:88px;align-self:start}
+.recap-card{background:var(--card);border:1px solid var(--b);border-radius:24px;overflow:hidden;box-shadow:0 24px 56px -16px rgba(15,16,17,0.15)}
+.recap-listing{padding:20px;display:flex;gap:14px;border-bottom:1px solid var(--b)}
+.recap-photo{width:100px;height:90px;border-radius:14px;background:linear-gradient(135deg,#fde68a,#c89b3c);flex-shrink:0;position:relative;overflow:hidden}
+.recap-photo .grain{position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.20),transparent 50%);mix-blend-mode:overlay}
+.recap-photo .select{position:absolute;bottom:5px;left:5px;font-family:var(--mono);font-size:7.5px;font-weight:800;padding:2px 5px;background:rgba(15,16,17,0.85);color:#fff;border-radius:3px;letter-spacing:0.04em}
+.recap-info .nm{font-family:var(--serif);font-size:18px;font-weight:400;letter-spacing:-0.02em;line-height:1.2;margin-bottom:4px}
+.recap-info .nm .it{font-style:italic;color:var(--goldD)}
+.recap-info .pm{font-family:var(--mono);font-size:10.5px;color:var(--ink3);font-weight:700;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px}
+.recap-info .rt{font-family:var(--mono);font-size:11.5px;color:var(--ink2);font-weight:700}
+.recap-info .rt .star{color:var(--gold);font-weight:800}
+
+.recap-stay{padding:18px 20px;border-bottom:1px solid var(--b)}
+.recap-line{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13.5px;color:var(--ink2)}
+.recap-line .v{font-family:var(--mono);font-weight:700;color:var(--ink)}
+
+.recap-prices{padding:18px 20px;border-bottom:1px solid var(--b)}
+.recap-prices .recap-line.muted{color:var(--ink3)}
+.recap-prices .recap-line.discount{color:var(--emerald)}
+.recap-prices .recap-line.discount .v{color:var(--emerald)}
+.recap-prices .recap-line.discount .label-flex{display:inline-flex;align-items:center;gap:6px}
+.recap-prices .recap-line.discount .label-flex .ai-dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#c084fc,var(--ai));color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center}
+
+.recap-total{padding:18px 20px;background:linear-gradient(135deg,var(--paper2),var(--paper));display:flex;justify-content:space-between;align-items:baseline}
+.recap-total .l{font-size:13px;font-weight:800;color:var(--ink)}
+.recap-total .v{font-family:var(--serif);font-size:30px;font-weight:400;font-style:italic;color:var(--goldD);letter-spacing:-0.025em;line-height:1}
+.recap-total .v small{font-family:var(--sans);font-style:normal;font-size:12px;color:var(--ink3);font-weight:500;margin-left:5px}
+
+.recap-cancel{margin-top:16px;padding:13px 16px;background:linear-gradient(135deg,var(--emT),transparent);border:1px solid rgba(5,150,105,0.20);border-radius:14px;display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--ink2);line-height:1.55}
+.recap-cancel .ic{font-size:16px;color:var(--emerald);flex-shrink:0}
+.recap-cancel b{color:var(--ink);font-weight:700}
+
+.recap-secure{margin-top:10px;padding:13px 16px;background:var(--card);border:1px solid var(--b);border-radius:14px;font-size:11.5px;color:var(--ink3);line-height:1.5}
+.recap-secure .h{font-family:var(--mono);font-size:9.5px;font-weight:800;color:var(--ink2);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+.recap-secure .badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.recap-secure .badges span{font-family:var(--mono);font-size:9px;font-weight:800;padding:3px 7px;background:var(--paper2);border-radius:5px;color:var(--ink2);letter-spacing:0.06em}
+
+@media (max-width:900px){
+  .content{grid-template-columns:1fr;gap:24px}
+  .recap-side{position:relative;top:0}
+  .form-row{grid-template-columns:1fr}
+  .stepper{overflow-x:auto;padding-bottom:14px}
+  .alt-pay{grid-template-columns:1fr}
+}
+</style></head><body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="brand"><span class="dot"></span>sojori</a>
+  <button class="nav-back">← Modifier</button>
+  <div class="nav-right">
+    <span class="secure-chip">🔒 PAIEMENT SÉCURISÉ · 3D SECURE</span>
+  </div>
+</nav>
+
+<!-- STEPPER -->
+<div class="stepper">
+  <div class="step done"><div class="n"><span class="num">1</span></div>Bien</div>
+  <div class="step-line done"></div>
+  <div class="step done"><div class="n"><span class="num">2</span></div>Voyageur</div>
+  <div class="step-line done"></div>
+  <div class="step on"><div class="n"><span class="num">3</span></div>Paiement</div>
+  <div class="step-line"></div>
+  <div class="step"><div class="n"><span class="num">4</span></div>Confirmation</div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- LEFT -->
+  <main>
+    <div class="co-hdr">
+      <h1>Finalisez votre <span class="it">réservation</span></h1>
+      <p class="sub">Paiement sécurisé chez Sojori · vos données chiffrées · annulation gratuite jusqu'au 8 juillet.</p>
+    </div>
+
+    <!-- AI hint -->
+    <div class="ai-hint">
+      <div class="av">✨</div>
+      <div class="body">
+        <div class="pretitle">Sojori AI</div>
+        <div class="txt">« Vous économisez <b style="font-style:normal;font-weight:700;color:var(--emerald);font-family:var(--sans)">245€</b> grâce au tarif négocié Sojori Select. La carte sera débitée uniquement après confirmation de Riad Luxe sous 24h. »</div>
+      </div>
+    </div>
+
+    <!-- CONTACT -->
+    <section class="sec">
+      <h2><span class="it">1.</span> Vos coordonnées</h2>
+      <p class="h-sub">Pour la confirmation de réservation et le contact avec Riad Luxe</p>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Prénom <span class="req">*</span></label>
+          <input value="Sarah" />
+        </div>
+        <div class="field">
+          <label>Nom <span class="req">*</span></label>
+          <input value="Martin" />
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="field">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" value="sarah.martin@example.com" />
+          <div class="hint">↳ confirmation de réservation envoyée ici</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Téléphone (WhatsApp) <span class="req">*</span></label>
+          <div class="phone-input">
+            <div class="phone-prefix">🇫🇷 +33</div>
+            <input class="mono" value="6 12 34 56 78" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Pays de résidence <span class="req">*</span></label>
+          <select>
+            <option>🇫🇷 France</option>
+            <option>🇧🇪 Belgique</option>
+            <option>🇨🇭 Suisse</option>
+            <option>🇲🇦 Maroc</option>
+            <option>🇬🇧 Royaume-Uni</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAYMENT -->
+    <section class="sec">
+      <h2><span class="it">2.</span> Mode de paiement</h2>
+      <p class="h-sub">Choisissez votre moyen · carte bancaire débitée après confirmation de l'hôte</p>
+
+      <!-- Apple/Google -->
+      <div class="alt-pay">
+        <button class="alt-pay-btn"><span class="ic"></span>Pay</button>
+        <button class="alt-pay-btn gpay"><span class="ic">G</span>Pay</button>
+      </div>
+      <div class="divider">OU PAYER PAR CARTE</div>
+
+      <!-- Payment tabs -->
+      <div class="pay-tabs">
+        <button class="pay-tab on">
+          <span class="ic">💳</span>Carte bancaire
+          <span class="brand-cards">
+            <span class="brand-card">VISA</span>
+            <span class="brand-card">MC</span>
+            <span class="brand-card">AMEX</span>
+          </span>
+        </button>
+        <button class="pay-tab"><span class="ic">🏦</span>Virement SEPA</button>
+        <button class="pay-tab"><span class="ic">🇲🇦</span>CMI · CB Maroc</button>
+      </div>
+
+      <!-- CARD BLOCK -->
+      <div class="card-block">
+        <div class="card-mock">
+          <div class="card-brand"><span class="ic">💳</span>VISA</div>
+        </div>
+
+        <div class="card-number">
+          <label>Numéro de carte <span class="req" style="color:var(--rose)">*</span></label>
+          <div class="input-wrap">
+            <input class="mono" value="4242 4242 4242 4242" maxlength="19" />
+            <span class="brand-detected">
+              <span class="ic">💳</span>
+              <span class="nm">VISA</span>
+            </span>
+            <span class="check">✓</span>
+          </div>
+        </div>
+
+        <div class="card-row">
+          <div class="card-cell">
+            <label>Expiration <span class="req" style="color:var(--rose)">*</span></label>
+            <input value="12 / 28" maxlength="7" />
+          </div>
+          <div class="card-cell">
+            <label>CVC / CVV <span class="req" style="color:var(--rose)">*</span></label>
+            <div class="cvc-wrap">
+              <input value="•••" maxlength="4" placeholder="3 chiffres" />
+              <span class="cvc-tip" title="Code à 3 chiffres au dos de la carte">?</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-name">
+          <label>Nom sur la carte <span class="req" style="color:var(--rose)">*</span></label>
+          <input value="Sarah Martin" />
+        </div>
+
+        <div class="save-card">
+          <input type="checkbox" id="save-card" />
+          <label for="save-card">Enregistrer cette carte pour mes prochaines réservations · <span style="color:var(--ink3)">chiffrée · révocable à tout moment</span></label>
+        </div>
+
+        <div class="pci-row">
+          <div class="ic">🔒</div>
+          <div class="info">
+            <div class="nm">Paiement sécurisé · 3D Secure</div>
+            <div class="ds">Vos données ne transitent jamais en clair · chiffrement TLS 1.3</div>
+          </div>
+          <div class="badges">
+            <span>PCI DSS</span>
+            <span>3DS2</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Billing address -->
+      <h2 style="font-size:20px;margin-top:18px"><span class="it">Adresse</span> de facturation</h2>
+      <p class="h-sub">Si différente de votre adresse personnelle</p>
+
+      <div class="form-row full">
+        <div class="field">
+          <label>Adresse <span class="req">*</span></label>
+          <input value="12 Rue de Rivoli" />
+        </div>
+      </div>
+      <div class="form-row split-3">
+        <div class="field">
+          <label>Ville <span class="req">*</span></label>
+          <input value="Paris" />
+        </div>
+        <div class="field">
+          <label>Code postal <span class="req">*</span></label>
+          <input class="mono" value="75004" />
+        </div>
+        <div class="field">
+          <label>Pays <span class="req">*</span></label>
+          <select><option>🇫🇷 France</option><option>🇧🇪 Belgique</option></select>
+        </div>
+      </div>
+    </section>
+
+    <!-- CGU + PAY -->
+    <div class="cgu">
+      <input type="checkbox" id="cgu" checked />
+      <label for="cgu">J'accepte les <a>Conditions Générales de Vente</a>, la <a>Politique d'Annulation</a> et le <a>Code de Conduite Voyageur</a>. Je comprends qu'un préautorisation sera effectuée et que ma carte sera débitée après confirmation de Riad Luxe sous 24h maximum.</label>
+    </div>
+
+    <button class="pay-btn">
+      <span class="lock">🔒</span>
+      Confirmer & Payer
+      <span class="amount">1 147€</span>
+    </button>
+
+    <div class="pay-foot">↳ DÉBIT APRÈS CONFIRMATION DE L'HÔTE · ANNULATION GRATUITE J-7</div>
+  </main>
+
+  <!-- RIGHT - RECAP -->
+  <aside class="recap-side">
+    <div class="recap-card">
+      <div class="recap-listing">
+        <div class="recap-photo">
+          <div class="grain"></div>
+          <span class="select">★ SELECT</span>
+        </div>
+        <div class="recap-info">
+          <div class="nm">Riad de la <span class="it">Bahia</span></div>
+          <div class="pm">RIAD LUXE</div>
+          <div class="rt"><span class="star">★</span>4.92 · 142 avis</div>
+        </div>
+      </div>
+
+      <div class="recap-stay">
+        <div class="recap-line"><span>📅 Arrivée</span><span class="v">15 juil · 15h</span></div>
+        <div class="recap-line"><span>📅 Départ</span><span class="v">22 juil · 11h</span></div>
+        <div class="recap-line"><span>🌙 Nuits</span><span class="v">7</span></div>
+        <div class="recap-line"><span>👥 Voyageurs</span><span class="v">4 ad · 1 enf</span></div>
+      </div>
+
+      <div class="recap-prices">
+        <div class="recap-line muted"><span>185€ × 7 nuits</span><span class="v">1 295€</span></div>
+        <div class="recap-line discount">
+          <span class="label-flex"><span class="ai-dot">✨</span>Réduction Sojori AI · −16%</span>
+          <span class="v">−245€</span>
+        </div>
+        <div class="recap-line muted"><span>Frais de ménage</span><span class="v">55€</span></div>
+        <div class="recap-line muted"><span>Taxes de séjour · 6€ × adulte × nuit</span><span class="v">42€</span></div>
+      </div>
+
+      <div class="recap-total">
+        <span class="l">Total à payer</span>
+        <span class="v">1 147€<small>EUR</small></span>
+      </div>
+    </div>
+
+    <div class="recap-cancel">
+      <span class="ic">↩</span>
+      <div><b>Annulation gratuite</b> jusqu'au 8 juillet · remboursement intégral sous 5 jours ouvrés.</div>
+    </div>
+
+    <div class="recap-secure">
+      <div class="h">🔒 PAIEMENT 100% SÉCURISÉ</div>
+      Vos données bancaires sont chiffrées et tokenisées. Sojori est certifié PCI DSS Level 1 et conforme RGPD.
+      <div class="badges">
+        <span>PCI DSS L1</span>
+        <span>3D SECURE 2</span>
+        <span>TLS 1.3</span>
+        <span>RGPD</span>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+document.querySelectorAll('.pay-tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.pay-tab').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+}));
+// Card number formatter
+const cn=document.querySelector('.card-number input');
+if(cn){cn.addEventListener('input',e=>{
+  let v=e.target.value.replace(/\s/g,'').replace(/\D/g,'').substring(0,16);
+  e.target.value=v.match(/.{1,4}/g)?.join(' ')||v;
+})}
+</script>
+</body></html>

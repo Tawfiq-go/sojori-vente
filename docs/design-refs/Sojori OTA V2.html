@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sojori · Premium stays in Morocco · curated by experts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f1011;--ink2:#3a3a3c;--ink3:#6e6e73;--ink4:#a8a7a4;
+  --paper:#faf7f0;--paper2:#f3eee2;--card:#ffffff;
+  --b:#e9e3d3;--bs:#d4ccb5;
+  --gold:#c89b3c;--goldD:#9b7626;--goldS:#e8c87a;--goldT:rgba(200,155,60,0.10);
+  --ai:#a855f7;--aiT:rgba(168,85,247,0.10);
+  --rose:#e11d48;--roseT:rgba(225,29,72,0.10);
+  --emerald:#059669;--emT:rgba(5,150,105,0.10);
+  --sans:Geist,system-ui,sans-serif;--serif:'Instrument Serif',Georgia,serif;--mono:'Geist Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+html,body{margin:0;background:var(--paper);font-family:var(--sans);color:var(--ink);font-size:14px;line-height:1.5}
+button{cursor:pointer;border:0;background:transparent;font:inherit;color:inherit;padding:0}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes pulseGold{0%,100%{box-shadow:0 0 0 0 rgba(200,155,60,0.45)}50%{box-shadow:0 0 0 12px rgba(200,155,60,0)}}
+@keyframes pulseAI{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,0.40)}50%{box-shadow:0 0 0 14px rgba(168,85,247,0)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* ─── NAV ─── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 32px;display:flex;align-items:center;gap:22px;background:rgba(250,247,240,0.80);backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid rgba(233,227,211,0.50);transition:padding .2s}
+.nav.scrolled{padding:12px 32px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:26px;font-weight:400;letter-spacing:-0.025em;font-style:italic}
+.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
+.nav-links{display:flex;align-items:center;gap:28px;margin-left:32px;font-size:13px;font-weight:500;color:var(--ink2)}
+.nav-links a:hover{color:var(--ink)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.lang-chip{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink2);padding:7px 11px;border:1px solid var(--b);border-radius:99px;letter-spacing:0.04em}
+.cmd-k{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:var(--card);border:1px solid var(--b);border-radius:99px;font-size:12px;color:var(--ink3);cursor:pointer;transition:all .15s}
+.cmd-k:hover{border-color:var(--gold);color:var(--gold)}
+.cmd-k kbd{font-family:var(--mono);font-size:10px;background:var(--paper2);padding:2px 6px;border-radius:4px;color:var(--ink2);font-weight:700;border:1px solid var(--b)}
+.nav-cta{padding:9px 18px;background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;border-radius:99px;letter-spacing:-0.005em}
+.nav-cta:hover{background:#1a1a1c}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--b);background:var(--card);font-size:14px;transition:all .15s}
+.icon-btn:hover{border-color:var(--ink2)}
+
+/* ─── HERO ─── */
+.hero{position:relative;min-height:96vh;display:flex;flex-direction:column;justify-content:center;padding:140px 32px 60px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:
+  radial-gradient(ellipse 60% 40% at 20% 30%, rgba(200,155,60,0.18), transparent),
+  radial-gradient(ellipse 40% 30% at 85% 70%, rgba(168,85,247,0.12), transparent),
+  radial-gradient(ellipse 50% 35% at 50% 100%, rgba(5,150,105,0.10), transparent);
+  pointer-events:none}
+.hero-noise{position:absolute;inset:0;opacity:0.20;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.78 0 0 0 0 0.61 0 0 0 0 0.24 0 0 0 0.3 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:multiply;pointer-events:none}
+.hero-inner{position:relative;max-width:1240px;margin:0 auto;width:100%}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:30px}
+.hero-eyebrow .line{width:32px;height:1px;background:var(--gold)}
+.hero h1{margin:0 0 32px;font-family:var(--serif);font-weight:400;font-size:104px;line-height:0.92;letter-spacing:-0.045em;max-width:980px}
+.hero h1 .it{font-style:italic;color:var(--goldD)}
+.hero h1 .small{font-family:var(--sans);font-size:0.50em;font-weight:600;letter-spacing:-0.025em;color:var(--ink3);display:block;margin-top:24px;line-height:1.3;max-width:680px}
+.hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:60px}
+
+/* AI Search bar (main attraction) */
+.ai-search{display:flex;align-items:stretch;gap:0;background:var(--card);border-radius:24px;padding:8px;box-shadow:0 32px 80px -16px rgba(15,16,17,0.20),0 8px 24px rgba(15,16,17,0.08);max-width:920px;border:1px solid var(--b);position:relative;overflow:hidden}
+.ai-search::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--gold) 0%,var(--ai) 50%,var(--emerald) 100%);background-size:200% 100%;animation:shimmer 4s linear infinite}
+.ai-prompt{flex:1;padding:18px 22px;display:flex;align-items:center;gap:14px;cursor:text}
+.ai-prompt .ic{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#c084fc,var(--ai));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;animation:pulseAI 3s infinite}
+.ai-prompt input{flex:1;border:0;outline:0;background:transparent;font-size:17px;font-weight:500;color:var(--ink);min-width:0;font-family:var(--sans)}
+.ai-prompt input::placeholder{color:var(--ink3)}
+.ai-search .divider{width:1px;background:var(--b);margin:14px 0}
+.ai-classic{display:flex;align-items:stretch;gap:0}
+.ai-cell{padding:14px 18px;cursor:pointer;border-radius:16px;transition:background .15s;min-width:130px}
+.ai-cell:hover{background:var(--paper2)}
+.ai-cell .l{font-size:10.5px;font-weight:700;color:var(--ink3);letter-spacing:0.04em;text-transform:uppercase;font-family:var(--mono)}
+.ai-cell .v{font-size:14px;font-weight:600;margin-top:3px;letter-spacing:-0.005em}
+.ai-cell .v.muted{color:var(--ink4);font-weight:500}
+.ai-go{align-self:center;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--goldS),var(--gold));color:var(--ink);font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 4px 0 8px;box-shadow:0 6px 18px rgba(200,155,60,0.40);font-weight:700;animation:pulseGold 3s infinite}
+.ai-go:hover{transform:scale(1.05)}
+
+.ai-suggestions{margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;max-width:920px;animation:slideUp .6s .2s both}
+.ai-sug{display:inline-flex;align-items:center;gap:7px;padding:10px 14px;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border:1px solid rgba(233,227,211,0.7);border-radius:99px;font-size:12.5px;font-weight:500;color:var(--ink2);cursor:pointer;transition:all .15s}
+.ai-sug:hover{border-color:var(--ai);background:var(--aiT);color:var(--ai)}
+.ai-sug .em{font-size:14px}
+
+/* Hero stats footer */
+.hero-stats{position:absolute;bottom:30px;left:32px;right:32px;display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--ink3);font-weight:600;letter-spacing:0.06em;text-transform:uppercase}
+.hs-num{display:inline-flex;align-items:baseline;gap:6px}
+.hs-num b{font-family:var(--serif);font-style:italic;font-size:22px;font-weight:400;color:var(--ink);letter-spacing:-0.02em;text-transform:none}
+
+/* ─── SECTIONS ─── */
+.section{padding:100px 32px;max-width:1320px;margin:0 auto}
+.section.full{max-width:none}
+.section.tight{padding:60px 32px}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:48px;flex-wrap:wrap}
+.section-head .pretitle{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.section-head .pretitle::before{content:'';width:24px;height:1px;background:currentColor}
+.section-head h2{margin:0;font-family:var(--serif);font-weight:400;font-size:56px;letter-spacing:-0.035em;line-height:1.05}
+.section-head h2 .it{font-style:italic;color:var(--goldD)}
+.section-head .sub{font-size:15px;color:var(--ink2);line-height:1.6;max-width:520px;margin-top:14px}
+.section-head .nav-arrows{display:flex;gap:8px;align-self:flex-end}
+.nav-arrow{width:46px;height:46px;border-radius:50%;border:1px solid var(--b);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--ink2);cursor:pointer;transition:all .15s}
+.nav-arrow:hover{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+
+/* ─── BRANDS (PM) ─── */
+.brands-grid{display:grid;grid-template-columns:1.8fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;height:540px}
+.brand-card{position:relative;border-radius:24px;overflow:hidden;cursor:pointer;transition:all .25s;background:linear-gradient(135deg,#fde68a,#d97706)}
+.brand-card:hover{transform:translateY(-3px);box-shadow:0 24px 48px -12px rgba(15,16,17,0.20)}
+.brand-card.featured{grid-row:1/3}
+.brand-card.b2{background:linear-gradient(135deg,#c4b5fd,#7c3aed)}
+.brand-card.b3{background:linear-gradient(135deg,#fda4af,#dc2626)}
+.brand-card.b4{background:linear-gradient(135deg,#a5f3fc,#0e7490)}
+.brand-card.b5{background:linear-gradient(135deg,#86efac,#15803d)}
+.brand-card .bg{position:absolute;inset:0;opacity:0.92}
+.brand-card .overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 0%,rgba(15,16,17,0.10) 50%,rgba(15,16,17,0.78) 100%);z-index:1}
+.brand-card .grain{position:absolute;inset:0;opacity:0.20;background:radial-gradient(circle at 30% 50%,rgba(255,255,255,0.15),transparent 60%);mix-blend-mode:overlay;z-index:1}
+.brand-card .badge{position:absolute;top:18px;left:18px;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-radius:99px;font-family:var(--mono);font-size:10px;font-weight:800;color:var(--ink);letter-spacing:0.08em;text-transform:uppercase;z-index:2}
+.brand-card .badge.gold{background:linear-gradient(135deg,var(--goldS),var(--gold));color:var(--ink)}
+.brand-card .content{position:absolute;left:22px;right:22px;bottom:22px;color:#fff;z-index:2}
+.brand-card .logo{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,0.95);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;letter-spacing:-0.02em;margin-bottom:14px;backdrop-filter:blur(8px)}
+.brand-card.featured .logo{width:60px;height:60px;font-size:18px;border-radius:18px}
+.brand-card .nm{font-family:var(--serif);font-weight:400;font-size:24px;letter-spacing:-0.025em;margin-bottom:4px}
+.brand-card.featured .nm{font-size:42px;line-height:1}
+.brand-card .nm .it{font-style:italic}
+.brand-card .tag{font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.85);margin-bottom:12px;letter-spacing:-0.005em}
+.brand-card.featured .tag{font-size:14.5px;margin-bottom:16px;max-width:380px;line-height:1.5}
+.brand-card .meta{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:11px;font-weight:700;color:rgba(255,255,255,0.92);letter-spacing:0.04em}
+.brand-card .meta .dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.5)}
+.brand-card .meta .star{color:var(--goldS);font-weight:800}
+.brand-card .preview{position:absolute;top:18px;right:18px;display:flex;gap:6px;z-index:2}
+.brand-card .preview .ph{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.20);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.30)}
+
+/* ─── LISTINGS CAROUSEL ─── */
+.car-row{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 32px 30px;margin:0 -32px;scrollbar-width:none}
+.car-row::-webkit-scrollbar{display:none}
+.car-item{flex:0 0 320px;scroll-snap-align:start;cursor:pointer;transition:transform .25s}
+.car-item:hover{transform:translateY(-4px)}
+.car-photo{position:relative;aspect-ratio:5/4;border-radius:20px;overflow:hidden;margin-bottom:14px;background:linear-gradient(135deg,#fde68a,#d97706)}
+.car-photo.b{background:linear-gradient(135deg,#a5f3fc,#0e7490)}
+.car-photo.c{background:linear-gradient(135deg,#c4b5fd,#7c3aed)}
+.car-photo.d{background:linear-gradient(135deg,#fda4af,#dc2626)}
+.car-photo.e{background:linear-gradient(135deg,#86efac,#15803d)}
+.car-photo.f{background:linear-gradient(135deg,#fcd34d,#a16207)}
+.car-photo.g{background:linear-gradient(135deg,#93c5fd,#1d4ed8)}
+.car-photo.h{background:linear-gradient(135deg,#f0abfc,#a21caf)}
+.car-photo .grain{position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.20),transparent 50%);mix-blend-mode:overlay}
+.car-photo .wish{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;color:var(--ink2)}
+.car-photo .wish.on{color:var(--rose)}
+.car-photo .wish:hover{transform:scale(1.1)}
+.car-photo .pm{position:absolute;top:14px;left:14px;display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 5px;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);border-radius:99px;font-size:11px;font-weight:700;color:var(--ink);letter-spacing:-0.005em}
+.car-photo .pm .pml{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--goldS),var(--goldD));color:var(--ink);font-family:var(--mono);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.car-photo .pages{position:absolute;bottom:14px;right:14px;font-family:var(--mono);font-size:10.5px;font-weight:700;background:rgba(15,16,17,0.65);color:#fff;padding:3px 8px;border-radius:99px;letter-spacing:0.04em;backdrop-filter:blur(6px)}
+.car-photo .gathern{position:absolute;bottom:14px;left:14px;display:inline-flex;align-items:center;gap:5px;padding:4px 9px;background:linear-gradient(135deg,#1c4f3a,#0a3526);color:#fff;border-radius:99px;font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:0.06em}
+.car-photo .gathern.airbnb{background:#FF385C}
+.car-photo .gathern.booking{background:#003580}
+.car-info .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.car-info .nm{font-size:15px;font-weight:600;letter-spacing:-0.01em;line-height:1.3;flex:1}
+.car-info .rating{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:12.5px;font-weight:700;flex-shrink:0}
+.car-info .rating .star{color:var(--gold)}
+.car-info .loc{font-size:12.5px;color:var(--ink3);margin-top:3px;letter-spacing:-0.005em}
+.car-info .price{margin-top:10px;display:flex;align-items:baseline;gap:6px}
+.car-info .price b{font-size:16px;font-weight:700;letter-spacing:-0.01em}
+.car-info .price .per{color:var(--ink3);font-size:13px;font-weight:500}
+.car-info .price .total{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--ink3);font-weight:600;letter-spacing:0.02em}
+
+/* ─── AI MAGIC ─── */
+.ai-magic{background:linear-gradient(180deg,var(--paper),#f5f0e0 100%);padding:100px 32px;position:relative;overflow:hidden}
+.ai-magic::before{content:'';position:absolute;top:-20%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(168,85,247,0.18),transparent 70%);pointer-events:none}
+.ai-magic::after{content:'';position:absolute;bottom:-20%;left:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(200,155,60,0.18),transparent 70%);pointer-events:none}
+.am-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1fr 460px;gap:60px;align-items:center;position:relative}
+.am-text .pretitle{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;display:inline-flex;align-items:center;gap:8px;padding:7px 14px;background:var(--aiT);border:1px solid rgba(168,85,247,0.30);border-radius:99px;color:var(--ai)}
+.am-text h2{margin:0 0 22px;font-family:var(--serif);font-weight:400;font-size:64px;line-height:1.05;letter-spacing:-0.035em}
+.am-text h2 .it{font-style:italic;background:linear-gradient(135deg,var(--ai),#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.am-text p{font-size:16.5px;color:var(--ink2);line-height:1.65;margin:0 0 32px;max-width:520px}
+.am-tools{display:flex;flex-direction:column;gap:14px;margin-bottom:32px}
+.am-tool{display:flex;align-items:center;gap:14px}
+.am-tool .ic{width:38px;height:38px;border-radius:11px;background:var(--card);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.am-tool .info{flex:1}
+.am-tool .nm{font-size:14px;font-weight:700;letter-spacing:-0.005em}
+.am-tool .ds{font-size:12.5px;color:var(--ink3);margin-top:2px}
+.am-cta{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;background:var(--ink);color:var(--paper);font-size:14px;font-weight:600;border-radius:99px;letter-spacing:-0.005em;transition:all .15s}
+.am-cta:hover{background:#1a1a1c;transform:translateY(-1px)}
+.am-cta .ic{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#c084fc,var(--ai));display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+
+/* AI chat mockup */
+.am-chat{background:var(--card);border:1px solid var(--b);border-radius:24px;padding:0;box-shadow:0 32px 80px -16px rgba(15,16,17,0.20);overflow:hidden;animation:float 6s ease-in-out infinite}
+.am-chat-head{padding:18px 22px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:12px;background:linear-gradient(180deg,rgba(168,85,247,0.04),transparent)}
+.am-chat-head .av{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#c084fc,var(--ai));color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 4px 12px rgba(168,85,247,0.30)}
+.am-chat-head .nm{font-size:14px;font-weight:700;letter-spacing:-0.005em}
+.am-chat-head .nm small{display:block;font-size:11px;color:var(--ai);font-family:var(--mono);font-weight:600;margin-top:1px;letter-spacing:0.04em}
+.am-chat-body{padding:22px;display:flex;flex-direction:column;gap:14px;background:var(--paper);max-height:420px;overflow-y:auto}
+.am-msg{max-width:90%;animation:slideUp .4s}
+.am-msg.u{align-self:flex-end}
+.am-msg.b{align-self:flex-start}
+.am-bub{padding:11px 15px;border-radius:18px;font-size:13.5px;line-height:1.5}
+.am-msg.u .am-bub{background:var(--ink);color:#fff;border-bottom-right-radius:4px}
+.am-msg.b .am-bub{background:var(--card);border:1px solid var(--b);border-bottom-left-radius:4px}
+.am-tool-chip{margin-top:8px;padding:9px 13px;background:var(--aiT);border:1px solid rgba(168,85,247,0.20);border-radius:12px;font-size:11.5px;color:var(--ai);font-family:var(--mono);font-weight:700;letter-spacing:0.02em;display:flex;align-items:center;gap:8px}
+.am-tool-chip .ic{width:16px;height:16px;border-radius:5px;background:var(--ai);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
+.am-result{margin-top:10px;display:flex;gap:10px;padding:10px;background:var(--card);border:1px solid var(--b);border-radius:14px}
+.am-result .ph{width:64px;height:54px;border-radius:10px;background:linear-gradient(135deg,#fde68a,#d97706);flex-shrink:0}
+.am-result .info{flex:1;min-width:0}
+.am-result .nm{font-size:12.5px;font-weight:700;letter-spacing:-0.005em;line-height:1.2}
+.am-result .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink3);font-weight:600;margin-top:3px;letter-spacing:0.02em}
+.am-result .price{font-family:var(--mono);font-weight:800;font-size:13px;margin-top:4px}
+.am-typing{align-self:flex-start;display:inline-flex;gap:4px;padding:12px 16px;background:var(--card);border:1px solid var(--b);border-radius:18px;border-bottom-left-radius:4px}
+.am-typing span{width:7px;height:7px;border-radius:50%;background:var(--ai);animation:blink 1.4s infinite}
+.am-typing span:nth-child(2){animation-delay:0.2s}
+.am-typing span:nth-child(3){animation-delay:0.4s}
+@keyframes blink{0%,80%,100%{opacity:0.3}40%{opacity:1}}
+.am-chat-input{padding:14px 18px;border-top:1px solid var(--b);background:var(--card);display:flex;align-items:center;gap:10px}
+.am-chat-input input{flex:1;padding:10px 14px;border:1px solid var(--b);border-radius:99px;font:inherit;font-size:13px;background:var(--paper)}
+.am-chat-input .send{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#c084fc,var(--ai));color:#fff;display:flex;align-items:center;justify-content:center}
+
+/* ─── CITY EDITORIAL ─── */
+.cities-strip{padding:60px 32px;background:var(--ink);color:var(--paper);position:relative;overflow:hidden}
+.cs-head{max-width:1280px;margin:0 auto 40px;display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.cs-head .pretitle{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--goldS);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px}
+.cs-head h2{margin:0;font-family:var(--serif);font-weight:400;font-size:56px;line-height:1;letter-spacing:-0.035em;color:var(--paper)}
+.cs-head h2 .it{font-style:italic;color:var(--goldS)}
+.cs-head .ds{margin-left:auto;font-size:14px;color:rgba(250,247,240,0.65);max-width:380px;line-height:1.6}
+.cs-grid{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.cs-card{position:relative;border-radius:20px;overflow:hidden;cursor:pointer;aspect-ratio:3/4;transition:transform .3s}
+.cs-card:hover{transform:translateY(-6px)}
+.cs-card.large{grid-column:span 2;grid-row:span 2;aspect-ratio:1}
+.cs-card .bg{position:absolute;inset:0;background:linear-gradient(135deg,#fde68a,#d97706)}
+.cs-card.casa .bg{background:linear-gradient(135deg,#fda4af,#dc2626)}
+.cs-card.fes .bg{background:linear-gradient(135deg,#c4b5fd,#7c3aed)}
+.cs-card.ess .bg{background:linear-gradient(135deg,#a5f3fc,#0e7490)}
+.cs-card.tng .bg{background:linear-gradient(135deg,#86efac,#15803d)}
+.cs-card.chf .bg{background:linear-gradient(135deg,#93c5fd,#1d4ed8)}
+.cs-card.fes2 .bg{background:linear-gradient(135deg,#fcd34d,#a16207)}
+.cs-card.ouar .bg{background:linear-gradient(135deg,#fb923c,#c2410c)}
+.cs-card .overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(15,16,17,0.85));z-index:1}
+.cs-card .info{position:absolute;left:16px;right:16px;bottom:16px;color:#fff;z-index:2}
+.cs-card.large .info{left:22px;right:22px;bottom:22px}
+.cs-card .nm{font-family:var(--serif);font-weight:400;font-size:22px;letter-spacing:-0.025em;line-height:1.05}
+.cs-card.large .nm{font-size:40px;margin-bottom:8px}
+.cs-card .ct{font-family:var(--mono);font-size:10.5px;font-weight:700;color:rgba(255,255,255,0.85);letter-spacing:0.06em;margin-top:4px}
+
+/* ─── BANDEAU TRUST ─── */
+.trust-bar{padding:50px 32px;background:var(--paper2);border-top:1px solid var(--b);border-bottom:1px solid var(--b)}
+.trust-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
+.trust-item{display:flex;flex-direction:column;gap:8px}
+.trust-item .em{font-size:22px;width:48px;height:48px;border-radius:14px;background:var(--card);border:1px solid var(--b);display:flex;align-items:center;justify-content:center}
+.trust-item .nm{font-size:14.5px;font-weight:700;letter-spacing:-0.01em;margin-top:6px}
+.trust-item .ds{font-size:12.5px;color:var(--ink3);line-height:1.5}
+
+/* ─── FOOTER ─── */
+.footer{background:var(--ink);color:var(--paper);padding:80px 32px 40px}
+.footer-inner{max-width:1280px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px;border-bottom:1px solid rgba(250,247,240,0.10)}
+.footer-brand{font-family:var(--serif);font-style:italic;font-size:38px;font-weight:400;letter-spacing:-0.025em;line-height:1;margin-bottom:18px}
+.footer-brand .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--goldS);margin-right:6px;vertical-align:middle}
+.footer-tag{font-size:14px;color:rgba(250,247,240,0.65);line-height:1.55;margin-bottom:22px;max-width:280px}
+.footer-social{display:flex;gap:8px}
+.fs-ic{width:40px;height:40px;border-radius:50%;background:rgba(250,247,240,0.06);display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s}
+.fs-ic:hover{background:rgba(250,247,240,0.12)}
+.footer-col h4{margin:0 0 16px;font-family:var(--mono);font-size:11px;font-weight:700;color:rgba(250,247,240,0.50);letter-spacing:0.10em;text-transform:uppercase}
+.footer-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px}
+.footer-col li{font-size:13.5px;color:rgba(250,247,240,0.75);cursor:pointer;transition:color .12s}
+.footer-col li:hover{color:var(--paper)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:32px;font-family:var(--mono);font-size:11px;color:rgba(250,247,240,0.40);letter-spacing:0.06em;font-weight:600;flex-wrap:wrap;gap:14px}
+
+/* ─── CMD-K MODAL ─── */
+.cmd-modal{position:fixed;inset:0;background:rgba(15,16,17,0.55);backdrop-filter:blur(8px);z-index:100;display:none;align-items:flex-start;justify-content:center;padding-top:88px;animation:fadeIn .2s}
+.cmd-modal.on{display:flex}
+.cmd-box{width:660px;max-width:92%;background:var(--card);border-radius:20px;box-shadow:0 32px 80px -16px rgba(15,16,17,0.40);overflow:hidden}
+.cmd-input{display:flex;align-items:center;gap:14px;padding:18px 22px;border-bottom:1px solid var(--b)}
+.cmd-input .ic{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#c084fc,var(--ai));color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;animation:pulseAI 3s infinite}
+.cmd-input input{flex:1;border:0;outline:0;font-size:17px;font-weight:500;color:var(--ink);background:transparent}
+.cmd-input kbd{font-family:var(--mono);font-size:10px;background:var(--paper2);padding:3px 7px;border-radius:5px;color:var(--ink2);font-weight:700;border:1px solid var(--b)}
+.cmd-section{padding:14px 22px 6px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:0.10em;text-transform:uppercase}
+.cmd-item{display:flex;align-items:center;gap:14px;padding:11px 22px;cursor:pointer;transition:background .12s}
+.cmd-item:hover,.cmd-item.on{background:var(--paper2)}
+.cmd-item .ic{width:32px;height:32px;border-radius:9px;background:var(--paper2);display:flex;align-items:center;justify-content:center;font-size:14px}
+.cmd-item .info{flex:1}
+.cmd-item .nm{font-size:13.5px;font-weight:600;letter-spacing:-0.005em}
+.cmd-item .ds{font-size:11.5px;color:var(--ink3);margin-top:1px}
+.cmd-item kbd{font-family:var(--mono);font-size:10px;background:var(--card);padding:3px 7px;border-radius:5px;color:var(--ink2);font-weight:700;border:1px solid var(--b)}
+.cmd-foot{padding:11px 22px;border-top:1px solid var(--b);display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10.5px;color:var(--ink3);font-weight:600;letter-spacing:0.04em}
+.cmd-foot kbd{font-family:var(--mono);font-size:9.5px;background:var(--paper2);padding:2px 5px;border-radius:4px;font-weight:700;border:1px solid var(--b);margin:0 3px}
+
+/* AI floating button */
+.ai-fab{position:fixed;bottom:28px;right:28px;display:flex;align-items:center;gap:0;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 6px 6px 18px;box-shadow:0 20px 48px -8px rgba(15,16,17,0.30);z-index:40;cursor:pointer;font-size:13.5px;font-weight:500;transition:all .2s;animation:slideUp .6s 1s both}
+.ai-fab:hover{transform:translateY(-2px);box-shadow:0 28px 56px -8px rgba(15,16,17,0.40)}
+.ai-fab .ic{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#c084fc,var(--ai));color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;margin-left:14px;animation:pulseAI 3s infinite}
+
+@media (max-width:900px){
+  .hero h1{font-size:64px}
+  .ai-search{flex-direction:column;padding:14px}
+  .ai-classic{display:none}
+  .am-inner{grid-template-columns:1fr}
+  .brands-grid{grid-template-columns:1fr;height:auto}
+  .brand-card.featured{grid-row:auto;min-height:320px}
+  .brand-card{min-height:240px}
+  .cs-grid{grid-template-columns:repeat(2,1fr)}
+  .cs-card.large{grid-column:span 2}
+  .footer-top{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+  .section-head h2{font-size:36px}
+}
+</style></head><body>
+
+<!-- ─── NAV ─── -->
+<nav class="nav" id="nav">
+  <a class="brand"><span class="dot"></span>sojori</a>
+  <div class="nav-links">
+    <a>Destinations</a>
+    <a>Hôtes vérifiés</a>
+    <a>Expériences</a>
+    <a>Devenir hôte</a>
+  </div>
+  <div class="nav-right">
+    <div class="cmd-k" onclick="document.getElementById('cmdModal').classList.add('on')">
+      <span>✨ Demander à Sojori AI</span>
+      <kbd>⌘K</kbd>
+    </div>
+    <button class="icon-btn">♡</button>
+    <button class="icon-btn">🌐</button>
+    <button class="nav-cta">Se connecter</button>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-noise"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span class="line"></span>Curated by Sojori · Maroc Premium</div>
+    <h1>
+      Des séjours <span class="it">d'exception</span><br>
+      au cœur du Maroc.
+      <span class="small">Pas d'hôtes amateurs. Des hôtes vérifiés, des marques curées, et une intelligence qui comprend ce que vous cherchez vraiment.</span>
+    </h1>
+
+    <div class="ai-search">
+      <div class="ai-prompt">
+        <div class="ic">✨</div>
+        <input placeholder="Un riad calme à Marrakech avec piscine pour 6, fin juillet, hammam apprécié…" />
+      </div>
+      <div class="divider"></div>
+      <div class="ai-classic">
+        <div class="ai-cell">
+          <div class="l">Où</div>
+          <div class="v muted">Marrakech</div>
+        </div>
+        <div class="ai-cell">
+          <div class="l">Quand</div>
+          <div class="v muted">15 → 22 juil</div>
+        </div>
+        <div class="ai-cell">
+          <div class="l">Qui</div>
+          <div class="v muted">5 voyageurs</div>
+        </div>
+      </div>
+      <button class="ai-go">→</button>
+    </div>
+
+    <div class="ai-suggestions">
+      <span class="ai-sug"><span class="em">🌿</span>Riad bohème avec patio</span>
+      <span class="ai-sug"><span class="em">🏊</span>Villa piscine en bord d'océan</span>
+      <span class="ai-sug"><span class="em">🎨</span>Séjour design à Tanger</span>
+      <span class="ai-sug"><span class="em">🌅</span>Désert + Atlas en 5 jours</span>
+      <span class="ai-sug"><span class="em">💼</span>Suite télétravail à Casablanca</span>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <span class="hs-num"><b>842</b> hôtes vérifiés</span>
+    <span class="hs-num"><b>4 200+</b> biens curés</span>
+    <span class="hs-num"><b>12</b> villes premium</span>
+    <span class="hs-num"><b>4.91 ★</b> note moyenne</span>
+  </div>
+</section>
+
+<!-- ─── HÔTES DE MARQUE ─── -->
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="pretitle">Hôtes vérifiés · curated brands</div>
+      <h2>Des <span class="it">marques</span>, pas des amateurs.</h2>
+      <p class="sub">Chaque hôte est un Property Manager professionnel · des collections cohérentes, des standards garantis, et un service qui n'a rien à voir avec celui d'un loueur particulier.</p>
+    </div>
+    <div class="nav-arrows">
+      <button class="nav-arrow">←</button>
+      <button class="nav-arrow">→</button>
+    </div>
+  </div>
+
+  <div class="brands-grid">
+    <div class="brand-card featured">
+      <div class="bg"></div>
+      <div class="grain"></div>
+      <div class="overlay"></div>
+      <span class="badge gold">⭐ Sojori Select · Top 1%</span>
+      <div class="preview">
+        <div class="ph"></div>
+        <div class="ph"></div>
+        <div class="ph"></div>
+      </div>
+      <div class="content">
+        <div class="logo">RL</div>
+        <div class="nm">Riad <span class="it">Luxe</span></div>
+        <div class="tag">Restauration de riads d'exception en Médina de Marrakech depuis 2015. Patrimoine, artisanat, hospitalité.</div>
+        <div class="meta">
+          <span>12 biens</span><span class="dot"></span>
+          <span><span class="star">★</span> 4.92 · 256 avis</span><span class="dot"></span>
+          <span>Marrakech</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="brand-card b2">
+      <div class="bg"></div><div class="grain"></div><div class="overlay"></div>
+      <span class="badge">Vérifié</span>
+      <div class="content">
+        <div class="logo">AS</div>
+        <div class="nm">Atlas <span class="it">Stays</span></div>
+        <div class="meta"><span>23 biens</span><span class="dot"></span><span><span class="star">★</span> 4.78</span></div>
+      </div>
+    </div>
+
+    <div class="brand-card b3">
+      <div class="bg"></div><div class="grain"></div><div class="overlay"></div>
+      <span class="badge">Vérifié</span>
+      <div class="content">
+        <div class="logo">CM</div>
+        <div class="nm">Casa <span class="it">Mediterranea</span></div>
+        <div class="meta"><span>17 biens</span><span class="dot"></span><span><span class="star">★</span> 4.85</span></div>
+      </div>
+    </div>
+
+    <div class="brand-card b4">
+      <div class="bg"></div><div class="grain"></div><div class="overlay"></div>
+      <span class="badge">Vérifié</span>
+      <div class="content">
+        <div class="logo">DH</div>
+        <div class="nm">Dar <span class="it">Hassan</span></div>
+        <div class="meta"><span>8 biens</span><span class="dot"></span><span><span class="star">★</span> 4.88</span></div>
+      </div>
+    </div>
+
+    <div class="brand-card b5">
+      <div class="bg"></div><div class="grain"></div><div class="overlay"></div>
+      <span class="badge">Nouveau · Essaouira</span>
+      <div class="content">
+        <div class="logo">OB</div>
+        <div class="nm">Océan <span class="it">Berbère</span></div>
+        <div class="meta"><span>6 biens</span><span class="dot"></span><span><span class="star">★</span> 4.94</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── LISTINGS FEATURED ─── -->
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="pretitle">Sélection éditoriale · cette semaine</div>
+      <h2>Coups de <span class="it">cœur</span> Sojori.</h2>
+    </div>
+    <div class="nav-arrows">
+      <button class="nav-arrow">←</button>
+      <button class="nav-arrow">→</button>
+    </div>
+  </div>
+</section>
+<div class="car-row">
+  <div class="car-item">
+    <div class="car-photo">
+      <div class="grain"></div>
+      <span class="pm"><span class="pml">RL</span>Riad Luxe</span>
+      <span class="gathern">SOJORI EXCLUSIF</span>
+      <button class="wish">♡</button>
+      <span class="pages">1 / 24</span>
+    </div>
+    <div class="car-info">
+      <div class="top">
+        <div class="nm">Riad de la Bahia · Médina</div>
+        <div class="rating"><span class="star">★</span>4.92</div>
+      </div>
+      <div class="loc">Marrakech · Médina</div>
+      <div class="price"><b>185€</b><span class="per">/ nuit</span><span class="total">1 295€ · 7 nuits</span></div>
+    </div>
+  </div>
+
+  <div class="car-item">
+    <div class="car-photo b">
+      <div class="grain"></div>
+      <span class="pm"><span class="pml" style="background:linear-gradient(135deg,#c4b5fd,#7c3aed);color:#fff">AS</span>Atlas Stays</span>
+      <span class="gathern airbnb">VIA AIRBNB</span>
+      <button class="wish on">♥</button>
+      <span class="pages">1 / 32</span>
+    </div>
+    <div class="car-info">
+      <div class="top">
+        <div class="nm">Villa contemporaine · Gueliz</div>
+        <div class="rating"><span class="star">★</span>4.86</div>
+      </div>
+      <div class="loc">Marrakech · Gueliz · Piscine</div>
+      <div class="price"><b>240€</b><span class="per">/ nuit</span><span class="total">1 680€ · 7 nuits</span></div>
+    </div>
+  </div>
+
+  <div class="car-item">
+    <div class="car-photo c">
+      <div class="grain"></div>
+      <span class="pm"><span class="pml" style="background:linear-gradient(135deg,#fda4af,#dc2626);color:#fff">CM</span>Casa Med</span>
+      <span class="gathern">SOJORI EXCLUSIF</span>
+      <button class="wish">♡</button>
+      <span class="pages">1 / 18</span>
+    </div>
+    <div class="car-info">
+      <div class="top">
+        <div class="nm">Penthouse Anfa · vue océan</div>
+        <div class="rating"><span class="star">★</span>4.78</div>
+      </div>
+      <div class="loc">Casablanca · Anfa</div>
+      <div class="price"><b>310€</b><span class="per">/ nuit</span><span class="total">2 170€ · 7 nuits</span></div>
+    </div>
+  </div>
+
+  <div class="car-item">
+    <div class="car-photo d">
+      <div class="grain"></div>
+      <span class="pm"><span class="pml" style="background:linear-gradient(135deg,#a5f3fc,#0e7490);color:#fff">DH</span>Dar Hassan</span>
+      <span class="gathern booking">VIA BOOKING</span>
+      <button class="wish">♡</button>
+      <span class="pages">1 / 15</span>
+    </div>
+    <div class="car-info">
+      <div class="top">
+        <div class="nm">Dar Essaouira · vue port</div>
+        <div class="rating"><span class="star">★</span>4.95</div>
+      </div>
+      <div class="loc">Essaouira · Médina</div>
+      <div class="price"><b>140€</b><span class="per">/ nuit</span><span class="total">980€ · 7 nuits</span></div>
+    </div>
+  </div>
+
+  <div class="car-item">
+    <div class="car-photo e">
+      <div class="grain"></div>
+      <span class="pm"><span class="pml">RL</span>Riad Luxe</span>
+      <span class="gathern">SOJORI EXCLUSIF</span>
+      <button class="wish">♡</button>
+      <span class="pages">1 / 28</span>
+    </div>
+    <div class="car-info">
+      <div class="top">
+        <div class="nm">Riad Marrakech · piscine</div>
+        <div class="rating"><span class="star">★</span>4.88</div>
+      </div>
+      <div class="loc">Marrakech · Palmeraie</div>
+      <div class="price"><b>295€</b><span class="per">/ nuit</span><span class="total">2 065€ · 7 nuits</span></div>
+    </div>
+  </div>
+
+  <div class="car-item">
+    <div class="car-photo f">
+      <div class="grain"></div>
+      <span class="pm"><span class="pml" style="background:linear-gradient(135deg,#c4b5fd,#7c3aed);color:#fff">AS</span>Atlas Stays</span>
+      <span class="gathern airbnb">VIA AIRBNB</span>
+      <button class="wish">♡</button>
+      <span class="pages">1 / 21</span>
+    </div>
+    <div class="car-info">
+      <div class="top">
+        <div class="nm">Appartement Fès · médina</div>
+        <div class="rating"><span class="star">★</span>4.71</div>
+      </div>
+      <div class="loc">Fès · Médina</div>
+      <div class="price"><b>95€</b><span class="per">/ nuit</span><span class="total">665€ · 7 nuits</span></div>
+    </div>
+  </div>
+
+  <div class="car-item">
+    <div class="car-photo g">
+      <div class="grain"></div>
+      <span class="pm"><span class="pml" style="background:linear-gradient(135deg,#a5f3fc,#0e7490);color:#fff">DH</span>Dar Hassan</span>
+      <span class="gathern">SOJORI EXCLUSIF</span>
+      <button class="wish">♡</button>
+      <span class="pages">1 / 19</span>
+    </div>
+    <div class="car-info">
+      <div class="top">
+        <div class="nm">Maison Chefchaouen · bleue</div>
+        <div class="rating"><span class="star">★</span>4.93</div>
+      </div>
+      <div class="loc">Chefchaouen · Médina</div>
+      <div class="price"><b>110€</b><span class="per">/ nuit</span><span class="total">770€ · 7 nuits</span></div>
+    </div>
+  </div>
+
+  <div class="car-item">
+    <div class="car-photo h">
+      <div class="grain"></div>
+      <span class="pm"><span class="pml" style="background:linear-gradient(135deg,#fda4af,#dc2626);color:#fff">CM</span>Casa Med</span>
+      <span class="gathern airbnb">VIA AIRBNB</span>
+      <button class="wish on">♥</button>
+      <span class="pages">1 / 26</span>
+    </div>
+    <div class="car-info">
+      <div class="top">
+        <div class="nm">Villa Tanger · vue mer</div>
+        <div class="rating"><span class="star">★</span>4.82</div>
+      </div>
+      <div class="loc">Tanger · Malabata</div>
+      <div class="price"><b>225€</b><span class="per">/ nuit</span><span class="total">1 575€ · 7 nuits</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── AI MAGIC ─── -->
+<section class="ai-magic">
+  <div class="am-inner">
+    <div class="am-text">
+      <div class="pretitle">✨ Sojori AI · powered by Claude</div>
+      <h2>Décrivez votre voyage. <span class="it">L'IA fait le reste.</span></h2>
+      <p>Au lieu de cliquer 47 filtres, parlez à Sojori AI en langage naturel. Elle comprend votre intention, compare les biens, vérifie les disponibilités, et prépare votre réservation. Vous validez · vous payez · c'est fait.</p>
+
+      <div class="am-tools">
+        <div class="am-tool"><div class="ic">🔍</div><div class="info"><div class="nm">Recherche sémantique</div><div class="ds">« calme · authentique · pas trop loin de Jemaa el-Fna »</div></div></div>
+        <div class="am-tool"><div class="ic">⚖️</div><div class="info"><div class="nm">Comparaison intelligente</div><div class="ds">Pour 4 ad + 1 enfant · le Bahia gagne sur le rapport qualité/calme</div></div></div>
+        <div class="am-tool"><div class="ic">📅</div><div class="info"><div class="nm">Disponibilités live</div><div class="ds">Synchronisé Airbnb, Booking et propre stock Sojori</div></div></div>
+        <div class="am-tool"><div class="ic">🎯</div><div class="info"><div class="nm">Pré-réservation</div><div class="ds">Génère un lien de paiement direct · Stripe sécurisé</div></div></div>
+      </div>
+
+      <button class="am-cta"><span class="ic">✨</span>Essayer Sojori AI</button>
+    </div>
+
+    <div class="am-chat">
+      <div class="am-chat-head">
+        <div class="av">✨</div>
+        <div class="nm">Sojori AI<small>EN LIGNE · CLAUDE SONNET</small></div>
+      </div>
+      <div class="am-chat-body">
+        <div class="am-msg u"><div class="am-bub">Un riad à Marrakech avec piscine, calme, pour 4 ad + 1 enfant, mi-juillet · budget 250€/nuit</div></div>
+        <div class="am-msg b">
+          <div class="am-bub">Je cherche des options correspondantes · 1 sec</div>
+          <div class="am-tool-chip"><div class="ic">⚡</div>search_listings · city: marrakech · 12 résultats</div>
+          <div class="am-result">
+            <div class="ph"></div>
+            <div class="info">
+              <div class="nm">Riad de la Bahia · Médina</div>
+              <div class="meta">★ 4.92 · 142 avis · Riad Luxe</div>
+              <div class="price">185€ <span style="color:var(--ink3);font-weight:500">/ nuit</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="am-msg u"><div class="am-bub">Compare-le avec d'autres</div></div>
+        <div class="am-typing"><span></span><span></span><span></span></div>
+      </div>
+      <div class="am-chat-input">
+        <input placeholder="Continuer la conversation…" />
+        <button class="send">➜</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CITIES ─── -->
+<section class="cities-strip">
+  <div class="cs-head">
+    <div>
+      <div class="pretitle">Destinations</div>
+      <h2>Le Maroc en <span class="it">12 villes</span>.</h2>
+    </div>
+    <div class="ds">De la Médina millénaire de Fès aux plages de Tanger, en passant par le bleu de Chefchaouen et les vagues d'Essaouira.</div>
+  </div>
+  <div class="cs-grid">
+    <div class="cs-card large">
+      <div class="bg"></div><div class="overlay"></div>
+      <div class="info"><div class="nm">Marrakech</div><div class="ct">412 BIENS · DÈS 65€</div></div>
+    </div>
+    <div class="cs-card casa"><div class="bg"></div><div class="overlay"></div><div class="info"><div class="nm">Casablanca</div><div class="ct">186 BIENS</div></div></div>
+    <div class="cs-card ess"><div class="bg"></div><div class="overlay"></div><div class="info"><div class="nm">Essaouira</div><div class="ct">94 BIENS</div></div></div>
+    <div class="cs-card fes"><div class="bg"></div><div class="overlay"></div><div class="info"><div class="nm">Fès</div><div class="ct">128 BIENS</div></div></div>
+    <div class="cs-card chf"><div class="bg"></div><div class="overlay"></div><div class="info"><div class="nm">Chefchaouen</div><div class="ct">42 BIENS</div></div></div>
+    <div class="cs-card tng"><div class="bg"></div><div class="overlay"></div><div class="info"><div class="nm">Tanger</div><div class="ct">76 BIENS</div></div></div>
+    <div class="cs-card ouar"><div class="bg"></div><div class="overlay"></div><div class="info"><div class="nm">Ouarzazate</div><div class="ct">28 BIENS</div></div></div>
+    <div class="cs-card fes2"><div class="bg"></div><div class="overlay"></div><div class="info"><div class="nm">Agadir</div><div class="ct">64 BIENS</div></div></div>
+  </div>
+</section>
+
+<!-- ─── TRUST ─── -->
+<section class="trust-bar">
+  <div class="trust-inner">
+    <div class="trust-item">
+      <div class="em">✓</div>
+      <div class="nm">Hôtes vérifiés</div>
+      <div class="ds">Inspection sur site avant publication · standards garantis</div>
+    </div>
+    <div class="trust-item">
+      <div class="em">🛟</div>
+      <div class="nm">Support 24/7 · Marrakech</div>
+      <div class="ds">Équipe locale francophone · réponse sous 5 minutes</div>
+    </div>
+    <div class="trust-item">
+      <div class="em">↩</div>
+      <div class="nm">Annulation transparente</div>
+      <div class="ds">Politique claire · remboursement automatique · zéro surprise</div>
+    </div>
+    <div class="trust-item">
+      <div class="em">🔒</div>
+      <div class="nm">Paiement Stripe · 3D Secure</div>
+      <div class="ds">Vos données chiffrées · PCI DSS Level 1</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand"><span class="dot"></span>sojori</div>
+        <p class="footer-tag">La marketplace premium des séjours au Maroc · curated by experts since 2024.</p>
+        <div class="footer-social">
+          <div class="fs-ic">📷</div>
+          <div class="fs-ic">𝕏</div>
+          <div class="fs-ic">in</div>
+          <div class="fs-ic">▶</div>
+        </div>
+      </div>
+      <div class="footer-col"><h4>Destinations</h4><ul><li>Marrakech</li><li>Casablanca</li><li>Fès</li><li>Essaouira</li><li>Tanger</li><li>Chefchaouen</li></ul></div>
+      <div class="footer-col"><h4>Sojori</h4><ul><li>À propos</li><li>Comment ça marche</li><li>Hôtes vérifiés</li><li>Sojori AI</li><li>Devenir hôte</li></ul></div>
+      <div class="footer-col"><h4>Voyageurs</h4><ul><li>Mes réservations</li><li>Wishlist</li><li>Centre d'aide</li><li>Annulation</li><li>Cartes cadeaux</li></ul></div>
+      <div class="footer-col"><h4>Légal</h4><ul><li>CGU</li><li>Confidentialité</li><li>Cookies</li><li>Mentions légales</li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 SOJORI · MADE IN MARRAKECH WITH ♥</span>
+      <span>FR · EN · AR</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── AI FAB ─── -->
+<button class="ai-fab" onclick="document.getElementById('cmdModal').classList.add('on')">
+  Demander à l'IA <span class="ic">✨</span>
+</button>
+
+<!-- ─── CMD-K MODAL ─── -->
+<div class="cmd-modal" id="cmdModal" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="cmd-box">
+    <div class="cmd-input">
+      <div class="ic">✨</div>
+      <input placeholder="Décrivez votre voyage idéal ou cherchez…" autofocus />
+      <kbd>esc</kbd>
+    </div>
+    <div class="cmd-section">⚡ Suggestions</div>
+    <div class="cmd-item on">
+      <div class="ic">🌿</div>
+      <div class="info">
+        <div class="nm">Riad calme à Marrakech avec hammam</div>
+        <div class="ds">Mi-juillet · 5 personnes · 6 résultats</div>
+      </div>
+      <kbd>↵</kbd>
+    </div>
+    <div class="cmd-item">
+      <div class="ic">🏊</div>
+      <div class="info">
+        <div class="nm">Villa avec piscine privée en bord de mer</div>
+        <div class="ds">Essaouira · août · 8 personnes</div>
+      </div>
+    </div>
+    <div class="cmd-item">
+      <div class="ic">⚖️</div>
+      <div class="info">
+        <div class="nm">Comparer mes 3 derniers favoris</div>
+        <div class="ds">Bahia · Atlas Stays · Dar Hassan</div>
+      </div>
+    </div>
+    <div class="cmd-section">📍 Navigation</div>
+    <div class="cmd-item">
+      <div class="ic">🏠</div>
+      <div class="info"><div class="nm">Tous les listings à Marrakech</div></div>
+      <kbd>⌘M</kbd>
+    </div>
+    <div class="cmd-item">
+      <div class="ic">⭐</div>
+      <div class="info"><div class="nm">Hôtes Sojori Select · top 1%</div></div>
+    </div>
+    <div class="cmd-foot">
+      <span>Sojori AI · powered by Claude</span>
+      <span>NAV <kbd>↑</kbd><kbd>↓</kbd> · SÉLECT <kbd>↵</kbd> · QUITTER <kbd>esc</kbd></span>
+    </div>
+  </div>
+</div>
+
+<script>
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20);
+});
+document.querySelectorAll('.wish').forEach(w=>w.addEventListener('click',e=>{
+  e.stopPropagation();w.classList.toggle('on');w.textContent=w.classList.contains('on')?'♥':'♡';
+}));
+window.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();document.getElementById('cmdModal').classList.add('on')}
+  if(e.key==='Escape')document.getElementById('cmdModal').classList.remove('on');
+});
+</script>
+</body></html>
