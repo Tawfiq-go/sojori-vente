@@ -97,8 +97,9 @@ class ApiClient {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      return { success: true, data };
+      const json = await response.json();
+      // Backend returns {success, data, count} - extract the data array
+      return { success: true, data: json.data || json };
     } catch (error) {
       console.error(`API Error [${endpoint}]:`, error);
       return {
