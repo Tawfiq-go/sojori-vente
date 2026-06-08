@@ -1,0 +1,85 @@
+.cs-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background: var(--paper);
+  color: var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+
+.cs-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.cs-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 36rem;
+  text-align: center;
+}
+
+.cs-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.cs-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 4px var(--goldT);
+}
+
+.cs-name {
+  text-transform: lowercase;
+}
+
+.cs-title {
+  font-family: var(--serif);
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 0 0 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.cs-title em {
+  font-style: italic;
+  color: var(--goldD);
+}
+
+.cs-lead {
+  margin: 0 0 2rem;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--ink2);
+}
+
+.cs-note {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ink3);
+}
+
+.cs-note a {
+  color: var(--goldD);
+  text-decoration: none;
+  border-bottom: 1px solid var(--goldS);
+}
+
+.cs-note a:hover {
+  color: var(--gold);
+}
