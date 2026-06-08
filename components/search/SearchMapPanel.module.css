@@ -1,0 +1,172 @@
+.panel {
+  padding: 24px 24px 60px;
+  border-left: 1px solid var(--b);
+  position: sticky;
+  top: 80px;
+  align-self: start;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  background: linear-gradient(180deg, var(--paper), rgba(243, 238, 226, 0.5));
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 18px;
+}
+
+.ic {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #fda4af, #dc2626);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.nm {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.mini {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #e6f0e6;
+  aspect-ratio: 1;
+}
+
+.label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 500;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  padding: 5px 10px;
+  border-radius: 99px;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
+.mapSlot {
+  position: absolute;
+  inset: 0;
+}
+
+.mapSlot :global(*) {
+  pointer-events: none;
+}
+
+.expand {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 500;
+  padding: 6px 11px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+}
+
+.expand:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.expand:hover:not(:disabled) {
+  background: #1a1a1c;
+}
+
+.mapLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+  color: var(--ink3);
+  font-size: 13px;
+  background: linear-gradient(135deg, #dde9d4, #e8edd9 50%, #ddd6b8);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+}
+
+.overlayHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--b);
+  background: rgba(250, 247, 240, 0.95);
+  backdrop-filter: blur(12px);
+}
+
+.overlayTitle {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.overlaySub {
+  font-size: 12px;
+  color: var(--ink3);
+  margin-top: 2px;
+}
+
+.close {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--b);
+  background: var(--card);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close:hover {
+  border-color: var(--ink2);
+}
+
+.overlayMap {
+  flex: 1;
+  min-height: 0;
+}
+
+.overlayMap > div {
+  height: 100%;
+  min-height: 100%;
+}
+
+@media (max-width: 1400px) {
+  .panel {
+    display: none;
+  }
+}

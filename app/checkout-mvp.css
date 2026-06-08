@@ -1,0 +1,161 @@
+/* ════════════════════════════════════════════════════════════════
+   SOJORI CHECKOUT MVP - Design System
+
+   Based on: Sojori Calendrier Checkout MVP.html
+   Date: 2026-05-29
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ═══ Colors - Ink (Text) ═══ */
+  --ink: #0f1011;        /* Primary text */
+  --ink2: #3a3a3c;       /* Secondary text */
+  --ink3: #6e6e73;       /* Tertiary text */
+  --ink4: #a8a7a4;       /* Quaternary text, disabled */
+
+  /* ═══ Colors - Backgrounds ═══ */
+  --paper: #faf7f0;      /* Main background */
+  --paper2: #f3eee2;     /* Secondary background */
+  --card: #ffffff;       /* Card background */
+
+  /* ═══ Colors - Borders ═══ */
+  --b: #e9e3d3;          /* Border */
+  --bs: #d4ccb5;         /* Border strong */
+
+  /* ═══ Colors - Brand (Gold) ═══ */
+  --gold: #c89b3c;       /* Primary brand */
+  --goldD: #9b7626;      /* Dark gold */
+  --goldS: #e8c87a;      /* Light gold */
+  --goldT: rgba(200, 155, 60, 0.12); /* Gold transparent */
+
+  /* ═══ Colors - Semantic ═══ */
+  --rose: #e11d48;       /* Error, destructive */
+  --roseT: rgba(225, 29, 72, 0.10); /* Rose transparent */
+  --emerald: #059669;    /* Success */
+  --emT: rgba(5, 150, 105, 0.10); /* Emerald transparent */
+
+  /* ═══ Typography ═══ */
+  --sans: 'Geist', system-ui, sans-serif;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --mono: 'Geist Mono', ui-monospace, monospace;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ════════════════════════════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fillRange {
+  from {
+    opacity: 0;
+    transform: scaleX(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0) rotate(-12deg);
+  }
+  55% {
+    transform: scale(1.18) rotate(0);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulseGold {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(200, 155, 60, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(200, 155, 60, 0);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ════════════════════════════════════════════════════════════════ */
+
+.animate-fadeIn {
+  animation: fadeIn 0.35s ease-out;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-checkmark {
+  animation: checkmark 0.5s ease-out;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TYPOGRAPHY HELPERS
+   ════════════════════════════════════════════════════════════════ */
+
+.font-sans {
+  font-family: var(--sans);
+}
+
+.font-serif {
+  font-family: var(--serif);
+}
+
+.font-mono {
+  font-family: var(--mono);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ════════════════════════════════════════════════════════════════ */
+
+/* Mobile: < 900px (handled in component CSS modules) */
+/* Desktop: ≥ 900px (default) */

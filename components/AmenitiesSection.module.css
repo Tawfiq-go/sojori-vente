@@ -1,0 +1,212 @@
+/* ════════════════════════════════════════════════════════════════
+   AMENITIES SECTION - Inspired by Airbnb & Booking.com
+   ════════════════════════════════════════════════════════════════ */
+
+.container {
+  margin: 60px 0;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--b);
+}
+
+.title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  color: var(--ink);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   POPULAR AMENITIES GRID (Airbnb style)
+   ═══════════════════════════════════════════════════════════════ */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.amenityCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  color: var(--ink2);
+  transition: all 0.15s;
+}
+
+.amenityCard:hover {
+  color: var(--ink);
+  transform: translateX(4px);
+}
+
+.icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.label {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.showAllButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: var(--card);
+  border: 1px solid var(--ink);
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.showAllButton:hover {
+  background: var(--ink);
+  color: var(--paper);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -8px rgba(15, 16, 17, 0.25);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FULL VIEW WITH CATEGORIES (Booking.com style)
+   ═══════════════════════════════════════════════════════════════ */
+
+.fullView {
+  margin-top: 24px;
+}
+
+.categoryFilters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.categoryFilters::-webkit-scrollbar {
+  height: 4px;
+}
+
+.categoryFilters::-webkit-scrollbar-track {
+  background: var(--paper2);
+  border-radius: 99px;
+}
+
+.categoryFilters::-webkit-scrollbar-thumb {
+  background: var(--goldD);
+  border-radius: 99px;
+}
+
+.categoryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: var(--card);
+  border: 1px solid var(--b);
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.categoryButton:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: var(--goldT);
+}
+
+.categoryButton.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--paper);
+  box-shadow: 0 4px 12px rgba(200, 155, 60, 0.25);
+}
+
+.categoryButton span:first-child {
+  font-size: 16px;
+}
+
+.amenitiesList {
+  margin-bottom: 24px;
+}
+
+.categorySection {
+  margin-bottom: 40px;
+}
+
+.categorySection:last-child {
+  margin-bottom: 0;
+}
+
+.categoryTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.showLessButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: transparent;
+  border: 1px solid var(--bs);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.showLessButton:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: var(--paper2);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 24px;
+  }
+
+  .categoryFilters {
+    gap: 6px;
+  }
+
+  .categoryButton {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}

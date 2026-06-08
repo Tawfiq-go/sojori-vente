@@ -1,0 +1,604 @@
+'use client';
+
+import { useState } from 'react';
+import type { CheckoutFlowProps, CheckoutStep, CheckoutData } from './types';
+import CheckoutStepper from './CheckoutStepper';
+import BookingRecapCard from './BookingRecapCard';
+import { CountryPhoneSelector } from './CountryPhoneSelector';
+import { useListing } from '@/lib/hooks/useListings';
+import { COUNTRIES, type Country, validatePhoneNumber } from '@/lib/config/countries';
+import { processPayment } from '@/lib/services/paymentService';
+import {
+  formatCardNumber,
+  formatExpiry,
+  validateCardNumber,
+  validateCVV,
+  validateExpiry
+} from '@/lib/utils/cardEncryption';
+import styles from './CheckoutFlow.module.css';
+import '../../app/checkout-mvp.css';
+
+export default function CheckoutFlow({
+  listingId,
+  dateRange,
+  guests,
+  pricing,
+  onComplete,
+  onCancel,
+}: CheckoutFlowProps) {
+  const [currentStep, setCurrentStep] = useState<CheckoutStep>(1);
+  const [accountMode, setAccountMode] = useState<'guest' | 'login' | 'signup'>('guest');
+  const [phoneCountry, setPhoneCountry] = useState('+212');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer' | 'cash'>('card');
+  const [data, setData] = useState<Partial<CheckoutData>>({
+    traveler: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+    },
+    payment: {
+      method: 'card',
+    },
+  });
+
+  // Card data states (sécurisés - jamais stockés)
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardCVV, setCardCVV] = useState('');
+  const [cardHolderName, setCardHolderName] = useState('');
+
+  // Fetch listing data for recap card
+  const { listing } = useListing(listingId);
+
+  const nights = Math.round((dateRange.checkOut.getTime() - dateRange.checkIn.getTime()) / (1000 * 60 * 60 * 24));
+
+  const goStep = (step: CheckoutStep) => {
+    setCurrentStep(step);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const [reservationNumber, setReservationNumber] = useState<string>('');
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePayment = async () => {
+    setProcessing(true);
+    setError(null);
+
+    try {
+      // Call reservation API
+      const checkInStr = dateRange.checkIn.toISOString().split('T')[0];
+      const checkOutStr = dateRange.checkOut.toISOString().split('T')[0];
+
+      // Prepare payload - adapt pricing structure
+      const payload = {
+        listingId,
+        checkIn: checkInStr,
+        checkOut: checkOutStr,
+        guests: {
+          adults: guests.adults,
+          children: guests.children || 0,
+          infants: guests.infants || 0,
+        },
+        traveler: {
+          firstName: data.traveler?.firstName,
+          lastName: data.traveler?.lastName,
+          email: data.traveler?.email,
+          phone: `${phoneCountry}${data.traveler?.phone}`, // Include country code
+        },
+        pricing: {
+          baseNights: pricing.baseNights || 0,
+          basePrice: pricing.basePrice || 0,
+          weekendNights: pricing.weekendNights || 0,
+          weekendPrice: pricing.weekendPrice || 0,
+          subtotal: pricing.subtotal || pricing.basePrice || 0,
+          serviceFee: pricing.serviceFee || 0,
+          tax: pricing.tax || 0,
+          total: pricing.total || 0,
+        },
+        payment: {
+          method: paymentMethod,
+        },
+      };
+
+      console.log('🔵 [CHECKOUT] Envoi réservation:', payload);
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/guest/reservations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      console.log('🔵 [CHECKOUT] Réponse API:', result);
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || result.message || 'Failed to create reservation');
+      }
+
+      // If payment method is 'card' and we have a payment URL, redirect to NAPS
+      if (result.data.paymentUrl) {
+        window.location.href = result.data.paymentUrl;
+        return;
+      }
+
+      // Otherwise, show confirmation
+      setReservationNumber(result.data.reservationNumber);
+      setCurrentStep(2);
+      onComplete(result.data.reservationId);
+    } catch (err) {
+      console.error('Reservation failed:', err);
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  return (
+    <div className={styles.wrap}>
+      {/* Stepper - Nouveau design MVP */}
+      <CheckoutStepper
+        currentStep={currentStep}
+        onStepClick={(step) => {
+          if (step < currentStep) {
+            goStep(step);
+          }
+        }}
+      />
+
+      <div className={styles.layout}>
+        <div className={styles.main}>
+          {/* STEP 1 - Informations & Paiement */}
+          {currentStep === 1 && (
+            <div className={styles.step}>
+              <h2>
+                Vos <span className={styles.it}>informations</span> & <span className={styles.it}>paiement</span>
+              </h2>
+              <p className={styles.hSub}>Partagées avec le Property Manager pour préparer votre arrivée</p>
+
+              {/* Account Mode Selector */}
+              <div className={styles.card}>
+                <div className={styles.lbl}>Réserver en tant que</div>
+                <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                  <button
+                    className={`${styles.accountBtn} ${accountMode === 'guest' ? styles.active : ''}`}
+                    onClick={() => setAccountMode('guest')}
+                    style={{
+                      flex: 1,
+                      padding: '12px 16px',
+                      border: accountMode === 'guest' ? '2px solid var(--gold)' : '1px solid var(--b)',
+                      borderRadius: '8px',
+                      background: accountMode === 'guest' ? 'var(--goldT)' : 'var(--card)',
+                      fontWeight: 600,
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    Sans compte
+                  </button>
+                  <button
+                    className={`${styles.accountBtn} ${accountMode === 'login' ? styles.active : ''}`}
+                    onClick={() => setAccountMode('login')}
+                    style={{
+                      flex: 1,
+                      padding: '12px 16px',
+                      border: accountMode === 'login' ? '2px solid var(--gold)' : '1px solid var(--b)',
+                      borderRadius: '8px',
+                      background: accountMode === 'login' ? 'var(--goldT)' : 'var(--card)',
+                      fontWeight: 600,
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    J'ai un compte
+                  </button>
+                  <button
+                    className={`${styles.accountBtn} ${accountMode === 'signup' ? styles.active : ''}`}
+                    onClick={() => setAccountMode('signup')}
+                    style={{
+                      flex: 1,
+                      padding: '12px 16px',
+                      border: accountMode === 'signup' ? '2px solid var(--gold)' : '1px solid var(--b)',
+                      borderRadius: '8px',
+                      background: accountMode === 'signup' ? 'var(--goldT)' : 'var(--card)',
+                      fontWeight: 600,
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    Créer un compte
+                  </button>
+                </div>
+              </div>
+
+              {/* Login Form */}
+              {accountMode === 'login' && (
+                <div className={styles.card}>
+                  <div className={styles.lbl}>Connexion</div>
+                  <div className={styles.field}>
+                    <label>
+                      Email<span className={styles.req}>*</span>
+                    </label>
+                    <input type="email" placeholder="votre@email.com" />
+                  </div>
+                  <div className={styles.field}>
+                    <label>
+                      Mot de passe<span className={styles.req}>*</span>
+                    </label>
+                    <input type="password" placeholder="••••••••" />
+                  </div>
+                  <button
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      background: 'var(--ink)',
+                      color: 'var(--paper)',
+                      border: 0,
+                      borderRadius: '8px',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      marginTop: '12px',
+                    }}
+                  >
+                    Se connecter
+                  </button>
+                  <p style={{ fontSize: '12px', color: 'var(--ink3)', marginTop: '8px', textAlign: 'center' }}>
+                    Mot de passe oublié ? <a href="#" style={{ color: 'var(--gold)' }}>Réinitialiser</a>
+                  </p>
+                </div>
+              )}
+
+              <div className={styles.card}>
+                <div className={styles.lbl}>Qui voyage ?</div>
+
+                {/* Nom et Prénom */}
+                <div className={styles.fieldGrid}>
+                  <div className={styles.field}>
+                    <label>
+                      Prénom<span className={styles.req}>*</span>
+                    </label>
+                    <input
+                      value={data.traveler?.firstName}
+                      onChange={(e) =>
+                        setData({ ...data, traveler: { ...data.traveler!, firstName: e.target.value } })
+                      }
+                      placeholder="Mohamed"
+                    />
+                  </div>
+                  <div className={styles.field}>
+                    <label>
+                      Nom<span className={styles.req}>*</span>
+                    </label>
+                    <input
+                      value={data.traveler?.lastName}
+                      onChange={(e) => setData({ ...data, traveler: { ...data.traveler!, lastName: e.target.value } })}
+                      placeholder="Benali"
+                    />
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className={styles.field}>
+                  <label>
+                    Email<span className={styles.req}>*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={data.traveler?.email}
+                    onChange={(e) => setData({ ...data, traveler: { ...data.traveler!, email: e.target.value } })}
+                    placeholder="mohamed@example.com"
+                  />
+                </div>
+
+                {/* Téléphone avec sélecteur de pays searchable */}
+                <div className={styles.field}>
+                  <label>
+                    Téléphone<span className={styles.req}>*</span>
+                  </label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <CountryPhoneSelector
+                      value={phoneCountry}
+                      onChange={setPhoneCountry}
+                    />
+                    <input
+                      type="tel"
+                      value={data.traveler?.phone}
+                      onChange={(e) => {
+                        // Remove leading 0 if present
+                        const value = e.target.value.replace(/^0+/, '');
+                        setData({ ...data, traveler: { ...data.traveler!, phone: value } });
+                      }}
+                      placeholder={phoneCountry === '+212' ? '612345678' : '612345678'}
+                      style={{ flex: 1 }}
+                    />
+                  </div>
+                  <p style={{ fontSize: '11px', color: 'var(--ink3)', marginTop: '4px' }}>
+                    Ne pas commencer par 0. Format Maroc : 6XX-XXXXXX
+                  </p>
+                </div>
+              </div>
+
+              <div className={styles.card}>
+                <div className={styles.lbl}>Arrivée</div>
+                <div className={styles.field}>
+                  <label>Heure d'arrivée estimée</label>
+                  <select>
+                    <option>15:00 · Standard</option>
+                    <option>17:00</option>
+                    <option>19:00</option>
+                    <option>🌃 Après 20:00 · late</option>
+                  </select>
+                </div>
+                <div className={styles.field}>
+                  <label>
+                    Demandes spéciales <span style={{ color: 'var(--ink4)', fontWeight: 500 }}>(optionnel)</span>
+                  </label>
+                  <textarea rows={2} placeholder="Lit bébé, parking, arrivée tardive…" />
+                </div>
+              </div>
+
+              {/* PAYMENT SECTION - Combined */}
+              <div className={styles.card}>
+                <div className={styles.lbl}>Mode de paiement</div>
+                <p style={{ fontSize: '13px', color: 'var(--ink3)', marginBottom: '16px' }}>
+                  Paiement sécurisé · débité après confirmation de l'hôte sous 24h
+                </p>
+
+                {/* Option 1: Carte bancaire */}
+                <label
+                  className={`${styles.payMethod} ${paymentMethod === 'card' ? styles.on : ''}`}
+                  onClick={() => setPaymentMethod('card')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <span className={styles.radio} />
+                  <div className={styles.pmInfo}>
+                    <div className={styles.pmNm}>💳 Carte bancaire</div>
+                  </div>
+                  <div className={styles.cards}>
+                    <span>VISA</span>
+                    <span>MC</span>
+                    <span>AMEX</span>
+                  </div>
+                </label>
+
+                {/* Option 2: Virement bancaire */}
+                <label
+                  className={`${styles.payMethod} ${paymentMethod === 'transfer' ? styles.on : ''}`}
+                  onClick={() => setPaymentMethod('transfer')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <span className={styles.radio} />
+                  <div className={styles.pmInfo}>
+                    <div className={styles.pmNm}>🏦 Virement bancaire</div>
+                    <div className={styles.pmDs}>Confirmation sous 24h</div>
+                  </div>
+                </label>
+
+                {/* Option 3: Cash */}
+                <label
+                  className={`${styles.payMethod} ${paymentMethod === 'cash' ? styles.on : ''}`}
+                  onClick={() => setPaymentMethod('cash')}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <span className={styles.radio} />
+                  <div className={styles.pmInfo}>
+                    <div className={styles.pmNm}>💵 Cash</div>
+                    <div className={styles.pmDs}>Paiement à l'arrivée</div>
+                  </div>
+                </label>
+
+                {/* Card fields - only show if card payment selected */}
+                {paymentMethod === 'card' && (
+                  <div className={styles.cardFields}>
+                  <div className={styles.field}>
+                    <label>
+                      Numéro de carte<span className={styles.req}>*</span>
+                    </label>
+                    <input
+                      maxLength={19}
+                      style={{ fontFamily: 'var(--mono)', letterSpacing: '0.06em' }}
+                      placeholder="4242 4242 4242 4242"
+                    />
+                  </div>
+                  <div className={styles.fieldGrid}>
+                    <div className={styles.field}>
+                      <label>
+                        Expiration<span className={styles.req}>*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={cardExpiry}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                          if (value.length <= 4) {
+                            // Format as MM/AA
+                            if (value.length >= 3) {
+                              setCardExpiry(`${value.slice(0, 2)} / ${value.slice(2)}`);
+                            } else {
+                              setCardExpiry(value);
+                            }
+                          }
+                        }}
+                        maxLength={7}
+                        style={{ fontFamily: 'var(--mono)' }}
+                        placeholder="MM / AA"
+                      />
+                    </div>
+                    <div className={styles.field}>
+                      <label>
+                        CVV<span className={styles.req}>*</span>
+                      </label>
+                      <input maxLength={4} style={{ fontFamily: 'var(--mono)' }} placeholder="•••" />
+                    </div>
+                  </div>
+                  <div className={styles.field}>
+                    <label>
+                      Nom sur la carte<span className={styles.req}>*</span>
+                    </label>
+                    <input placeholder="MOHAMED BENALI" />
+                  </div>
+                  <div className={styles.sslRow}>🔒 Paiement sécurisé SSL · 3D Secure · PCI DSS Level 1</div>
+                  </div>
+                )}
+
+                {/* Transfer info - only show if transfer selected */}
+                {paymentMethod === 'transfer' && (
+                  <div style={{
+                    marginTop: '16px',
+                    padding: '16px',
+                    background: 'var(--paper2)',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    lineHeight: '1.6'
+                  }}>
+                    <div style={{ fontWeight: 600, marginBottom: '8px' }}>📋 Informations de virement</div>
+                    <div style={{ color: 'var(--ink2)' }}>
+                      Les coordonnées bancaires vous seront envoyées par email après validation de votre réservation.
+                      Votre réservation sera confirmée après réception du virement sous 24h.
+                    </div>
+                  </div>
+                )}
+
+                {/* Cash info - only show if cash selected */}
+                {paymentMethod === 'cash' && (
+                  <div style={{
+                    marginTop: '16px',
+                    padding: '16px',
+                    background: 'var(--paper2)',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    lineHeight: '1.6'
+                  }}>
+                    <div style={{ fontWeight: 600, marginBottom: '8px' }}>💵 Paiement en espèces</div>
+                    <div style={{ color: 'var(--ink2)' }}>
+                      Le paiement s'effectuera directement auprès de l'hôte à votre arrivée.
+                      Votre réservation sera confirmée sous réserve de disponibilité.
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {error && (
+                <div style={{
+                  padding: '12px 16px',
+                  background: '#fee',
+                  color: '#c33',
+                  borderRadius: '8px',
+                  marginTop: '16px',
+                  fontSize: '14px'
+                }}>
+                  ⚠️ {error}
+                </div>
+              )}
+
+              <div className={styles.nav}>
+                <button className={`${styles.btn} ${styles.next}`} onClick={handlePayment} disabled={processing} style={{ width: '100%' }}>
+                  {processing ? '⏳ Traitement...' : `🔒 Payer ${pricing.total.toLocaleString('fr-FR')} MAD`}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2 - Confirmation */}
+          {currentStep === 2 && (
+            <div className={styles.step}>
+              <div className={styles.confirmHero}>
+                <div className={styles.confirmCheck}>✓</div>
+                <h2>Réservation confirmée !</h2>
+                <p>
+                  Un email de confirmation a été envoyé à <b>{data.traveler?.email}</b>. Le Property Manager confirmera
+                  votre réservation sous 24h.
+                </p>
+              </div>
+
+              <div className={styles.refBox}>
+                <div className={styles.info}>
+                  <div className={styles.l}>Numéro de réservation</div>
+                  <div className={styles.v}>#{reservationNumber || 'SOJORI-2026-XXXX'}</div>
+                </div>
+                <button className={styles.copy} onClick={() => navigator.clipboard.writeText(reservationNumber)}>⧉ Copier</button>
+              </div>
+
+              <div className={styles.card}>
+                <div className={styles.listingRecap}>
+                  <div className={styles.ph} style={{ width: '80px', height: '72px' }}>
+                    <div className={styles.grain} />
+                  </div>
+                  <div className={styles.info}>
+                    <div className={styles.nm} style={{ fontSize: '18px' }}>
+                      Riad de la Bahia
+                    </div>
+                    <div className={styles.loc}>
+                      📅 {dateRange.checkIn.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} →{' '}
+                      {dateRange.checkOut.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} · 👥{' '}
+                      {guests.adults} ad · {guests.children} enf · 💰 {pricing.total.toLocaleString('fr-FR')} MAD
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.card}>
+                <div className={styles.lbl}>Prochaines étapes</div>
+                <div className={styles.timelineSteps}>
+                  <div className={styles.tlStep}>
+                    <div className={styles.n}>1</div>
+                    <div className={styles.tx}>
+                      Vous recevrez les <b>instructions d'arrivée</b> par email 48h avant le check-in.
+                    </div>
+                  </div>
+                  <div className={styles.tlStep}>
+                    <div className={styles.n}>2</div>
+                    <div className={styles.tx}>
+                      Le <b>Property Manager</b> vous contactera 24h avant votre arrivée.
+                    </div>
+                  </div>
+                  <div className={styles.tlStep}>
+                    <div className={styles.n}>3</div>
+                    <div className={styles.tx}>
+                      <b>Check-in</b> à partir de 15:00 · concierge sur place pour l'accueil.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.nav}>
+                <button className={`${styles.btn} ${styles.back}`}>Voir ma réservation</button>
+                <button className={`${styles.btn} ${styles.next}`}>Retour à l'accueil</button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* SIDE RECAP - Nouveau design MVP */}
+        {listing && (
+          <aside className={styles.side}>
+            <BookingRecapCard
+              listing={{
+                title: listing.title,
+                location: `${listing.neighborhood}, ${listing.city}`,
+                rating: listing.rating,
+                reviewCount: listing.reviewCount,
+                imageUrl: listing.images?.[0],
+              }}
+              checkIn={dateRange.checkIn}
+              checkOut={dateRange.checkOut}
+              guests={{
+                adults: guests.adults,
+                children: guests.children,
+              }}
+              pricing={pricing}
+              showDetails={true}
+            />
+          </aside>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,540 @@
+/* ════════════════════════════════════════════════════════════════
+   AVAILABILITY CALENDAR - Sojori Design System
+   ════════════════════════════════════════════════════════════════ */
+
+.wrapper {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  display: block; /* Change from grid to block to not interfere with parent layout */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CALENDAR CARD
+   ═══════════════════════════════════════════════════════════════ */
+
+.calendarCard {
+  background: var(--card);
+  border: 1px solid var(--b);
+  border-radius: 22px;
+  padding: 24px 16px; /* Réduit padding horizontal pour plus d'espace */
+  box-shadow: 0 1px 2px rgba(15, 16, 17, 0.04);
+  overflow: visible;
+  width: 100%;
+  max-width: 100%;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 16px;
+}
+
+.navButton {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--b);
+  background: var(--card);
+  font-size: 15px;
+  color: var(--ink2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.navButton:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.monthsContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px; /* Réduit le gap pour plus d'espace */
+  flex: 1;
+  position: relative;
+  width: 100%;
+}
+
+/* Trait vertical entre les deux mois */
+.monthsContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  background: #E5E5E5;
+  opacity: 0.6;
+}
+
+.month {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+.monthTitle {
+  text-align: center;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+  color: #1A1A1A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.dow span {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink4);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px; /* Gap minimal */
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.dayEmpty {
+  aspect-ratio: 1;
+}
+
+.day {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  background: #FFFFFF;
+  border: 1px solid #E8E8E8;
+  min-width: 0;
+  overflow: visible;
+  padding: 6px 2px; /* Padding minimal */
+}
+
+.num {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: #1A1A1A;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.price {
+  font-family: var(--mono);
+  font-size: 11px; /* Plus grand maintenant sans currency */
+  color: #666666;
+  font-weight: 700;
+  margin: 0;
+  transition: all 0.15s;
+  white-space: nowrap;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.day:hover:not(.blocked):not(.past):not(.checkin):not(.checkout):not(.range) {
+  background: #FAFAFA;
+  border-color: #D0D0D0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.day:hover:not(.blocked):not(.past) .price {
+  color: #333333;
+}
+
+.day.weekend .price {
+  color: #666666;
+}
+
+.day.blocked {
+  cursor: not-allowed;
+  background: #F9F9F9;
+  opacity: 0.6;
+  pointer-events: none;
+  border: 1px solid #E8E8E8;
+  position: relative;
+}
+
+.day.blocked .num {
+  color: #BDBDBD;
+  text-decoration: line-through;
+  font-weight: 400;
+  z-index: 2;
+  position: relative;
+}
+
+.day.blocked .price {
+  display: none;
+}
+
+/* Add X icon for blocked dates */
+.day.blocked::before {
+  content: '✕';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: #D0D0D0;
+  font-weight: 300;
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.day.past {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: #f5f5f5;
+  pointer-events: none;
+}
+
+.day.past .num {
+  color: #ccc;
+  text-decoration: line-through;
+}
+
+.day.past .price {
+  display: none;
+}
+
+.day.range {
+  background: linear-gradient(135deg, #F5EFE7 0%, #F0E6D8 100%); /* Beige/crème pour le séjour */
+  border-color: #D4C4B0;
+  border-radius: 0;
+  animation: fillRange 0.2s both;
+}
+
+.day.checkin,
+.day.checkout {
+  background: linear-gradient(135deg, #C89B3C 0%, #A37D2E 100%); /* Marron/doré pour sélection */
+  border-radius: 8px;
+  z-index: 2;
+  box-shadow: 0 3px 10px rgba(200, 155, 60, 0.3);
+  border-color: #B88A32;
+}
+
+.day.checkin .num,
+.day.checkout .num {
+  color: #FFFFFF;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.day.checkin .price,
+.day.checkout .price {
+  display: none;
+}
+
+.day.checkin {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.day.checkout {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.endpointBadge {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 700;
+  background: #1A1A1A;
+  color: #FFFFFF;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+/* Tooltip */
+.tip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 9px 12px;
+  border-radius: 10px;
+  width: 160px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.20);
+}
+
+.day:hover .tip {
+  opacity: 1;
+}
+
+.tDate {
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  letter-spacing: -0.005em;
+}
+
+.tRow {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 0;
+}
+
+.tRow.total {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin-top: 4px;
+  padding-top: 5px;
+  font-weight: 800;
+}
+
+.tRow .v {
+  color: var(--goldS);
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--b);
+}
+
+.legItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  color: var(--ink2);
+  font-weight: 500;
+}
+
+.swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+}
+
+.swatchAvail {
+  background: #FFFFFF;
+  border: 1px solid #E8E8E8;
+}
+
+.swatchSel {
+  background: linear-gradient(135deg, #C89B3C 0%, #A37D2E 100%); /* Marron/doré */
+}
+
+.swatchRange {
+  background: linear-gradient(135deg, #F5EFE7 0%, #F0E6D8 100%); /* Beige/crème */
+  border: 1px solid #D4C4B0;
+}
+
+.swatchBlocked {
+  background: #F8F8F8;
+  border: 1px solid #E5E5E5;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RECAP SIDEBAR (Sticky)
+   ═══════════════════════════════════════════════════════════════ */
+
+.recap {
+  display: none; /* Hide calendar's own recap - we use the main booking card instead */
+}
+
+.recapTitle {
+  margin: 0 0 4px;
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+
+.datesDisplay {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  background: var(--paper2);
+  border-radius: 14px;
+  margin: 16px 0;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.arrow {
+  color: var(--gold);
+  font-size: 16px;
+}
+
+.datesDisplay.empty {
+  color: var(--ink4);
+  font-weight: 500;
+  justify-content: center;
+}
+
+.nights {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.breakdown {
+  margin-top: 16px;
+}
+
+.bdLine {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  font-size: 13.5px;
+  color: var(--ink2);
+}
+
+.bdLine .value {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.bdLine.sub {
+  border-top: 1px solid var(--b);
+  margin-top: 6px;
+  padding-top: 12px;
+}
+
+.bdLine.total {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  padding-top: 10px;
+}
+
+.bdLine.total .value {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--goldD);
+}
+
+.recapCta {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14.5px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 14px;
+  transition: all 0.15s;
+  border: none;
+  cursor: pointer;
+}
+
+.recapCta:hover {
+  background: #1a1a1c;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px -8px rgba(15, 16, 17, 0.30);
+}
+
+.recapCta:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.clearButton {
+  display: block;
+  width: 100%;
+  margin-top: 9px;
+  padding: 9px;
+  font-size: 12px;
+  color: var(--ink3);
+  font-weight: 600;
+  text-align: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.clearButton:hover {
+  color: var(--rose);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .wrapper {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .monthsContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .recap {
+    position: static;
+  }
+}

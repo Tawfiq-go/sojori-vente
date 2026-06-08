@@ -1,0 +1,98 @@
+/* ═══════════════════════════════════════════════════════════════
+   PRICE DISPLAY - Sojori Design System
+   ═══════════════════════════════════════════════════════════════ */
+
+.price {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.main {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.amount {
+  font-family: var(--sans);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.period {
+  font-family: var(--sans);
+  font-weight: 500;
+  color: var(--ink2);
+}
+
+.original {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink3);
+}
+
+.disclaimer {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink3);
+  font-style: italic;
+}
+
+.loading {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink3);
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* Size Variants */
+/* ─────────────────────────────────────────────────────────────── */
+
+.small .amount {
+  font-size: 14px;
+}
+
+.small .period {
+  font-size: 12px;
+}
+
+.medium .amount {
+  font-size: 18px;
+}
+
+.medium .period {
+  font-size: 14px;
+}
+
+.large .amount {
+  font-size: 28px;
+}
+
+.large .period {
+  font-size: 16px;
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* Mobile */
+/* ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .large .amount {
+    font-size: 24px;
+  }
+
+  .large .period {
+    font-size: 14px;
+  }
+
+  .disclaimer,
+  .original {
+    font-size: 10px;
+  }
+}

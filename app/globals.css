@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Clerk modal — fond blanc forcé (évite header transparent / texte invisible) */
+.cl-modalContent,
+.cl-card,
+.cl-main,
+.cl-header,
+.cl-footer,
+[class*='cl-modalContent'],
+[class*='cl-cardBox'] {
+  background-color: #ffffff !important;
+}
+
+.cl-headerTitle,
+.cl-headerSubtitle,
+.cl-socialButtonsBlockButtonText,
+.cl-formFieldLabel,
+.cl-formFieldInput,
+.cl-footerActionText {
+  color: #0f1011 !important;
+}
+
+.cl-headerSubtitle,
+.cl-footerActionText {
+  color: #6e6e73 !important;
+}
+
 :root {
   /* ─── Colors ─── */
   --ink: #0f1011;

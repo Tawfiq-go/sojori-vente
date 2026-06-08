@@ -1,0 +1,158 @@
+/* ════════════════════════════════════════════════════════════════
+   BOOKING RECAP CARD - Sticky Sidebar
+   ════════════════════════════════════════════════════════════════ */
+
+.recap {
+  position: sticky;
+  top: 88px;
+  background: var(--card);
+  border: 1px solid var(--b);
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 20px 48px -16px rgba(15, 16, 17, 0.14);
+  animation: fadeIn 0.35s;
+}
+
+.listingInfo {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.imagePlaceholder {
+  width: 120px;
+  height: 110px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fde68a, #c89b3c);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 50%);
+  mix-blend-mode: overlay;
+}
+
+.image {
+  width: 120px;
+  height: 110px;
+  flex-shrink: 0;
+}
+
+.details {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  margin: 0 0 6px;
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.location {
+  font-size: 12px;
+  color: var(--ink3);
+  margin-bottom: 4px;
+}
+
+.rating {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink2);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.star {
+  color: var(--gold);
+  font-size: 14px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--b);
+  margin: 16px 0;
+}
+
+.info {
+  margin-bottom: 16px;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.infoLabel {
+  color: var(--ink3);
+  font-weight: 500;
+}
+
+.infoValue {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.breakdown {
+  margin-top: 16px;
+}
+
+.bdLine {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  font-size: 13.5px;
+  color: var(--ink2);
+}
+
+.bdLine .value {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.bdLine.sub {
+  border-top: 1px solid var(--b);
+  margin-top: 6px;
+  padding-top: 12px;
+}
+
+.bdLine.total {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  padding-top: 10px;
+  border-top: 1px solid var(--b);
+  margin-top: 8px;
+}
+
+.bdLine.total .value {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--goldD);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .recap {
+    position: static;
+    margin-bottom: 24px;
+  }
+}

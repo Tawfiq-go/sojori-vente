@@ -1,0 +1,157 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--paper2);
+}
+
+.wrapper :global(.leaflet-container) {
+  position: relative;
+}
+
+.wrapperCompact {
+  min-height: 0;
+  aspect-ratio: 1;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.map :global(.leaflet-container) {
+  font-family: var(--sans);
+  background: #e8edd9;
+}
+
+.map :global(.leaflet-control-zoom) {
+  border: 1px solid var(--b);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(15, 16, 17, 0.08);
+}
+
+.map :global(.leaflet-control-zoom a) {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  font-size: 16px;
+  color: var(--ink2);
+  background: var(--card);
+}
+
+.pricePinWrap {
+  background: transparent !important;
+  border: none !important;
+}
+
+:global(.search-price-pin) {
+  transform: translate(-50%, -100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 9px;
+  border-radius: 99px;
+  background: var(--card);
+  border: 1.5px solid var(--bs);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ink);
+  box-shadow: 0 4px 10px rgba(15, 16, 17, 0.15);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+:global(.search-price-pin-active) {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+  transform: translate(-50%, -100%) scale(1.08);
+  z-index: 2;
+}
+
+:global(.search-price-pin-dimmed) {
+  opacity: 0.42;
+  transform: translate(-50%, -100%) scale(0.92);
+}
+
+.popup :global(.leaflet-popup-content-wrapper) {
+  border-radius: 12px;
+  border: 1px solid var(--b);
+  box-shadow: 0 8px 24px rgba(15, 16, 17, 0.12);
+  padding: 0;
+}
+
+.popup :global(.leaflet-popup-content) {
+  margin: 0;
+  min-width: 160px;
+}
+
+.popupBody {
+  padding: 12px 14px;
+}
+
+.popupTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.popupLoc {
+  font-size: 12px;
+  color: var(--ink3);
+  margin-bottom: 6px;
+}
+
+.popupPrice {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--goldD);
+  margin-bottom: 4px;
+}
+
+.popupApprox {
+  font-size: 10px;
+  color: var(--ink3);
+  font-family: var(--mono);
+  margin-bottom: 8px;
+}
+
+.popupLink {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.popupLink:hover {
+  color: var(--goldD);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  min-height: 280px;
+  color: var(--ink3);
+  font-size: 13px;
+  background: linear-gradient(135deg, #dde9d4, #e8edd9 50%, #ddd6b8);
+  border-radius: 14px;
+}
+
+.emptyCompact {
+  aspect-ratio: 1;
+  min-height: 0;
+}
+
+.empty span {
+  font-size: 28px;
+}

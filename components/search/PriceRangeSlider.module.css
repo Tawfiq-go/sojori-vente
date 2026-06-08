@@ -1,0 +1,104 @@
+.wrap {
+  padding: 4px 2px 0;
+}
+
+.hist {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 48px;
+  margin-bottom: 8px;
+}
+
+.bar {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  background: var(--paper2);
+  transition: background 0.15s;
+}
+
+.barOn {
+  background: linear-gradient(180deg, var(--goldS), var(--gold));
+}
+
+.track {
+  position: relative;
+  height: 24px;
+}
+
+.track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  background: var(--paper2);
+  border-radius: 99px;
+}
+
+.fill {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  background: linear-gradient(90deg, var(--goldS), var(--gold));
+  border-radius: 99px;
+  pointer-events: none;
+}
+
+.thumbLo,
+.thumbHi {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  top: 0;
+  height: 24px;
+  margin: 0;
+  pointer-events: none;
+  appearance: none;
+  background: transparent;
+}
+
+.thumbLo::-webkit-slider-thumb,
+.thumbHi::-webkit-slider-thumb {
+  pointer-events: auto;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  box-shadow: 0 2px 8px rgba(15, 16, 17, 0.15);
+  cursor: grab;
+}
+
+.thumbLo::-moz-range-thumb,
+.thumbHi::-moz-range-thumb {
+  pointer-events: auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  box-shadow: 0 2px 8px rgba(15, 16, 17, 0.15);
+  cursor: grab;
+}
+
+.labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.median {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink3);
+}

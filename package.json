@@ -6,15 +6,24 @@
     "dev": "next dev -p 6001",
     "build": "next build",
     "start": "next start -p 6001",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report"
   },
   "dependencies": {
+    "@clerk/localizations": "^4.7.0",
+    "@clerk/nextjs": "^7.4.1",
+    "leaflet": "^1.9.4",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-leaflet": "^5.0.0",
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

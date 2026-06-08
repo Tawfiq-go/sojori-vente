@@ -1,0 +1,85 @@
+.wrap {
+  background: var(--card, #fff);
+  border: 1px solid var(--b, #e9e3d3);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+  padding: 8px 16px 16px;
+  min-width: 340px;
+  max-width: 400px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--b, #ebebeb);
+}
+
+.row:last-of-type {
+  border-bottom: none;
+}
+
+.rowLabel {
+  flex: 1;
+}
+
+.rowTitle {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink, #222);
+}
+
+.rowSub {
+  font-size: 13px;
+  color: var(--ink3, #717171);
+  margin-top: 2px;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--bs, #b0b0b0);
+  background: var(--card, #fff);
+  color: var(--ink, #222);
+  font-size: 18px;
+  font-weight: 300;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.btn:disabled {
+  border-color: #ebebeb;
+  color: #ebebeb;
+  cursor: not-allowed;
+}
+
+.val {
+  min-width: 24px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.closeBtn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--ink, #222);
+  color: var(--paper, #fff);
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}

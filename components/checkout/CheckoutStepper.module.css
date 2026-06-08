@@ -1,0 +1,105 @@
+/* ════════════════════════════════════════════════════════════════
+   CHECKOUT STEPPER - Progress Indicator
+   ════════════════════════════════════════════════════════════════ */
+
+.stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 36px;
+}
+
+.stepWrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.stepWrapper:last-child {
+  flex: 0;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink3);
+  transition: all 0.25s;
+}
+
+.step.active {
+  color: var(--ink);
+}
+
+.number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--paper2);
+  border: 1px solid var(--b);
+  color: var(--ink3);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.25s;
+}
+
+.step.done .number {
+  background: var(--emT);
+  border-color: transparent;
+  color: var(--emerald);
+}
+
+.step.active .number {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+}
+
+.checkmark {
+  font-size: 14px;
+  animation: checkmark 0.5s ease-out;
+}
+
+.label {
+  white-space: nowrap;
+}
+
+.line {
+  flex: 1;
+  height: 1px;
+  background: var(--b);
+  margin: 0 14px;
+  transition: background 0.3s;
+}
+
+.line.lineDone {
+  background: var(--emerald);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .step .label {
+    display: none;
+  }
+
+  .stepWrapper {
+    flex: 1;
+  }
+
+  .stepWrapper:last-child {
+    flex: 1;
+  }
+
+  .line {
+    margin: 0 8px;
+  }
+}

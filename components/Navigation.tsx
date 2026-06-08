@@ -3,10 +3,20 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useWishlistStore } from '@/lib/store/useBookingStore';
+import { UserButton, useUser } from '@clerk/nextjs';
+import { CurrencySelector } from '@/components/CurrencySelector';
+import { AuthButtons } from '@/components/auth/AuthButtons';
+import { clerkAppearance } from '@/lib/clerk/appearance';
 
 export function Navigation() {
   const pathname = usePathname();
   const wishlistCount = useWishlistStore((state) => state.items.length);
+  const { isSignedIn, user } = useUser();
+
+  const handleLanguageSwitch = () => {
+    // Mockup: Just alert for now
+    alert('Changement de langue à venir');
+  };
 
   return (
     <nav className="nav">
@@ -16,24 +26,41 @@ export function Navigation() {
       </Link>
 
       <div className="nav-links">
-        <Link href="/">Accueil</Link>
-        <Link href="/search">Explorer</Link>
-        <Link href="/about">À propos</Link>
-        <Link href="/pms">Property Managers</Link>
+        <Link href="/search">Destinations</Link>
+        <Link href="/verified-hosts">Hôtes vérifiés</Link>
+        <Link href="/experiences">Expériences</Link>
+        <Link href="/become-host">Devenir hôte</Link>
       </div>
 
       <div className="nav-right">
-        <div className="lang-chip">FR</div>
-        <button className="cmd-k">
-          <span>✨ AI Search</span>
+        <button className="cmd-k" onClick={() => window.location.href = '/search?ai=true'}>
+          <span>✨ Demander à Sojori AI</span>
           <kbd>⌘K</kbd>
         </button>
         <Link href="/wishlist" className="icon-btn">
           {wishlistCount > 0 ? `♥ ${wishlistCount}` : '♡'}
         </Link>
-        <Link href="/account" className="nav-cta">
-          Mon compte
-        </Link>
+        <CurrencySelector />
+        <button className="icon-btn" onClick={handleLanguageSwitch}>🌐</button>
+
+        {isSignedIn ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Link href="/profile" style={{ fontSize: '13px', fontWeight: '500', color: 'var(--ink2)' }}>
+              Mon compte
+            </Link>
+            <UserButton
+              appearance={{
+                ...clerkAppearance,
+                elements: {
+                  ...clerkAppearance.elements,
+                  avatarBox: 'w-10 h-10',
+                },
+              }}
+            />
+          </div>
+        ) : (
+          <AuthButtons />
+        )}
       </div>
 
       <style jsx>{`
@@ -106,6 +133,7 @@ export function Navigation() {
           border: 1px solid var(--b);
           border-radius: 99px;
           letter-spacing: 0.04em;
+          cursor: pointer;
         }
 
         .cmd-k {
@@ -138,6 +166,12 @@ export function Navigation() {
           border: 1px solid var(--b);
         }
 
+        .auth-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
         .nav-cta {
           padding: 9px 18px;
           background: var(--ink);
@@ -146,10 +180,28 @@ export function Navigation() {
           font-weight: 600;
           border-radius: 99px;
           letter-spacing: -0.005em;
+          white-space: nowrap;
         }
 
         .nav-cta:hover {
           background: #1a1a1c;
+          color: var(--paper);
+        }
+
+        .nav-signup {
+          padding: 9px 14px;
+          border: 1px solid var(--b);
+          background: var(--card);
+          color: var(--ink2);
+          font-size: 13px;
+          font-weight: 600;
+          border-radius: 99px;
+          white-space: nowrap;
+        }
+
+        .nav-signup:hover {
+          border-color: var(--gold);
+          color: var(--ink);
         }
 
         .icon-btn {
