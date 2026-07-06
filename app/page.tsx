@@ -742,7 +742,17 @@ export default function HomePage() {
               <div className="grain"></div>
               {pm.verified && <div className={`badge${idx === 0 ? ' gold' : ''}`}>✓ VÉRIFIÉ</div>}
               <div className="content">
-                <div className="logo">{pm.logoText || pm.name.slice(0, 2).toUpperCase()}</div>
+                <div className="logo">
+                  {pm.vitrineLogoUrl ? (
+                    <img
+                      src={pm.vitrineLogoUrl}
+                      alt=""
+                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                  ) : (
+                    pm.logoText || pm.name.slice(0, 2).toUpperCase()
+                  )}
+                </div>
                 <div className="nm">
                   {pm.name.split(' ')[0]} <span className="it">{pm.name.split(' ').slice(1).join(' ')}</span>
                 </div>

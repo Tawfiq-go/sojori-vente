@@ -76,6 +76,7 @@ interface PropertyManager {
   name: string;
   slug: string;
   logoText?: string;
+  vitrineLogoUrl?: string;
   images?: string[];
   coverUrl?: string;
   tagline?: string;

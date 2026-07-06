@@ -127,9 +127,18 @@ export default function PMPage() {
                   color: brandTo,
                   border: '3px solid rgba(255,255,255,0.4)',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                  overflow: 'hidden',
                 }}
               >
-                {pm.logoText || pm.name.slice(0, 2).toUpperCase()}
+                {pm.vitrineLogoUrl ? (
+                  <img
+                    src={pm.vitrineLogoUrl}
+                    alt=""
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 8 }}
+                  />
+                ) : (
+                  pm.logoText || pm.name.slice(0, 2).toUpperCase()
+                )}
               </div>
 
               <div>
@@ -238,7 +247,7 @@ export default function PMPage() {
         </section>
 
         {/* Gallery (uploaded PM photos) */}
-        {pm.images && pm.images.length > 1 && (
+        {pm.images && pm.images.length > 0 && (
           <section style={{ padding: '40px 32px 0', maxWidth: '1320px', margin: '0 auto' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
               {pm.images.slice(0, 8).map((img, i) => (

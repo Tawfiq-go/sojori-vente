@@ -61,7 +61,7 @@ interface AvailabilityCalendarProps {
 export default function AvailabilityCalendar({
   basePricePerNight,
   weekendPricePerNight,
-  currency = 'EUR',
+  currency = 'MAD',
   blockedDates = [],
   calendarData = [],
   selectedRange,

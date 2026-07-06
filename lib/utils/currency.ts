@@ -2,7 +2,7 @@
  * Currency Conversion Utilities
  */
 
-import { Currency, EXCHANGE_RATES, SUPPORTED_CURRENCIES, PAYMENT_CURRENCY } from '@/lib/config/currency';
+import { Currency, EXCHANGE_RATES, SUPPORTED_CURRENCIES, PAYMENT_CURRENCY, DEFAULT_CURRENCY } from '@/lib/config/currency';
 
 /**
  * Convert price from MAD to target currency
@@ -177,35 +177,11 @@ export function calculateTotalWithConversion(
 }
 
 /**
- * Detect user currency based on browser locale
- *
- * @returns Detected currency or default (MAD)
+ * Detect user currency based on browser locale.
+ * Site default is always MAD; locale-based auto-switch is disabled.
  */
 export function detectUserCurrency(): Currency {
-  if (typeof navigator === 'undefined') return 'MAD';
-
-  const locale = navigator.language.toLowerCase();
-
-  // European countries → EUR
-  if (
-    locale.startsWith('fr') ||
-    locale.startsWith('de') ||
-    locale.startsWith('es') ||
-    locale.startsWith('it') ||
-    locale.startsWith('pt') ||
-    locale.startsWith('nl') ||
-    locale.startsWith('be')
-  ) {
-    return 'EUR';
-  }
-
-  // US, Canada → USD
-  if (locale.startsWith('en-us') || locale.startsWith('en-ca')) {
-    return 'USD';
-  }
-
-  // Default: MAD (Morocco)
-  return 'MAD';
+  return DEFAULT_CURRENCY;
 }
 
 /**
@@ -220,8 +196,8 @@ export function getCurrency(): Currency {
     return stored as Currency;
   }
 
-  // Fallback: auto-detect
-  return detectUserCurrency();
+  // First visit: always MAD (user can switch via selector)
+  return DEFAULT_CURRENCY;
 }
 
 /**

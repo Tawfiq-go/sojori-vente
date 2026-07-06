@@ -196,11 +196,20 @@ export default function VerifiedHostsPage() {
                       fontSize: '24px',
                       fontWeight: 700,
                       color: '#fff',
+                      overflow: 'hidden',
                       background: pm.brandColor
                         ? `linear-gradient(135deg, ${pm.brandColor.from}, ${pm.brandColor.to})`
                         : 'linear-gradient(135deg, #e8c87a, #c89b3c)'
                     }}>
-                      {pm.logoText || pm.name.slice(0, 2).toUpperCase()}
+                      {pm.vitrineLogoUrl ? (
+                        <img
+                          src={pm.vitrineLogoUrl}
+                          alt=""
+                          style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }}
+                        />
+                      ) : (
+                        pm.logoText || pm.name.slice(0, 2).toUpperCase()
+                      )}
                     </div>
                   )}
                   <h3 style={{
