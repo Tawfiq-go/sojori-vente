@@ -911,6 +911,10 @@
   background: linear-gradient(135deg, #fde68a, #d97706);
 }
 
+.lc-photo.has-img {
+  background: #e5e5e5;
+}
+
 .lc-photo.b {
   background: linear-gradient(135deg, #a5f3fc, #0e7490);
 }

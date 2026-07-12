@@ -22,6 +22,14 @@ export const metadata: Metadata = {
   title: 'Sojori · Séjours Premium au Maroc · Riads, Villas & Appartements',
   description:
     'Découvrez des riads, villas et appartements triés par des experts locaux. Marrakech, Essaouira, Fès, Casablanca. Biens vérifiés, recherche IA, Property Managers sélectionnés.',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', type: 'image/png', sizes: '32x32' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+    shortcut: '/favicon.svg',
+  },
   keywords: [
     'Maroc',
     'séjour Maroc',

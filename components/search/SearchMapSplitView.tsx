@@ -39,7 +39,7 @@ export default function SearchMapSplitView({
             <h2 className={styles.listTitle}>
               {listings.length} bien{listings.length !== 1 ? 's' : ''} · {cityLabel}
             </h2>
-            <p className={styles.listSub}>Survolez un bien ou un pin pour voir le détail</p>
+            <p className={styles.listSub}>Survolez pour surligner · cliquez un prix pour la fiche</p>
           </div>
           <button type="button" className={styles.closeList} onClick={onClose}>
             ☰ Liste
@@ -95,9 +95,6 @@ export default function SearchMapSplitView({
           listings={listings}
           activeListingId={activeListingId}
           onListingHover={onListingHover}
-          onListingClick={(id) => {
-            window.location.href = buildListingUrl(id);
-          }}
           listingUrlBuilder={buildListingUrl}
           interactive
         />

@@ -821,9 +821,26 @@ export default function HomePage() {
               if (pets > 0) params.append('pets', pets.toString());
               const listingUrl = `/listings/${listingId}${params.toString() ? `?${params.toString()}` : ''}`;
 
+              const coverImage =
+                listing.images?.find(Boolean) ||
+                (listing as { coverUrl?: string }).coverUrl ||
+                '';
+              const imageCount = Math.max(listing.images?.filter(Boolean).length || 0, coverImage ? 1 : 0);
+
               return (
                 <Link key={listingId} href={listingUrl} className="car-item">
-                  <div className={`car-photo ${['', 'b', 'c', 'd'][idx % 4]}`}>
+                  <div
+                    className={`car-photo ${coverImage ? 'has-img' : ['', 'b', 'c', 'd'][idx % 4]}`}
+                    style={
+                      coverImage
+                        ? {
+                            backgroundImage: `url(${coverImage})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                          }
+                        : undefined
+                    }
+                  >
                     <div className="grain"></div>
                     <button
                       className="wish"
@@ -838,7 +855,7 @@ export default function HomePage() {
                         {pmData.name.split(' ')[0]}
                       </div>
                     )}
-                    <div className="pages">1/5</div>
+                    {imageCount > 0 && <div className="pages">1/{imageCount}</div>}
                     <div className="gathern exclusive">✦ DIRECT</div>
                   </div>
                   <div className="car-info">

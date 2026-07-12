@@ -6,35 +6,49 @@
   max-width: 100%;
   margin: 0;
   padding: 0;
-  display: block; /* Change from grid to block to not interfere with parent layout */
+  display: block;
 }
-
-/* ═══════════════════════════════════════════════════════════════
-   CALENDAR CARD
-   ═══════════════════════════════════════════════════════════════ */
 
 .calendarCard {
   background: var(--card);
   border: 1px solid var(--b);
   border-radius: 22px;
-  padding: 24px 16px; /* Réduit padding horizontal pour plus d'espace */
+  padding: 22px 18px 20px;
   box-shadow: 0 1px 2px rgba(15, 16, 17, 0.04);
-  overflow: visible;
+  overflow: hidden;
   width: 100%;
   max-width: 100%;
 }
 
+.currencyBadge {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  font-family: var(--mono);
+}
+
+.currencyBadge strong {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
 .nav {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 18px;
-  gap: 16px;
+  margin-bottom: 14px;
+  gap: 10px;
 }
 
 .navButton {
   width: 38px;
   height: 38px;
+  margin-top: 28px;
   border-radius: 50%;
   border: 1px solid var(--b);
   background: var(--card);
@@ -47,39 +61,44 @@
   flex-shrink: 0;
 }
 
-.navButton:hover {
+.navButton:hover:not(:disabled) {
   border-color: var(--ink);
   background: var(--ink);
   color: var(--paper);
 }
 
+.navButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 .monthsContainer {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px; /* Réduit le gap pour plus d'espace */
+  gap: 28px;
   flex: 1;
   position: relative;
   width: 100%;
+  min-width: 0;
 }
 
-/* Trait vertical entre les deux mois */
 .monthsContainer::before {
   content: '';
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 8px;
+  bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
   width: 1px;
-  background: #E5E5E5;
-  opacity: 0.6;
+  background: #e5e5e5;
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .month {
   min-width: 0;
-  max-width: 100%;
   width: 100%;
-  overflow: visible;
+  overflow: hidden;
   position: relative;
   z-index: 1;
 }
@@ -91,24 +110,25 @@
   font-weight: 400;
   font-style: italic;
   letter-spacing: -0.01em;
-  margin-bottom: 16px;
-  color: #1A1A1A;
+  margin-bottom: 12px;
+  color: #1a1a1a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-transform: capitalize;
 }
 
 .dow {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  margin-bottom: 10px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 8px;
 }
 
 .dow span {
   text-align: center;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   color: var(--ink4);
   letter-spacing: 0.04em;
@@ -117,110 +137,132 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px; /* Gap minimal */
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
   width: 100%;
-  max-width: 100%;
-  overflow: visible;
 }
 
 .dayEmpty {
-  aspect-ratio: 1;
+  min-height: 56px;
 }
 
 .day {
-  aspect-ratio: 1;
-  border-radius: 6px;
+  min-height: 56px;
+  width: 100%;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 4px;
   cursor: pointer;
   position: relative;
-  transition: all 0.15s ease;
-  background: #FFFFFF;
-  border: 1px solid #E8E8E8;
+  transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  background: #fff;
+  border: 1px solid #e8e8e8;
   min-width: 0;
-  overflow: visible;
-  padding: 6px 2px; /* Padding minimal */
+  overflow: hidden;
+  padding: 6px 2px 5px;
+  box-sizing: border-box;
+  font: inherit;
+  color: inherit;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .num {
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  color: #1A1A1A;
-  margin: 0;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: #1a1a1a;
   flex-shrink: 0;
 }
 
 .price {
   font-family: var(--mono);
-  font-size: 11px; /* Plus grand maintenant sans currency */
-  color: #666666;
+  font-size: 10px;
+  color: #666;
   font-weight: 700;
-  margin: 0;
-  transition: all 0.15s;
-  white-space: nowrap;
+  line-height: 1.05;
   text-align: center;
-  flex-shrink: 0;
-  line-height: 1;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 4–6 digit prices: shrink so they fit the cell */
+.priceMd {
+  font-size: 9px;
+  letter-spacing: -0.03em;
+}
+
+.priceLg {
+  font-size: 8px;
+  letter-spacing: -0.04em;
+}
+
+.priceXl {
+  font-size: 7.5px;
+  letter-spacing: -0.05em;
 }
 
 .day:hover:not(.blocked):not(.past):not(.checkin):not(.checkout):not(.range) {
-  background: #FAFAFA;
-  border-color: #D0D0D0;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  background: #fafafa;
+  border-color: #d0d0d0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 .day:hover:not(.blocked):not(.past) .price {
-  color: #333333;
+  color: #333;
 }
 
 .day.weekend .price {
-  color: #666666;
+  color: #5c5c5c;
 }
 
 .day.blocked {
   cursor: not-allowed;
-  background: #F9F9F9;
-  opacity: 0.6;
+  background: #f7f7f7;
+  opacity: 0.75;
   pointer-events: none;
-  border: 1px solid #E8E8E8;
-  position: relative;
+  border-color: #ebebeb;
 }
 
 .day.blocked .num {
-  color: #BDBDBD;
+  color: #bdbdbd;
   text-decoration: line-through;
   font-weight: 400;
-  z-index: 2;
   position: relative;
+  z-index: 2;
 }
 
 .day.blocked .price {
   display: none;
 }
 
-/* Add X icon for blocked dates */
 .day.blocked::before {
   content: '✕';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 24px;
-  color: #D0D0D0;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #d0d0d0;
   font-weight: 300;
-  opacity: 0.4;
+  opacity: 0.55;
   pointer-events: none;
   z-index: 1;
 }
 
 .day.past {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: not-allowed;
   background: #f5f5f5;
   pointer-events: none;
@@ -236,31 +278,30 @@
 }
 
 .day.range {
-  background: linear-gradient(135deg, #F5EFE7 0%, #F0E6D8 100%); /* Beige/crème pour le séjour */
-  border-color: #D4C4B0;
+  background: linear-gradient(135deg, #f5efe7 0%, #f0e6d8 100%);
+  border-color: #d4c4b0;
   border-radius: 0;
-  animation: fillRange 0.2s both;
 }
 
 .day.checkin,
 .day.checkout {
-  background: linear-gradient(135deg, #C89B3C 0%, #A37D2E 100%); /* Marron/doré pour sélection */
+  background: linear-gradient(135deg, #c89b3c 0%, #a37d2e 100%);
   border-radius: 8px;
   z-index: 2;
-  box-shadow: 0 3px 10px rgba(200, 155, 60, 0.3);
-  border-color: #B88A32;
+  box-shadow: 0 2px 8px rgba(200, 155, 60, 0.28);
+  border-color: #b88a32;
 }
 
 .day.checkin .num,
 .day.checkout .num {
-  color: #FFFFFF;
+  color: #fff;
   font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .day.checkin .price,
 .day.checkout .price {
-  display: none;
+  color: rgba(255, 255, 255, 0.92);
+  display: block;
 }
 
 .day.checkin {
@@ -275,77 +316,34 @@
 
 .endpointBadge {
   position: absolute;
-  bottom: -10px;
+  bottom: 2px;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--mono);
-  font-size: 8px;
-  font-weight: 700;
-  background: #1A1A1A;
-  color: #FFFFFF;
-  padding: 2px 6px;
+  font-size: 6.5px;
+  font-weight: 800;
+  background: rgba(26, 26, 26, 0.92);
+  color: #fff;
+  padding: 1px 4px;
   border-radius: 3px;
   letter-spacing: 0.02em;
   white-space: nowrap;
-  z-index: 10;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  z-index: 3;
+  line-height: 1.2;
 }
 
-/* Tooltip */
-.tip {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--ink);
-  color: var(--paper);
-  padding: 9px 12px;
-  border-radius: 10px;
-  width: 160px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s;
-  z-index: 10;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.20);
-}
-
-.day:hover .tip {
-  opacity: 1;
-}
-
-.tDate {
-  font-size: 11px;
-  font-weight: 700;
-  margin-bottom: 5px;
-  letter-spacing: -0.005em;
-}
-
-.tRow {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--mono);
-  font-size: 10px;
-  padding: 2px 0;
-}
-
-.tRow.total {
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  margin-top: 4px;
-  padding-top: 5px;
-  font-weight: 800;
-}
-
-.tRow .v {
-  color: var(--goldS);
+.day.checkin .price,
+.day.checkout .price {
+  margin-bottom: 10px;
 }
 
 /* Legend */
 .legend {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
-  margin-top: 20px;
-  padding-top: 18px;
+  margin-top: 18px;
+  padding-top: 16px;
   border-top: 1px solid var(--b);
 }
 
@@ -362,33 +360,31 @@
   width: 16px;
   height: 16px;
   border-radius: 5px;
+  flex-shrink: 0;
 }
 
 .swatchAvail {
-  background: #FFFFFF;
-  border: 1px solid #E8E8E8;
+  background: #fff;
+  border: 1px solid #e8e8e8;
 }
 
 .swatchSel {
-  background: linear-gradient(135deg, #C89B3C 0%, #A37D2E 100%); /* Marron/doré */
+  background: linear-gradient(135deg, #c89b3c 0%, #a37d2e 100%);
 }
 
 .swatchRange {
-  background: linear-gradient(135deg, #F5EFE7 0%, #F0E6D8 100%); /* Beige/crème */
-  border: 1px solid #D4C4B0;
+  background: linear-gradient(135deg, #f5efe7 0%, #f0e6d8 100%);
+  border: 1px solid #d4c4b0;
 }
 
 .swatchBlocked {
-  background: #F8F8F8;
-  border: 1px solid #E5E5E5;
+  background: #f8f8f8;
+  border: 1px solid #e5e5e5;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RECAP SIDEBAR (Sticky)
-   ═══════════════════════════════════════════════════════════════ */
-
+/* Recap hidden — booking card is used instead */
 .recap {
-  display: none; /* Hide calendar's own recap - we use the main booking card instead */
+  display: none;
 }
 
 .recapTitle {
@@ -489,19 +485,6 @@
   cursor: pointer;
 }
 
-.recapCta:hover {
-  background: #1a1a1c;
-  transform: translateY(-1px);
-  box-shadow: 0 12px 28px -8px rgba(15, 16, 17, 0.30);
-}
-
-.recapCta:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
 .clearButton {
   display: block;
   width: 100%;
@@ -516,25 +499,50 @@
   cursor: pointer;
 }
 
-.clearButton:hover {
-  color: var(--rose);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════ */
-
 @media (max-width: 900px) {
-  .wrapper {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
   .monthsContainer {
     grid-template-columns: 1fr;
+    gap: 28px;
   }
 
-  .recap {
-    position: static;
+  .monthsContainer::before {
+    display: none;
+  }
+
+  .day {
+    min-height: 52px;
+  }
+
+  .navButton {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .calendarCard {
+    padding: 16px 10px 14px;
+  }
+
+  .day {
+    min-height: 48px;
+    padding: 5px 1px 4px;
+    gap: 3px;
+  }
+
+  .num {
+    font-size: 11px;
+  }
+
+  .price {
+    font-size: 9px;
+  }
+
+  .priceMd {
+    font-size: 8px;
+  }
+
+  .priceLg,
+  .priceXl {
+    font-size: 7px;
   }
 }

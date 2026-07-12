@@ -49,35 +49,72 @@
   border: none !important;
 }
 
+.clusterPinWrap {
+  background: transparent !important;
+  border: none !important;
+}
+
 :global(.search-price-pin) {
   transform: translate(-50%, -100%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 9px;
-  border-radius: 99px;
-  background: var(--card);
-  border: 1.5px solid var(--bs);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid rgba(15, 16, 17, 0.12);
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--ink);
-  box-shadow: 0 4px 10px rgba(15, 16, 17, 0.15);
+  box-shadow: 0 2px 8px rgba(15, 16, 17, 0.16);
   white-space: nowrap;
   cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, color 0.12s ease,
+    opacity 0.12s ease;
+  will-change: transform;
+  user-select: none;
 }
 
+:global(.search-price-pin:hover),
 :global(.search-price-pin-active) {
   background: var(--ink);
-  color: var(--paper);
+  color: #fff;
   border-color: var(--ink);
   transform: translate(-50%, -100%) scale(1.08);
+  box-shadow: 0 6px 16px rgba(15, 16, 17, 0.22);
   z-index: 2;
 }
 
 :global(.search-price-pin-dimmed) {
-  opacity: 0.42;
-  transform: translate(-50%, -100%) scale(0.92);
+  opacity: 0.38;
+  transform: translate(-50%, -100%) scale(0.94);
+  box-shadow: 0 1px 4px rgba(15, 16, 17, 0.1);
+}
+
+:global(.search-cluster-pin) {
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  border: 2px solid #fff;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(15, 16, 17, 0.22);
+  cursor: pointer;
+  user-select: none;
+}
+
+:global(.search-cluster-pin:hover) {
+  transform: translate(-50%, -50%) scale(1.06);
 }
 
 .popup :global(.leaflet-popup-content-wrapper) {

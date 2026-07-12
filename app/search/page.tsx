@@ -126,6 +126,28 @@ function SearchContent() {
   const [mapViewMode, setMapViewMode] = useState<'list' | 'split'>('list');
   const urlSyncReady = useRef(false);
   const skipNextUrlParse = useRef(false);
+  const hoverClearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const setMapHover = useCallback((id: string | null) => {
+    if (hoverClearTimer.current) {
+      clearTimeout(hoverClearTimer.current);
+      hoverClearTimer.current = null;
+    }
+    if (id) {
+      setHoveredListingId(id);
+      return;
+    }
+    hoverClearTimer.current = setTimeout(() => {
+      setHoveredListingId(null);
+      hoverClearTimer.current = null;
+    }, 120);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hoverClearTimer.current) clearTimeout(hoverClearTimer.current);
+    };
+  }, []);
 
   const guestCounts: GuestCounts = useMemo(
     () => ({
@@ -602,7 +624,7 @@ function SearchContent() {
             city={city}
             listings={mapListings}
             activeListingId={hoveredListingId}
-            onListingHover={setHoveredListingId}
+            onListingHover={setMapHover}
             onClose={() => setMapViewMode('list')}
             buildListingUrl={buildListingUrl}
           />
@@ -695,15 +717,28 @@ function SearchContent() {
 
                   const listingUrl = buildListingUrl(listingId);
 
+                  const coverImage = listing.images?.find(Boolean) || '';
+
                   return (
                     <Link
                       key={listingId}
                       href={listingUrl}
                       className="lc"
-                      onMouseEnter={() => setHoveredListingId(listingId)}
-                      onMouseLeave={() => setHoveredListingId(null)}
+                      onMouseEnter={() => setMapHover(listingId)}
+                      onMouseLeave={() => setMapHover(null)}
                     >
-                      <div className={`lc-photo ${colorClass}`}>
+                      <div
+                        className={`lc-photo ${coverImage ? 'has-img' : colorClass}`}
+                        style={
+                          coverImage
+                            ? {
+                                backgroundImage: `url(${coverImage})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                              }
+                            : undefined
+                        }
+                      >
                         <div className="grain"></div>
                         <button
                           className={`wish ${wishlistItems.includes(listingId) ? 'on' : ''}`}
@@ -781,9 +816,22 @@ function SearchContent() {
                       const colorClass = colors[i % colors.length];
                       const neighborhood = (listing as any).neighborhood || listing.city;
 
+                      const coverImage = listing.images?.find(Boolean) || '';
+
                       return (
                         <div key={listingId} className="lc" style={{ position: 'relative', pointerEvents: 'none' }}>
-                          <div className={`lc-photo ${colorClass}`}>
+                          <div
+                            className={`lc-photo ${coverImage ? 'has-img' : colorClass}`}
+                            style={
+                              coverImage
+                                ? {
+                                    backgroundImage: `url(${coverImage})`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                  }
+                                : undefined
+                            }
+                          >
                             <div className="grain"></div>
                             <div style={{
                               position: 'absolute',
@@ -866,9 +914,22 @@ function SearchContent() {
                       const colorClass = colors[i % colors.length];
                       const neighborhood = (listing as any).neighborhood || listing.city;
 
+                      const coverImage = listing.images?.find(Boolean) || '';
+
                       return (
                         <div key={listingId} className="lc" style={{ position: 'relative', pointerEvents: 'none' }}>
-                          <div className={`lc-photo ${colorClass}`}>
+                          <div
+                            className={`lc-photo ${coverImage ? 'has-img' : colorClass}`}
+                            style={
+                              coverImage
+                                ? {
+                                    backgroundImage: `url(${coverImage})`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                  }
+                                : undefined
+                            }
+                          >
                             <div className="grain"></div>
                             <div style={{
                               position: 'absolute',
@@ -935,7 +996,7 @@ function SearchContent() {
           city={city}
           listings={mapListings}
           activeListingId={hoveredListingId}
-          onListingHover={setHoveredListingId}
+          onListingHover={setMapHover}
           onOpenSplitView={() => setMapViewMode('split')}
         />
           </>

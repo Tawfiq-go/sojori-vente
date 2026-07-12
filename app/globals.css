@@ -886,6 +886,10 @@ textarea {
   background: linear-gradient(135deg, #fde68a, #d97706);
 }
 
+.car-photo.has-img {
+  background: #e5e5e5;
+}
+
 .car-photo.b {
   background: linear-gradient(135deg, #a5f3fc, #0e7490);
 }

@@ -108,7 +108,9 @@ export default function AvailabilityCalendar({
     // Build blocked dates from both sources:
     // 1. Legacy blockedDates prop
     // 2. calendarData where available === false OR stopSell === true
-    const blocked = new Set(blockedDates.map(d => d.toISOString().split('T')[0]));
+    const blocked = new Set(
+      blockedDates.map((d) => toDateKey(d instanceof Date ? d : new Date(d))),
+    );
 
     calendarData.forEach(day => {
       // Logique: dispo si available === true ET stopSell === false
@@ -138,7 +140,7 @@ export default function AvailabilityCalendar({
     checkOut.setHours(0, 0, 0, 0);
 
     while (current < checkOut) {
-      const dateStr = current.toISOString().split('T')[0];
+      const dateStr = toDateKey(current);
       const dayOfWeek = current.getDay();
       const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
       const calendarDay = calendarDataMap.get(dateStr);
@@ -254,27 +256,17 @@ export default function AvailabilityCalendar({
   return (
     <div className={styles.wrapper}>
       <div className={styles.calendarCard}>
-        {/* Currency indicator */}
-        <div style={{
-          textAlign: 'center',
-          fontSize: '12px',
-          fontWeight: '600',
-          color: '#666',
-          marginBottom: '16px',
-          padding: '8px 12px',
-          background: '#F9F9F9',
-          borderRadius: '6px',
-          fontFamily: 'var(--mono)'
-        }}>
-          Prix affichés en <span style={{ color: '#1A1A1A', fontWeight: '700' }}>{currency}</span>
+        <div className={styles.currencyBadge}>
+          Prix affichés en <strong>{currency}</strong>
         </div>
 
         <div className={styles.nav}>
           <button
+            type="button"
             onClick={handlePrevMonth}
             className={styles.navButton}
             disabled={!canGoPrevious()}
-            style={{ opacity: canGoPrevious() ? 1 : 0.3, cursor: canGoPrevious() ? 'pointer' : 'not-allowed' }}
+            aria-label="Mois précédent"
           >
             ←
           </button>
@@ -285,7 +277,6 @@ export default function AvailabilityCalendar({
                 month={month}
                 basePricePerNight={basePricePerNight}
                 weekendPricePerNight={weekendPrice}
-                currency={currency}
                 blockedDatesSet={blockedDatesSet}
                 calendarDataMap={calendarDataMap}
                 onDayClick={handleDayClick}
@@ -295,7 +286,12 @@ export default function AvailabilityCalendar({
               />
             ))}
           </div>
-          <button onClick={handleNextMonth} className={styles.navButton}>
+          <button
+            type="button"
+            onClick={handleNextMonth}
+            className={styles.navButton}
+            aria-label="Mois suivant"
+          >
             →
           </button>
         </div>
@@ -370,13 +366,13 @@ export default function AvailabilityCalendar({
                   </div>
                 </div>
 
-                <button className={styles.recapCta}>
+                <button type="button" className={styles.recapCta}>
                   Réserver · {pricing.total} {currency}
                 </button>
               </>
             )}
 
-            <button onClick={handleClear} className={styles.clearButton}>
+            <button type="button" onClick={handleClear} className={styles.clearButton}>
               Effacer les dates
             </button>
           </>
@@ -398,7 +394,6 @@ interface MonthGridProps {
   month: Date;
   basePricePerNight: number;
   weekendPricePerNight: number;
-  currency: string;
   blockedDatesSet: Set<string>;
   calendarDataMap: Map<string, CalendarDayData>;
   onDayClick: (date: Date, isBlocked: boolean, isPast: boolean) => void;
@@ -411,7 +406,6 @@ function MonthGrid({
   month,
   basePricePerNight,
   weekendPricePerNight,
-  currency,
   blockedDatesSet,
   calendarDataMap,
   onDayClick,
@@ -429,7 +423,7 @@ function MonthGrid({
       <div className={styles.monthTitle}>{monthName}</div>
 
       <div className={styles.dow}>
-        {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
+        {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day) => (
           <span key={day}>{day}</span>
         ))}
       </div>
@@ -440,14 +434,14 @@ function MonthGrid({
             return <div key={`empty-${idx}`} className={styles.dayEmpty} />;
           }
 
-          const dateStr = day.toISOString().split('T')[0];
+          const dateStr = toDateKey(day);
           const isBlocked = blockedDatesSet.has(dateStr);
           const isPast = day < today;
           const isWeekend = day.getDay() === 5 || day.getDay() === 6;
-
-          // Get price from backend calendar data, fallback to base price
           const calendarDay = calendarDataMap.get(dateStr);
           const price = calendarDay?.price || (isWeekend ? weekendPricePerNight : basePricePerNight);
+          const rounded = Math.round(price);
+          const priceClass = priceDigitClass(rounded);
 
           const dayClasses = [
             styles.day,
@@ -457,44 +451,31 @@ function MonthGrid({
             isInRange(day) && styles.range,
             isCheckIn(day) && styles.checkin,
             isCheckOut(day) && styles.checkout,
-          ].filter(Boolean).join(' ');
+          ]
+            .filter(Boolean)
+            .join(' ');
+
+          const title =
+            !isBlocked && !isPast
+              ? `${formatDate(day)} · ${formatCellPrice(rounded)} MAD${isWeekend ? ' (week-end)' : ''}`
+              : undefined;
 
           return (
-            <div
-              key={idx}
+            <button
+              key={dateStr}
+              type="button"
               className={dayClasses}
+              title={title}
+              disabled={isBlocked || isPast}
               onClick={() => onDayClick(day, isBlocked, isPast)}
             >
-              <div className={styles.num}>{day.getDate()}</div>
+              <span className={styles.num}>{day.getDate()}</span>
               {!isBlocked && !isPast && (
-                <div className={styles.price}>
-                  {Math.round(price)}
-                </div>
+                <span className={`${styles.price} ${priceClass}`}>{formatCellPrice(rounded)}</span>
               )}
-
-              {isCheckIn(day) && <div className={styles.endpointBadge}>ARRIVÉE</div>}
-              {isCheckOut(day) && <div className={styles.endpointBadge}>DÉPART</div>}
-
-              {/* Tooltip - Simple version */}
-              {!isBlocked && !isPast && (
-                <div className={styles.tip}>
-                  <div className={styles.tDate}>{formatDate(day)}</div>
-                  <div style={{ paddingTop: '8px', textAlign: 'center' }}>
-                    <span style={{ fontSize: '20px', fontWeight: '700' }}>
-                      {Math.round(price)}
-                    </span>
-                    <span style={{ fontSize: '13px', fontWeight: '600', marginLeft: '4px', opacity: 0.7 }}>
-                      {currency}
-                    </span>
-                  </div>
-                  {isWeekend && (
-                    <div style={{ fontSize: '11px', color: '#9EA0A3', marginTop: '6px', textAlign: 'center' }}>
-                      Prix week-end
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+              {isCheckIn(day) && <span className={styles.endpointBadge}>ARRIVÉE</span>}
+              {isCheckOut(day) && <span className={styles.endpointBadge}>DÉPART</span>}
+            </button>
           );
         })}
       </div>
@@ -505,6 +486,29 @@ function MonthGrid({
 // ═══════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════
+
+function toDateKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/** Compact cell label that still shows up to 6 digits without blowing the layout. */
+function formatCellPrice(price: number): string {
+  const n = Math.round(price);
+  if (n >= 1_000_000) return `${Math.round(n / 1000)}k`;
+  // Narrow no-break space for thousands (fr) — keeps 125000 → 125 000 readable
+  return n.toLocaleString('fr-FR').replace(/\u202f/g, '\u202f');
+}
+
+function priceDigitClass(price: number): string {
+  const digits = String(Math.round(Math.abs(price))).length;
+  if (digits >= 6) return styles.priceXl;
+  if (digits >= 5) return styles.priceLg;
+  if (digits >= 4) return styles.priceMd;
+  return '';
+}
 
 function generateMonthDays(month: Date): (Date | null)[] {
   const year = month.getFullYear();
@@ -519,12 +523,10 @@ function generateMonthDays(month: Date): (Date | null)[] {
 
   const days: (Date | null)[] = [];
 
-  // Add empty cells for days before month starts
   for (let i = 0; i < firstDayOfWeek; i++) {
     days.push(null);
   }
 
-  // Add all days of the month
   for (let date = 1; date <= lastDay.getDate(); date++) {
     days.push(new Date(year, monthIndex, date));
   }
