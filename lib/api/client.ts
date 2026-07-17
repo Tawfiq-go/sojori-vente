@@ -101,6 +101,27 @@ class ApiClient {
   }
 
   /**
+   * Scope marque blanche : quand un tenant est actif (?pm= persisté),
+   * les endpoints publics listing sont appelés avec pm=<slug> — le
+   * backend limite alors le catalogue aux annonces de ce PM (fail-closed).
+   */
+  private withTenantScope(endpoint: string): string {
+    if (typeof window === 'undefined') return endpoint;
+    if (!/\/listing\/public\/(listings|cities)|\/listings\/search/.test(endpoint)) return endpoint;
+    if (endpoint.includes('pm=')) return endpoint;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const fromUrl = params.get('pm');
+      const slug =
+        fromUrl && fromUrl !== 'off' ? fromUrl : localStorage.getItem('sojori_pm_preview');
+      if (!slug) return endpoint;
+      return `${endpoint}${endpoint.includes('?') ? '&' : '?'}pm=${encodeURIComponent(slug)}`;
+    } catch {
+      return endpoint;
+    }
+  }
+
+  /**
    * Generic fetch wrapper with error handling
    */
   private async fetchJson<T>(
@@ -108,7 +129,7 @@ class ApiClient {
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
     try {
-      const url = `${this.baseUrl}${endpoint}`;
+      const url = `${this.baseUrl}${this.withTenantScope(endpoint)}`;
       const response = await fetch(url, {
         ...options,
         headers: {
