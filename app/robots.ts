@@ -19,12 +19,14 @@ export default function robots(): MetadataRoute.Robots {
           '/checkout/*', // Don't index checkout pages
           '/profile', // Don't index user profiles
           '/wishlist', // Don't index wishlists
+          '/fail/*', // Transactional page, no SEO value
+          '/thankYou/*', // Transactional page, no SEO value
         ],
       },
       {
         userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/checkout/*', '/profile', '/wishlist'],
+        disallow: ['/api/', '/admin/', '/checkout/*', '/profile', '/wishlist', '/fail/*', '/thankYou/*'],
         crawlDelay: 0,
       },
       {

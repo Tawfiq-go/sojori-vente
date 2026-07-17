@@ -30,6 +30,9 @@ export function Navigation() {
         <Link href="/verified-hosts">Hôtes vérifiés</Link>
         <Link href="/experiences">Expériences</Link>
         <Link href="/become-host">Devenir hôte</Link>
+        <a href="https://business.sojori.com" target="_blank" rel="noopener noreferrer">
+          Pour les professionnels
+        </a>
       </div>
 
       <div className="nav-right">

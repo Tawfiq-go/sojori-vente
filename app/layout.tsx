@@ -78,8 +78,35 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: 'your-google-verification-code',
+};
+
+// Organization JSON-LD volontairement minimal — l'entité "Sojori" canonique vit sur
+// business.sojori.com (logiciel B2B). sojori.com n'est qu'un produit rattaché
+// (marketplace grand public), référencé ici via sameAs plutôt que dupliqué en detail
+// (adresse/contactPoint complets restent uniquement sur business.sojori.com).
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Sojori',
+  url: 'https://business.sojori.com',
+  sameAs: [
+    'https://sojori.com',
+    'https://www.linkedin.com/company/108488739',
+    'https://instagram.com/sojoriapp',
+  ],
+  description:
+    "Sojori est une entreprise de technologie hôtelière. sojori.com est sa marketplace de location courte durée au Maroc (riads, villas, appartements) ; business.sojori.com est sa plateforme de gestion locative pour property managers professionnels.",
+};
+
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Sojori',
+  url: 'https://sojori.com',
+  publisher: {
+    '@type': 'Organization',
+    name: 'Sojori',
+    url: 'https://business.sojori.com',
   },
 };
 
@@ -109,6 +136,14 @@ export default function RootLayout({
           <link
             href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap"
             rel="stylesheet"
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
           />
         </head>
         <body>
