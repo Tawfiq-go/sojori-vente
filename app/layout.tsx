@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/config/site';
 import { Instrument_Serif } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import ThemePreview from '@/components/ThemePreview';
@@ -21,7 +22,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://sojori.com'),
+  metadataBase: new URL(SITE_URL),
   title: 'Sojori · Séjours Premium au Maroc · Riads, Villas & Appartements',
   description:
     'Découvrez des riads, villas et appartements triés par des experts locaux. Marrakech, Essaouira, Fès, Casablanca. Biens vérifiés, recherche IA, Property Managers sélectionnés.',
@@ -44,20 +45,20 @@ export const metadata: Metadata = {
     'Sojori',
     'property management Maroc',
   ],
-  authors: [{ name: 'Sojori', url: 'https://sojori.com' }],
+  authors: [{ name: 'Sojori', url: SITE_URL }],
   creator: 'Sojori',
   publisher: 'Sojori',
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    url: 'https://sojori.com',
+    url: SITE_URL,
     title: 'Sojori · Séjours Premium au Maroc',
     description:
       'Riads, villas & appartements triés par des experts locaux. Marrakech, Essaouira, Fès, Casablanca.',
     siteName: 'Sojori',
     images: [
       {
-        url: 'https://sojori.com/og-image.jpg',
+        url: `${SITE_URL}/og-image.jpg`,
         width: 1200,
         height: 630,
         alt: 'Sojori - Séjours Premium au Maroc',
@@ -68,7 +69,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Sojori · Séjours Premium au Maroc',
     description: 'Riads, villas & appartements triés par des experts locaux.',
-    images: ['https://sojori.com/og-image.jpg'],
+    images: [`${SITE_URL}/og-image.jpg`],
     creator: '@sojori',
   },
   robots: {
@@ -94,7 +95,7 @@ const organizationJsonLd = {
   name: 'Sojori',
   url: 'https://business.sojori.com',
   sameAs: [
-    'https://sojori.com',
+    SITE_URL,
     'https://www.linkedin.com/company/108488739',
     'https://instagram.com/sojoriapp',
   ],
@@ -106,7 +107,7 @@ const websiteJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'Sojori',
-  url: 'https://sojori.com',
+  url: SITE_URL,
   publisher: {
     '@type': 'Organization',
     name: 'Sojori',

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/config/site';
 import { apiClient } from '@/lib/api/client';
 
 export async function generateMetadata({
@@ -17,7 +18,7 @@ export async function generateMetadata({
     listing.description ||
     `${listing.propertyType} à ${listing.city}, ${listing.bedrooms} chambres, jusqu'à ${listing.maxGuests} voyageurs.`
   ).slice(0, 160);
-  const url = `https://sojori.com/listings/${id}`;
+  const url = `${SITE_URL}/listings/${id}`;
 
   return {
     title,

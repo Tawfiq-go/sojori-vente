@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/config/site';
 import { apiClient } from '@/lib/api/client';
 
 export async function generateMetadata({
@@ -18,7 +19,7 @@ export async function generateMetadata({
     propertyManager.description ||
     `Property manager vérifié sur Sojori, ${listings.length} biens.`
   ).slice(0, 160);
-  const url = `https://sojori.com/pm/${slug}`;
+  const url = `${SITE_URL}/pm/${slug}`;
   const image = propertyManager.coverUrl || propertyManager.images?.[0];
 
   return {
