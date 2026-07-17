@@ -2,7 +2,7 @@
 
 /**
  * Mode preview des thèmes direct booking : `?theme=medina|riviera|desert`
- * applique le preset sur tout le site (persisté en localStorage pour
+ * applique le preset sur tout le site (persisté en sessionStorage pour
  * naviguer de page en page) ; `?theme=sojori` ou `?theme=off` revient au
  * défaut. Démo/vente uniquement — la résolution par domaine (multi-tenant)
  * remplacera ce mécanisme pour les vrais sites clients.
@@ -37,31 +37,31 @@ export default function ThemePreview() {
       const shape = params.get('shape')
       if (shape && SHAPES.includes(shape)) {
         if (shape === 'auto') {
-          localStorage.removeItem('sojori_shape_preview')
+          sessionStorage.removeItem('sojori_shape_preview')
           delete document.documentElement.dataset.shape
         } else {
-          localStorage.setItem('sojori_shape_preview', shape)
+          sessionStorage.setItem('sojori_shape_preview', shape)
           document.documentElement.dataset.shape = shape
         }
       } else {
-        const storedShape = localStorage.getItem('sojori_shape_preview')
+        const storedShape = sessionStorage.getItem('sojori_shape_preview')
         if (storedShape && SHAPES.includes(storedShape) && storedShape !== 'auto') {
           document.documentElement.dataset.shape = storedShape
         }
       }
 
       if (fromUrl === 'off' || fromUrl === 'sojori') {
-        localStorage.removeItem(STORAGE_KEY)
+        sessionStorage.removeItem(STORAGE_KEY)
         applyTheme('sojori')
         return
       }
       if (isThemeId(fromUrl)) {
-        localStorage.setItem(STORAGE_KEY, fromUrl)
+        sessionStorage.setItem(STORAGE_KEY, fromUrl)
         applyTheme(fromUrl)
         return
       }
 
-      const stored = localStorage.getItem(STORAGE_KEY)
+      const stored = sessionStorage.getItem(STORAGE_KEY)
       if (isThemeId(stored)) applyTheme(stored)
     } catch {
       // preview best-effort — jamais bloquant

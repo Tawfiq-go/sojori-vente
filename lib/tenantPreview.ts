@@ -40,14 +40,14 @@ export function getTenantSlug(): string | null {
     }
     const fromUrl = params.get('pm')
     if (fromUrl === 'off') {
-      localStorage.removeItem(SLUG_KEY)
+      sessionStorage.removeItem(SLUG_KEY)
       return null
     }
     if (fromUrl) {
-      localStorage.setItem(SLUG_KEY, fromUrl)
+      sessionStorage.setItem(SLUG_KEY, fromUrl)
       return fromUrl
     }
-    return localStorage.getItem(SLUG_KEY)
+    return sessionStorage.getItem(SLUG_KEY)
   } catch {
     return null
   }
