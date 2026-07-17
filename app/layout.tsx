@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Instrument_Serif } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
+import ThemePreview from '@/components/ThemePreview';
 import { frFR } from '@clerk/localizations';
 import { CurrencyProvider } from '@/context/CurrencyContext';
 import { clerkAppearance } from '@/lib/clerk/appearance';
@@ -147,6 +148,7 @@ export default function RootLayout({
           />
         </head>
         <body>
+          <ThemePreview />
           <CurrencyProvider>
             {children}
           </CurrencyProvider>
