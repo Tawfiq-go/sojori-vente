@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { fetchTenantPublic, getTenantSlug, type TenantPublic } from '@/lib/tenantPreview';
 import SiteFooterSocial from '@/components/SiteFooterSocial';
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -20,6 +21,16 @@ export default function HomePage() {
   const initialCheckOut = searchParams.get('checkOut') ? new Date(searchParams.get('checkOut')!) : null;
   const initialGuests = searchParams.get('guests') ? parseInt(searchParams.get('guests')!, 10) : 2;
   const initialCity = searchParams.get('city') || 'Marrakech';
+
+  // Tenant marque blanche (?pm=) : hero configurable + sections marketplace masquées
+  const [tenant, setTenant] = useState<TenantPublic | null>(null);
+  useEffect(() => {
+    const slug = getTenantSlug();
+    if (!slug) return;
+    void fetchTenantPublic(slug).then((pm) => {
+      if (pm) setTenant(pm);
+    });
+  }, []);
 
   const [aiPrompt, setAiPrompt] = useState('');
   const [location, setLocation] = useState(initialCity);
@@ -186,14 +197,21 @@ export default function HomePage() {
         <div className="hero-inner">
           <div className="hero-eyebrow">
             <span className="line"></span>
-            MAROC · SÉJOURS PREMIUM
+            {tenant?.directBooking?.heroEyebrow || 'MAROC · SÉJOURS PREMIUM'}
           </div>
 
           <h1>
-            Vivez le Maroc{' '}
-            <span className="it">autrement</span>
+            {tenant?.directBooking?.heroTitle ? (
+              <>{tenant.directBooking.heroTitle}</>
+            ) : (
+              <>
+                Vivez le Maroc{' '}
+                <span className="it">autrement</span>
+              </>
+            )}
             <span className="small">
-              Riads, villas & appartements triés par des experts locaux. Marrakech, Essaouira, Fès, Casablanca.
+              {tenant?.directBooking?.heroSubtitle ||
+                'Riads, villas & appartements triés par des experts locaux. Marrakech, Essaouira, Fès, Casablanca.'}
             </span>
           </h1>
 
@@ -663,27 +681,10 @@ export default function HomePage() {
             </div>
           </DropdownPortal>
 
-          {/* AI Suggestions */}
-          <div className="ai-suggestions">
-            <button className="ai-sug" onClick={() => handleSuggestionClick('Riad avec piscine médina Marrakech')}>
-              <span className="em">🏊</span>Riad avec piscine médina
-            </button>
-            <button className="ai-sug" onClick={() => handleSuggestionClick('Villa vue Atlas Marrakech')}>
-              <span className="em">🏔️</span>Villa vue Atlas
-            </button>
-            <button className="ai-sug" onClick={() => handleSuggestionClick('Bord de mer Essaouira')}>
-              <span className="em">🌊</span>Bord de mer Essaouira
-            </button>
-            <button className="ai-sug" onClick={() => handleSuggestionClick('Grand groupe 8+ personnes')}>
-              <span className="em">👨‍👩‍👧‍👦</span>Grand groupe 8+ personnes
-            </button>
-            <button className="ai-sug" onClick={() => handleSuggestionClick('Meilleur rapport qualité prix Marrakech')}>
-              <span className="em">💰</span>Meilleur rapport qualité/prix
-            </button>
-          </div>
         </div>
 
-        {/* Hero Stats */}
+        {/* Hero Stats — marketplace Sojori uniquement */}
+        {!tenant && (
         <div className="hero-stats">
           <div>
             <span className="hs-num">
@@ -704,10 +705,11 @@ export default function HomePage() {
             · 12 847 AVIS
           </div>
         </div>
+        )}
       </section>
 
-      {/* PROPERTY MANAGERS GRID */}
-      {propertyManagers.length > 0 && (
+      {/* PROPERTY MANAGERS GRID — marketplace Sojori uniquement */}
+      {!tenant && propertyManagers.length > 0 && (
       <section className="section">
         <div className="section-head">
           <div>
