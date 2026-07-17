@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { fetchTenantPublic, getTenantSlug, type TenantPublic } from '@/lib/tenantPreview';
 import { useWishlistStore } from '@/lib/store/useBookingStore';
 import { UserButton, useUser } from '@clerk/nextjs';
 import { CurrencySelector } from '@/components/CurrencySelector';
@@ -13,6 +15,18 @@ export function Navigation() {
   const wishlistCount = useWishlistStore((state) => state.items.length);
   const { isSignedIn, user } = useUser();
 
+  // Site client (marque blanche) : marque du PM + liens marketplace masqués
+  // (Hôtes vérifiés, Devenir hôte, Pour les professionnels sont du Sojori pur).
+  const [tenant, setTenant] = useState<TenantPublic | null>(null);
+  useEffect(() => {
+    const slug = getTenantSlug();
+    if (!slug) return;
+    void fetchTenantPublic(slug).then((pm) => {
+      if (pm) setTenant(pm);
+    });
+  }, []);
+  const tenantName = tenant?.directBooking?.siteName || tenant?.name || '';
+
   const handleLanguageSwitch = () => {
     // Mockup: Just alert for now
     alert('Changement de langue à venir');
@@ -21,18 +35,31 @@ export function Navigation() {
   return (
     <nav className="nav">
       <Link href="/" className="brand">
-        <span className="dot"></span>
-        sojori
+        {tenant?.vitrineLogoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={tenant.vitrineLogoUrl}
+            alt={tenantName}
+            style={{ height: 28, width: 'auto', borderRadius: 6 }}
+          />
+        ) : (
+          <span className="dot"></span>
+        )}
+        {tenant ? tenantName || 'sojori' : 'sojori'}
       </Link>
 
       <div className="nav-links">
         <Link href="/search">Destinations</Link>
-        <Link href="/verified-hosts">Hôtes vérifiés</Link>
-        <Link href="/experiences">Expériences</Link>
-        <Link href="/become-host">Devenir hôte</Link>
-        <a href="https://business.sojori.com" target="_blank" rel="noopener noreferrer">
-          Pour les professionnels
-        </a>
+        {!tenant && (
+          <>
+            <Link href="/verified-hosts">Hôtes vérifiés</Link>
+            <Link href="/experiences">Expériences</Link>
+            <Link href="/become-host">Devenir hôte</Link>
+            <a href="https://business.sojori.com" target="_blank" rel="noopener noreferrer">
+              Pour les professionnels
+            </a>
+          </>
+        )}
       </div>
 
       <div className="nav-right">

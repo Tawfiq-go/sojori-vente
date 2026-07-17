@@ -25,10 +25,28 @@ export default clerkMiddleware(async (auth, req) => {
   // via le cookie `pm_tenant` — sojori.com n'en pose jamais et reste la
   // marketplace. Le cookie étant par domaine, aucune fuite entre les deux.
   const tenant = await resolveTenantFromHost(req.headers.get('host'));
-  const res = NextResponse.next();
   if (tenant) {
+    // Routes 100 % marketplace Sojori (annuaire des PMs, recrutement, expériences)
+    // interdites sur un site client — retour à son accueil. Sa propre vitrine
+    // /pm/<slug> reste accessible.
+    const path = req.nextUrl.pathname;
+    const marketplaceOnly = /^\/(verified-hosts|become-host|experiences)(\/|$)/.test(path);
+    const foreignVitrine =
+      /^\/pm(\/|$)/.test(path) && !(path === `/pm/${tenant}` || path.startsWith(`/pm/${tenant}/`));
+    if (marketplaceOnly || foreignVitrine) {
+      const url = req.nextUrl.clone();
+      url.pathname = '/';
+      url.search = '';
+      const redirect = NextResponse.redirect(url);
+      redirect.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
+      return redirect;
+    }
+    const res = NextResponse.next();
     res.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
-  } else if (req.cookies.has(TENANT_COOKIE)) {
+    return res;
+  }
+  const res = NextResponse.next();
+  if (req.cookies.has(TENANT_COOKIE)) {
     res.cookies.delete(TENANT_COOKIE);
   }
   return res;

@@ -28,7 +28,11 @@ export default function HomePage() {
     const slug = getTenantSlug();
     if (!slug) return;
     void fetchTenantPublic(slug).then((pm) => {
-      if (pm) setTenant(pm);
+      if (pm) {
+        setTenant(pm);
+        const name = pm.directBooking?.siteName || pm.name;
+        if (name) document.title = `${name} · Réservation en direct`;
+      }
     });
   }, []);
 
@@ -1082,9 +1086,14 @@ export default function HomePage() {
           <div className="footer-top">
             <div>
               <div className="footer-brand">
-                <span className="dot"></span>sojori
+                <span className="dot"></span>
+                {tenant ? tenant.directBooking?.siteName || tenant.name : 'sojori'}
               </div>
-              <div className="footer-tag">Séjours premium au Maroc · Riads, villas & appartements · Sélection experte</div>
+              <div className="footer-tag">
+                {tenant
+                  ? 'Réservation en direct — meilleur prix garanti, sans commission de plateforme'
+                  : 'Séjours premium au Maroc · Riads, villas & appartements · Sélection experte'}
+              </div>
               <SiteFooterSocial />
             </div>
 
@@ -1098,15 +1107,17 @@ export default function HomePage() {
               </ul>
             </div>
 
-            <div className="footer-col">
-              <h4>Sojori</h4>
-              <ul>
-                <li><a href="#">À propos</a></li>
-                <li><Link href="/verified-hosts">Property Managers</Link></li>
-                <li><a href="#">Blog</a></li>
-                <li><a href="#">Carrières</a></li>
-              </ul>
-            </div>
+            {!tenant && (
+              <div className="footer-col">
+                <h4>Sojori</h4>
+                <ul>
+                  <li><a href="#">À propos</a></li>
+                  <li><Link href="/verified-hosts">Property Managers</Link></li>
+                  <li><a href="#">Blog</a></li>
+                  <li><a href="#">Carrières</a></li>
+                </ul>
+              </div>
+            )}
 
             <div className="footer-col">
               <h4>Support</h4>
@@ -1130,7 +1141,11 @@ export default function HomePage() {
           </div>
 
           <div className="footer-bottom">
-            <div>© 2026 Sojori · Tous droits réservés</div>
+            <div>
+              {tenant
+                ? `© 2026 ${tenant.directBooking?.siteName || tenant.name} · Propulsé par Sojori`
+                : '© 2026 Sojori · Tous droits réservés'}
+            </div>
             <div>🇫🇷 FRANÇAIS · 🇪🇺 EUR · 🇲🇦 MADE IN MOROCCO</div>
           </div>
         </div>
