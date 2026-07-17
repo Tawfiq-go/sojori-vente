@@ -17,6 +17,8 @@ const CACHE_MS = 5 * 60 * 1000
 export type TenantPublic = {
   slug: string
   name: string
+  logoText?: string
+  vitrineLogoUrl?: string
   brandColor?: { from?: string; to?: string }
   directBooking?: {
     siteName?: string
