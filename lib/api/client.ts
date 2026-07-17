@@ -110,10 +110,13 @@ class ApiClient {
     if (!/\/listing\/public\/(listings|cities)|\/listings\/search/.test(endpoint)) return endpoint;
     if (endpoint.includes('pm=')) return endpoint;
     try {
+      const cookieMatch = document.cookie.match(/(?:^|;\s*)pm_tenant=([^;]+)/);
+      const fromDomain = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
       const params = new URLSearchParams(window.location.search);
       const fromUrl = params.get('pm');
       const slug =
-        fromUrl && fromUrl !== 'off' ? fromUrl : sessionStorage.getItem('sojori_pm_preview');
+        fromDomain ||
+        (fromUrl && fromUrl !== 'off' ? fromUrl : sessionStorage.getItem('sojori_pm_preview'));
       if (!slug) return endpoint;
       return `${endpoint}${endpoint.includes('?') ? '&' : '?'}pm=${encodeURIComponent(slug)}`;
     } catch {
