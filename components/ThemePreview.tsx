@@ -33,6 +33,23 @@ export default function ThemePreview() {
       const params = new URLSearchParams(window.location.search)
       const fromUrl = params.get('theme')
 
+      const SHAPES = ['auto', 'arche', 'carre', 'arrondi', 'galbe']
+      const shape = params.get('shape')
+      if (shape && SHAPES.includes(shape)) {
+        if (shape === 'auto') {
+          localStorage.removeItem('sojori_shape_preview')
+          delete document.documentElement.dataset.shape
+        } else {
+          localStorage.setItem('sojori_shape_preview', shape)
+          document.documentElement.dataset.shape = shape
+        }
+      } else {
+        const storedShape = localStorage.getItem('sojori_shape_preview')
+        if (storedShape && SHAPES.includes(storedShape) && storedShape !== 'auto') {
+          document.documentElement.dataset.shape = storedShape
+        }
+      }
+
       if (fromUrl === 'off' || fromUrl === 'sojori') {
         localStorage.removeItem(STORAGE_KEY)
         applyTheme('sojori')
