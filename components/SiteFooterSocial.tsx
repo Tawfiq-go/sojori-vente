@@ -7,6 +7,7 @@
  * multi-tenant fournira le slug par domaine. Sans tenant : réseaux Sojori.
  */
 import { useEffect, useState } from 'react'
+import { getTenantSlug } from '@/lib/tenantPreview'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.sojori.com'
 
@@ -29,11 +30,7 @@ export default function SiteFooterSocial() {
 
   useEffect(() => {
     try {
-      const params = new URLSearchParams(window.location.search)
-      const fromUrl = params.get('pm')
-      if (fromUrl === 'off') sessionStorage.removeItem('sojori_pm_preview')
-      else if (fromUrl) sessionStorage.setItem('sojori_pm_preview', fromUrl)
-      const slug = fromUrl && fromUrl !== 'off' ? fromUrl : sessionStorage.getItem('sojori_pm_preview')
+      const slug = getTenantSlug()
       if (!slug) return
 
       void fetch(`${API_BASE}/api/v1/listing/public/property-managers/${encodeURIComponent(slug)}`)

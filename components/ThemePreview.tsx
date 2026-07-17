@@ -8,6 +8,8 @@
  * remplacera ce mécanisme pour les vrais sites clients.
  */
 import { useEffect } from 'react'
+import { readTenantCookie } from '@/lib/tenantDomains'
+import { fetchTenantPublic } from '@/lib/tenantPreview'
 import { THEME_PRESETS, isThemeId, type ThemeId } from '@/lib/themes/presets'
 
 const STORAGE_KEY = 'sojori_theme_preview'
@@ -62,7 +64,25 @@ export default function ThemePreview() {
       }
 
       const stored = sessionStorage.getItem(STORAGE_KEY)
-      if (isThemeId(stored)) applyTheme(stored)
+      if (isThemeId(stored)) {
+        applyTheme(stored)
+        return
+      }
+
+      // Domaine client (cookie du middleware) : appliquer le thème et la
+      // forme SAUVÉS dans la config direct booking du PM — le site du client
+      // porte sa charte sans aucun paramètre d'URL.
+      const domainSlug = readTenantCookie()
+      if (domainSlug) {
+        void fetchTenantPublic(domainSlug).then((pm) => {
+          const db = pm?.directBooking
+          if (!db) return
+          if (isThemeId(db.theme)) applyTheme(db.theme)
+          if (db.shape && SHAPES.includes(db.shape) && db.shape !== 'auto') {
+            document.documentElement.dataset.shape = db.shape
+          }
+        })
+      }
     } catch {
       // preview best-effort — jamais bloquant
     }

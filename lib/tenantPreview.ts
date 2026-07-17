@@ -7,6 +7,8 @@
  * consommateurs (hero, footer, sections) resteront identiques.
  */
 
+import { readTenantCookie } from './tenantDomains'
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.sojori.com'
 const SLUG_KEY = 'sojori_pm_preview'
 const CACHE_KEY = 'sojori_pm_public_cache'
@@ -29,6 +31,9 @@ export type TenantPublic = {
 
 export function getTenantSlug(): string | null {
   try {
+    // Domaine client : le tenant est imposé par le middleware (non débrayable).
+    const fromDomain = readTenantCookie()
+    if (fromDomain) return fromDomain
     const params = new URLSearchParams(window.location.search)
     // ?fresh=1 (studio d'aperçu du dashboard) : ignorer le cache config
     if (params.has('fresh')) {
