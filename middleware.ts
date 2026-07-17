@@ -24,7 +24,7 @@ export default clerkMiddleware(async (auth, req) => {
   // Marque blanche : un domaine client (ex. siyahai.com) impose son tenant
   // via le cookie `pm_tenant` — sojori.com n'en pose jamais et reste la
   // marketplace. Le cookie étant par domaine, aucune fuite entre les deux.
-  const tenant = resolveTenantFromHost(req.headers.get('host'));
+  const tenant = await resolveTenantFromHost(req.headers.get('host'));
   const res = NextResponse.next();
   if (tenant) {
     res.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
