@@ -113,7 +113,7 @@ class ApiClient {
       const params = new URLSearchParams(window.location.search);
       const fromUrl = params.get('pm');
       const slug =
-        fromUrl && fromUrl !== 'off' ? fromUrl : localStorage.getItem('sojori_pm_preview');
+        fromUrl && fromUrl !== 'off' ? fromUrl : sessionStorage.getItem('sojori_pm_preview');
       if (!slug) return endpoint;
       return `${endpoint}${endpoint.includes('?') ? '&' : '?'}pm=${encodeURIComponent(slug)}`;
     } catch {

@@ -31,9 +31,9 @@ export default function SiteFooterSocial() {
     try {
       const params = new URLSearchParams(window.location.search)
       const fromUrl = params.get('pm')
-      if (fromUrl === 'off') localStorage.removeItem('sojori_pm_preview')
-      else if (fromUrl) localStorage.setItem('sojori_pm_preview', fromUrl)
-      const slug = fromUrl && fromUrl !== 'off' ? fromUrl : localStorage.getItem('sojori_pm_preview')
+      if (fromUrl === 'off') sessionStorage.removeItem('sojori_pm_preview')
+      else if (fromUrl) sessionStorage.setItem('sojori_pm_preview', fromUrl)
+      const slug = fromUrl && fromUrl !== 'off' ? fromUrl : sessionStorage.getItem('sojori_pm_preview')
       if (!slug) return
 
       void fetch(`${API_BASE}/api/v1/listing/public/property-managers/${encodeURIComponent(slug)}`)
