@@ -62,8 +62,9 @@ const nextConfig: NextConfig = {
             value: 'nosniff',
           },
           {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            key: 'Content-Security-Policy',
+            value:
+              "frame-ancestors 'self' https://app.sojori.com http://127.0.0.1:3001 http://localhost:3001",
           },
           {
             key: 'X-XSS-Protection',

@@ -1,0 +1,98 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Langage de formes des thèmes direct booking (data-theme / data-shape
+   posés sur <html> par ThemePreview, demain par le middleware tenant).
+
+   Chaque thème définit :  --r-visual (rayon des visuels/cartes photos),
+   --r-btn (boutons), --font-display (titres) + une matière de fond.
+   L'option « forme des visuels » (data-shape) prime sur le thème.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --r-visual: 16px;
+  --r-btn: 12px;
+  --font-display: inherit;
+}
+
+/* ── Médina — porte marocaine, pilules safran, serif, zellige discret ── */
+[data-theme='medina'] {
+  --r-visual: 46% 46% 14px 14px / 34% 34% 14px 14px;
+  --r-btn: 999px;
+  --font-display: var(--serif);
+}
+
+[data-theme='medina'] body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cpath d='M28 4l6 18h18l-14 11 5 19-15-12-15 12 5-19L4 22h18z' fill='%239a3412' fill-opacity='0.028'/%3E%3C/svg%3E");
+}
+
+[data-theme='medina'] main h1,
+[data-theme='medina'] main h2 {
+  font-family: var(--font-display);
+  letter-spacing: 0;
+}
+
+/* ── Riviera — angles francs, filets, capitales espacées ── */
+[data-theme='riviera'] {
+  --r-visual: 0px;
+  --r-btn: 2px;
+  --font-display: var(--sans);
+}
+
+[data-theme='riviera'] main h2 {
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 500;
+}
+
+[data-theme='riviera'] main h1 {
+  letter-spacing: 0.02em;
+}
+
+/* ── Désert — douceur, graisse légère, silence ── */
+[data-theme='desert'] {
+  --r-visual: 14px;
+  --r-btn: 10px;
+  --font-display: var(--sans);
+}
+
+[data-theme='desert'] main h1,
+[data-theme='desert'] main h2 {
+  font-weight: 300;
+  letter-spacing: 0.01em;
+}
+
+/* ── Forme des visuels à la carte — prime sur le preset ── */
+[data-shape='arche'] {
+  --r-visual: 46% 46% 14px 14px / 34% 34% 14px 14px;
+}
+
+[data-shape='carre'] {
+  --r-visual: 0px;
+}
+
+[data-shape='arrondi'] {
+  --r-visual: 16px;
+}
+
+[data-shape='galbe'] {
+  --r-visual: 28px;
+}
+
+/* ── Application du langage de formes ─────────────────────────────────
+   Active dès qu'un thème non-Sojori OU une forme explicite est posé.  */
+[data-theme]:not([data-theme='sojori']) main [class*='photo'],
+[data-theme]:not([data-theme='sojori']) main [class*='card'] > img,
+[data-theme]:not([data-theme='sojori']) main [class*='card'] picture img,
+[data-theme]:not([data-theme='sojori']) main [class*='cover'],
+[data-shape]:not([data-shape='auto']) main [class*='photo'],
+[data-shape]:not([data-shape='auto']) main [class*='card'] > img,
+[data-shape]:not([data-shape='auto']) main [class*='card'] picture img,
+[data-shape]:not([data-shape='auto']) main [class*='cover'] {
+  border-radius: var(--r-visual);
+  overflow: hidden;
+}
+
+[data-theme]:not([data-theme='sojori']) main button:not([class*='icon']):not([aria-label]),
+[data-theme]:not([data-theme='sojori']) main a[class*='btn'],
+[data-theme]:not([data-theme='sojori']) main [class*='cta'] {
+  border-radius: var(--r-btn);
+}

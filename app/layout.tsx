@@ -6,6 +6,7 @@ import { frFR } from '@clerk/localizations';
 import { CurrencyProvider } from '@/context/CurrencyContext';
 import { clerkAppearance } from '@/lib/clerk/appearance';
 import './globals.css';
+import './themes.css';
 import './homepage.css';
 
 /** Vercel prod : évite prerender statique (useSearchParams / Clerk sur plusieurs pages). */
