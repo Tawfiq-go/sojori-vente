@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import SiteFooterSocial from '@/components/SiteFooterSocial';
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Navigation } from '@/components/Navigation';
@@ -1082,12 +1083,7 @@ export default function HomePage() {
                 <span className="dot"></span>sojori
               </div>
               <div className="footer-tag">Séjours premium au Maroc · Riads, villas & appartements · Sélection experte</div>
-              <div className="footer-social">
-                <button className="fs-ic">📘</button>
-                <button className="fs-ic">📷</button>
-                <button className="fs-ic">✕</button>
-                <button className="fs-ic">📺</button>
-              </div>
+              <SiteFooterSocial />
             </div>
 
             <div className="footer-col">
