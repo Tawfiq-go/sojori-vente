@@ -21,9 +21,11 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://sojori.com'),
   title: 'Sojori · Séjours Premium au Maroc · Riads, Villas & Appartements',
   description:
     'Découvrez des riads, villas et appartements triés par des experts locaux. Marrakech, Essaouira, Fès, Casablanca. Biens vérifiés, recherche IA, Property Managers sélectionnés.',
+  alternates: { canonical: '/' },
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
