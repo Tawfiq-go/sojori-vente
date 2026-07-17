@@ -9,8 +9,25 @@
  */
 import { useEffect } from 'react'
 import { readTenantCookie } from '@/lib/tenantDomains'
-import { fetchTenantPublic } from '@/lib/tenantPreview'
+import { fetchTenantPublic, getTenantSlug, type TenantPublic } from '@/lib/tenantPreview'
 import { THEME_PRESETS, isThemeId, type ThemeId } from '@/lib/themes/presets'
+
+/** Marque du tenant dans l'onglet : favicon = logo du PM, titre = nom du site.
+ *  Ne remplace le titre que s'il porte encore la marque Sojori par défaut
+ *  (les pages annonce gardent leur titre spécifique). */
+function applyTenantBrand(pm: TenantPublic) {
+  const name = pm.directBooking?.siteName || pm.name
+  if (name && document.title.startsWith('Sojori')) {
+    document.title = `${name} · Réservation en direct`
+  }
+  if (pm.vitrineLogoUrl) {
+    for (const l of Array.from(document.querySelectorAll("link[rel*='icon']"))) l.remove()
+    const link = document.createElement('link')
+    link.rel = 'icon'
+    link.href = pm.vitrineLogoUrl
+    document.head.appendChild(link)
+  }
+}
 
 const STORAGE_KEY = 'sojori_theme_preview'
 
@@ -34,6 +51,15 @@ export default function ThemePreview() {
     try {
       const params = new URLSearchParams(window.location.search)
       const fromUrl = params.get('theme')
+
+      // Tenant actif (domaine client ou preview ?pm=) : favicon + titre à sa marque,
+      // sur toutes les pages.
+      const tenantSlug = getTenantSlug()
+      if (tenantSlug) {
+        void fetchTenantPublic(tenantSlug).then((pm) => {
+          if (pm) applyTenantBrand(pm)
+        })
+      }
 
       const SHAPES = ['auto', 'arche', 'carre', 'arrondi', 'galbe']
       const shape = params.get('shape')
