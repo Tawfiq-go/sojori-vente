@@ -30,6 +30,14 @@ export type TenantPublic = {
 export function getTenantSlug(): string | null {
   try {
     const params = new URLSearchParams(window.location.search)
+    // ?fresh=1 (studio d'aperçu du dashboard) : ignorer le cache config
+    if (params.has('fresh')) {
+      try {
+        sessionStorage.removeItem(CACHE_KEY)
+      } catch {
+        // best-effort
+      }
+    }
     const fromUrl = params.get('pm')
     if (fromUrl === 'off') {
       localStorage.removeItem(SLUG_KEY)
