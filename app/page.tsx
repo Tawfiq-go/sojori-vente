@@ -24,9 +24,14 @@ export default function HomePage() {
 
   // Tenant marque blanche (?pm=) : hero configurable + sections marketplace masquées
   const [tenant, setTenant] = useState<TenantPublic | null>(null);
+  // Scope tenant actif (?pm= ou domaine client) : les sections marketplace
+  // disparaissent même si la config publique n'est pas (encore) chargeable —
+  // un nouveau client sans config ne doit JAMAIS voir le look sojori.com.
+  const [tenantActive, setTenantActive] = useState(false);
   useEffect(() => {
     const slug = getTenantSlug();
     if (!slug) return;
+    setTenantActive(true);
     void fetchTenantPublic(slug).then((pm) => {
       if (pm) {
         setTenant(pm);
@@ -688,7 +693,7 @@ export default function HomePage() {
         </div>
 
         {/* Hero Stats — marketplace Sojori uniquement */}
-        {!tenant && (
+        {!tenantActive && (
         <div className="hero-stats">
           <div>
             <span className="hs-num">
@@ -713,7 +718,7 @@ export default function HomePage() {
       </section>
 
       {/* PROPERTY MANAGERS GRID — marketplace Sojori uniquement */}
-      {!tenant && propertyManagers.length > 0 && (
+      {!tenantActive && propertyManagers.length > 0 && (
       <section className="section">
         <div className="section-head">
           <div>
@@ -1107,7 +1112,7 @@ export default function HomePage() {
               </ul>
             </div>
 
-            {!tenant && (
+            {!tenantActive && (
               <div className="footer-col">
                 <h4>Sojori</h4>
                 <ul>
