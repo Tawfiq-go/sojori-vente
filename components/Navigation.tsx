@@ -41,7 +41,7 @@ export function Navigation() {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={tenant.vitrineLogoUrl}
-            alt={tenantName}
+            alt=""
             style={{ height: 28, width: 'auto', borderRadius: 6 }}
           />
         ) : (
@@ -58,9 +58,11 @@ export function Navigation() {
         {!tenantActive && <Link href="/verified-hosts">Hôtes vérifiés</Link>}
         <Link href="/experiences">Expériences</Link>
         <Link href="/become-host">Devenir hôte</Link>
-        <a href="https://business.sojori.com" target="_blank" rel="noopener noreferrer">
-          Pour les professionnels
-        </a>
+        {!tenantActive && (
+          <a href="https://business.sojori.com" target="_blank" rel="noopener noreferrer">
+            Pour les professionnels
+          </a>
+        )}
       </div>
 
       <div className="nav-right">
