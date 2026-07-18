@@ -18,9 +18,11 @@ export function Navigation() {
   // Site client (marque blanche) : marque du PM + liens marketplace masqués
   // (Hôtes vérifiés, Devenir hôte, Pour les professionnels sont du Sojori pur).
   const [tenant, setTenant] = useState<TenantPublic | null>(null);
+  const [tenantActive, setTenantActive] = useState(false);
   useEffect(() => {
     const slug = getTenantSlug();
     if (!slug) return;
+    setTenantActive(true);
     void fetchTenantPublic(slug).then((pm) => {
       if (pm) setTenant(pm);
     });
@@ -50,16 +52,15 @@ export function Navigation() {
 
       <div className="nav-links">
         <Link href="/search">Destinations</Link>
-        {!tenant && (
-          <>
-            <Link href="/verified-hosts">Hôtes vérifiés</Link>
-            <Link href="/experiences">Expériences</Link>
-            <Link href="/become-host">Devenir hôte</Link>
-            <a href="https://business.sojori.com" target="_blank" rel="noopener noreferrer">
-              Pour les professionnels
-            </a>
-          </>
-        )}
+        {/* Annuaire des PMs : sojori.com uniquement. Expériences (celles du PM
+            plus tard), Devenir hôte et Pour les professionnels restent partout
+            (acquisition de nouveaux PMs). */}
+        {!tenantActive && <Link href="/verified-hosts">Hôtes vérifiés</Link>}
+        <Link href="/experiences">Expériences</Link>
+        <Link href="/become-host">Devenir hôte</Link>
+        <a href="https://business.sojori.com" target="_blank" rel="noopener noreferrer">
+          Pour les professionnels
+        </a>
       </div>
 
       <div className="nav-right">

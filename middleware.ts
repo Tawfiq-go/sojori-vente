@@ -30,7 +30,7 @@ export default clerkMiddleware(async (auth, req) => {
     // interdites sur un site client — retour à son accueil. Sa propre vitrine
     // /pm/<slug> reste accessible.
     const path = req.nextUrl.pathname;
-    const marketplaceOnly = /^\/(verified-hosts|become-host|experiences)(\/|$)/.test(path);
+    const marketplaceOnly = /^\/verified-hosts(\/|$)/.test(path);
     const foreignVitrine =
       /^\/pm(\/|$)/.test(path) && !(path === `/pm/${tenant}` || path.startsWith(`/pm/${tenant}/`));
     if (marketplaceOnly || foreignVitrine) {
