@@ -108,6 +108,10 @@ export default function ListingPage() {
   const [showSubnav, setShowSubnav] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('Basic');
   const [showAllReviews, setShowAllReviews] = useState(false);
+  // Galerie photos plein écran (lightbox) — « Voir les N photos » ou clic sur
+  // n'importe quelle photo de la grille.
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
   const [intervalMinPrice, setIntervalMinPrice] = useState<number | null>(null);
   const [similarListings, setSimilarListings] = useState<Listing[]>([]);
   const [pricingLoading, setPricingLoading] = useState(false);
@@ -117,6 +121,30 @@ export default function ListingPage() {
       ? (priceBreakdown.nights ??
         (priceBreakdown.baseNights ?? 0) + (priceBreakdown.weekendNights ?? 0))
       : 0;
+
+  // Lightbox : clavier (Échap / ← →) + verrouillage du scroll de la page.
+  const galleryImages = listing?.images ?? [];
+  useEffect(() => {
+    if (!galleryOpen) return;
+    const total = galleryImages.length;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setGalleryOpen(false);
+      if (e.key === 'ArrowRight') setGalleryIndex((i) => (i + 1) % total);
+      if (e.key === 'ArrowLeft') setGalleryIndex((i) => (i - 1 + total) % total);
+    };
+    window.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [galleryOpen, galleryImages.length]);
+
+  const openGallery = (index: number) => {
+    setGalleryIndex(index);
+    setGalleryOpen(true);
+  };
 
   const displayNightlyPrice = (() => {
     if (priceBreakdown && selectedNights > 0 && priceBreakdown.subtotal > 0) {
@@ -469,7 +497,9 @@ export default function ListingPage() {
           <div className={styles.gallery}>
             <div
               className={`${styles.g} ${styles.main}`}
+              onClick={() => openGallery(0)}
               style={{
+                cursor: 'pointer',
                 backgroundImage: `url(${listing.images[0]})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
@@ -481,7 +511,9 @@ export default function ListingPage() {
             {listing.images[1] && (
               <div
                 className={`${styles.g} ${styles.b}`}
+                onClick={() => openGallery(1)}
                 style={{
+                  cursor: 'pointer',
                   backgroundImage: `url(${listing.images[1]})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
@@ -493,7 +525,9 @@ export default function ListingPage() {
             {listing.images[2] && (
               <div
                 className={`${styles.g} ${styles.c}`}
+                onClick={() => openGallery(2)}
                 style={{
+                  cursor: 'pointer',
                   backgroundImage: `url(${listing.images[2]})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
@@ -505,7 +539,9 @@ export default function ListingPage() {
             {listing.images[3] && (
               <div
                 className={`${styles.g} ${styles.d}`}
+                onClick={() => openGallery(3)}
                 style={{
+                  cursor: 'pointer',
                   backgroundImage: `url(${listing.images[3]})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
@@ -517,14 +553,22 @@ export default function ListingPage() {
             {listing.images[4] && (
               <div
                 className={`${styles.g} ${styles.e}`}
+                onClick={() => openGallery(4)}
                 style={{
+                  cursor: 'pointer',
                   backgroundImage: `url(${listing.images[4]})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
               >
                 <div className={styles.grain}></div>
-                <span className={styles.allPhotos}>
+                <span
+                  className={styles.allPhotos}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openGallery(0);
+                  }}
+                >
                   ⊞ Voir les {listing.images.length} photos
                 </span>
               </div>
@@ -544,6 +588,146 @@ export default function ListingPage() {
               fontSize: '18px'
             }}>
               📷 Pas de photo disponible
+            </div>
+          </div>
+        )}
+
+        {/* ─── LIGHTBOX PHOTOS ─── */}
+        {galleryOpen && galleryImages.length > 0 && (
+          <div
+            onClick={() => setGalleryOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 1000,
+              background: 'rgba(12, 10, 8, 0.94)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+            }}
+          >
+            <button
+              onClick={() => setGalleryOpen(false)}
+              aria-label="Fermer"
+              style={{
+                position: 'absolute',
+                top: 18,
+                right: 22,
+                fontSize: 26,
+                color: '#fff',
+                background: 'rgba(255,255,255,0.12)',
+                border: 'none',
+                borderRadius: 999,
+                width: 44,
+                height: 44,
+                cursor: 'pointer',
+              }}
+            >
+              ✕
+            </button>
+            <div
+              style={{
+                position: 'absolute',
+                top: 26,
+                left: 24,
+                color: 'rgba(255,255,255,0.85)',
+                fontSize: 14,
+                letterSpacing: '0.06em',
+              }}
+            >
+              {galleryIndex + 1} / {galleryImages.length}
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setGalleryIndex((i) => (i - 1 + galleryImages.length) % galleryImages.length);
+              }}
+              aria-label="Photo précédente"
+              style={{
+                position: 'absolute',
+                left: 12,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                fontSize: 22,
+                color: '#fff',
+                background: 'rgba(255,255,255,0.12)',
+                border: 'none',
+                borderRadius: 999,
+                width: 48,
+                height: 48,
+                cursor: 'pointer',
+              }}
+            >
+              ←
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setGalleryIndex((i) => (i + 1) % galleryImages.length);
+              }}
+              aria-label="Photo suivante"
+              style={{
+                position: 'absolute',
+                right: 12,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                fontSize: 22,
+                color: '#fff',
+                background: 'rgba(255,255,255,0.12)',
+                border: 'none',
+                borderRadius: 999,
+                width: 48,
+                height: 48,
+                cursor: 'pointer',
+              }}
+            >
+              →
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={galleryImages[galleryIndex]}
+              alt={`Photo ${galleryIndex + 1}`}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                maxWidth: 'min(92vw, 1200px)',
+                maxHeight: '74vh',
+                objectFit: 'contain',
+                borderRadius: 10,
+                boxShadow: '0 20px 80px rgba(0,0,0,0.55)',
+              }}
+            />
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                display: 'flex',
+                gap: 8,
+                marginTop: 16,
+                maxWidth: '92vw',
+                overflowX: 'auto',
+                padding: '4px 2px',
+              }}
+            >
+              {galleryImages.map((img, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={img + i}
+                  src={img}
+                  alt={`Miniature ${i + 1}`}
+                  onClick={() => setGalleryIndex(i)}
+                  style={{
+                    width: 74,
+                    height: 52,
+                    objectFit: 'cover',
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                    flex: '0 0 auto',
+                    opacity: i === galleryIndex ? 1 : 0.45,
+                    outline: i === galleryIndex ? '2px solid #fff' : 'none',
+                  }}
+                />
+              ))}
             </div>
           </div>
         )}
