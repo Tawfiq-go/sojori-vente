@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { TENANT_COOKIE, resolveTenantFromHost } from '@/lib/tenantDomains';
+import { TENANT_COOKIE, lastResolveDebug, resolveTenantFromHost } from '@/lib/tenantDomains';
 
 /** Seules ces routes exigent une session — tout le reste (homepage, listings…) reste public. */
 const isProtectedRoute = createRouteMatcher(['/profile(.*)']);
@@ -43,9 +43,11 @@ export default clerkMiddleware(async (auth, req) => {
     }
     const res = NextResponse.next();
     res.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
+    res.headers.set('x-pm-resolve', lastResolveDebug || 'static');
     return res;
   }
   const res = NextResponse.next();
+  res.headers.set('x-pm-resolve', lastResolveDebug || 'none');
   if (req.cookies.has(TENANT_COOKIE)) {
     res.cookies.delete(TENANT_COOKIE);
   }

@@ -14,10 +14,14 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.sojori.com
 export const TENANT_DOMAINS: Record<string, string> = {
   'siyahai.com': 'sojori-collection',
   'www.siyahai.com': 'sojori-collection',
+  'daraway.com': 'daraway',
+  'www.daraway.com': 'daraway',
 }
 
 /** Hôtes qui ne sont JAMAIS des tenants — sojori.com reste la marketplace. */
 const OWN_HOSTS = /(^|\.)sojori\.com$|\.vercel\.app$|^localhost$|^127\.0\.0\.1$/
+
+export let lastResolveDebug = ''
 
 type CacheEntry = { slug: string | null; at: number }
 const CACHE_MS = 5 * 60 * 1000
@@ -45,13 +49,17 @@ export async function resolveTenantFromHost(
     if (res.ok) {
       const body = (await res.json()) as { data?: { slug?: string } }
       slug = String(body?.data?.slug || '').trim() || null
+      lastResolveDebug = `ok:${res.status}:${slug}`
     } else if (res.status === 404) {
       slug = null
+      lastResolveDebug = `404`
     } else {
       slug = TENANT_DOMAINS[clean] ?? null
+      lastResolveDebug = `http:${res.status}`
     }
-  } catch {
+  } catch (err) {
     slug = TENANT_DOMAINS[clean] ?? null
+    lastResolveDebug = `err:${err instanceof Error ? err.message.slice(0, 60) : 'unknown'}`
   }
 
   domainCache.set(clean, { slug, at: Date.now() })
