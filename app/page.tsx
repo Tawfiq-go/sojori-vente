@@ -753,18 +753,20 @@ export default function HomePage() {
               <div className="overlay"></div>
               <div className="grain"></div>
               {pm.verified && <div className={`badge${idx === 0 ? ' gold' : ''}`}>✓ VÉRIFIÉ</div>}
+              {/* Logo discret en coin (sous le badge Vérifié s'il est présent) —
+                  jamais dans le bloc de contenu, pour ne pas concurrencer le nom. */}
+              <div className="logo">
+                {pm.vitrineLogoUrl ? (
+                  <img
+                    src={pm.vitrineLogoUrl}
+                    alt=""
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  />
+                ) : (
+                  pm.logoText || pm.name.slice(0, 2).toUpperCase()
+                )}
+              </div>
               <div className="content">
-                <div className="logo">
-                  {pm.vitrineLogoUrl ? (
-                    <img
-                      src={pm.vitrineLogoUrl}
-                      alt=""
-                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                    />
-                  ) : (
-                    pm.logoText || pm.name.slice(0, 2).toUpperCase()
-                  )}
-                </div>
                 <div className="nm">
                   {pm.name.split(' ')[0]} <span className="it">{pm.name.split(' ').slice(1).join(' ')}</span>
                 </div>
