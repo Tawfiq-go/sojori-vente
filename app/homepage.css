@@ -1233,34 +1233,37 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, #fde68a, #d97706);
+  background-image: url(https://storage.googleapis.com/seraphic-vertex-474520-b8-listings-images/MS/images/cities/dest-marrakech.jpg);
+  background-size: cover;
+  background-position: center;
 }
 
 .cs-card.casa .bg {
-  background: linear-gradient(135deg, #fda4af, #dc2626);
+  background: url(https://storage.googleapis.com/seraphic-vertex-474520-b8-listings-images/MS/images/cities/dest-casablanca.jpg) center/cover no-repeat, linear-gradient(135deg, #fda4af, #dc2626);
 }
 
 .cs-card.fes .bg {
-  background: linear-gradient(135deg, #c4b5fd, #7c3aed);
+  background: url(https://storage.googleapis.com/seraphic-vertex-474520-b8-listings-images/MS/images/cities/dest-fes.jpg) center/cover no-repeat, linear-gradient(135deg, #c4b5fd, #7c3aed);
 }
 
 .cs-card.ess .bg {
-  background: linear-gradient(135deg, #a5f3fc, #0e7490);
+  background: url(https://storage.googleapis.com/seraphic-vertex-474520-b8-listings-images/MS/images/cities/dest-essaouira.jpg) center/cover no-repeat, linear-gradient(135deg, #a5f3fc, #0e7490);
 }
 
 .cs-card.tng .bg {
-  background: linear-gradient(135deg, #86efac, #15803d);
+  background: url(https://storage.googleapis.com/seraphic-vertex-474520-b8-listings-images/MS/images/cities/dest-tanger.jpg) center/cover no-repeat, linear-gradient(135deg, #86efac, #15803d);
 }
 
 .cs-card.chf .bg {
-  background: linear-gradient(135deg, #93c5fd, #1d4ed8);
+  background: url(https://storage.googleapis.com/seraphic-vertex-474520-b8-listings-images/MS/images/cities/dest-chefchaouen.jpg) center/cover no-repeat, linear-gradient(135deg, #93c5fd, #1d4ed8);
 }
 
 .cs-card.fes2 .bg {
-  background: linear-gradient(135deg, #fcd34d, #a16207);
+  background: url(https://storage.googleapis.com/seraphic-vertex-474520-b8-listings-images/MS/images/cities/dest-agadir.jpg) center/cover no-repeat, linear-gradient(135deg, #fcd34d, #a16207);
 }
 
 .cs-card.ouar .bg {
-  background: linear-gradient(135deg, #fb923c, #c2410c);
+  background: url(https://storage.googleapis.com/seraphic-vertex-474520-b8-listings-images/MS/images/cities/dest-ouarzazate.jpg) center/cover no-repeat, linear-gradient(135deg, #fb923c, #c2410c);
 }
 
 .cs-card .overlay {
