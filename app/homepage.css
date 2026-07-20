@@ -406,7 +406,7 @@
 .brand-card.featured .logo{top:16px;right:16px;bottom:auto;width:52px;height:52px;font-size:23px;border-radius:13px}
 .brand-card.featured .content{padding:30px}
 .brand-card.featured .nm{font-size:40px}
-.brand-card.featured .quote{font-family:var(--serif);font-style:italic;font-size:23px;line-height:1.32;color:#f4ecdb;margin-top:14px;max-width:34ch;text-wrap:pretty}
+.brand-card.featured .quote{font-family:var(--serif);font-style:italic;font-size:23px;line-height:1.32;color:#f4ecdb;margin-top:14px;max-width:34ch;text-wrap:pretty;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .brand-card.featured .quote::before{content:'\201C';color:var(--goldS)}
 .brand-card.featured .quote::after{content:'\201D';color:var(--goldS)}
 .brand-card .hoods{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
@@ -421,6 +421,9 @@
 @media(max-width:560px){
   .brands-section{padding:48px 18px 60px}.brands-section h2{font-size:34px}
   .brands-grid{grid-template-columns:1fr}.brand-card.featured{grid-column:auto}
+  .brand-card.featured .nm{font-size:30px;padding-right:64px}
+  .brand-card.featured .quote{font-size:18px;-webkit-line-clamp:3}
+  .brand-card .nm{padding-right:56px}
 }
 
 /* Carousel */
