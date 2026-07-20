@@ -370,190 +370,57 @@
   color: var(--paper);
 }
 
-/* Brands Grid */
-.brands-grid {
-  display: grid;
-  grid-template-columns: 1.8fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 14px;
-  height: 540px;
-}
+/* Brands Section — Partenaires sélectionnés (redesign éditorial) */
+.brands-section{max-width:1200px;margin:0 auto;padding:72px 32px 90px}
+.brands-section .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:34px}
+.brands-section .kick{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.brands-section h2{font-family:var(--serif);font-weight:400;font-size:46px;line-height:1;letter-spacing:-.01em}
+.brands-section h2 em{font-style:italic}
+.brands-section .aside{font-size:14px;color:var(--ink3,#7a7264);max-width:280px;text-align:right;line-height:1.5}
 
-.brand-card {
-  position: relative;
-  border-radius: 24px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.25s;
-  background: linear-gradient(135deg, #fde68a, #d97706);
-}
+.brands-grid{display:grid;grid-template-columns:1.7fr 1fr 1fr;grid-auto-rows:1fr;gap:16px}
+.brand-card{position:relative;border-radius:18px;overflow:hidden;isolation:isolate;min-height:236px;display:flex;flex-direction:column;justify-content:flex-end;transition:transform .18s ease,box-shadow .18s ease;box-shadow:0 1px 2px rgba(26,22,16,.06)}
+.brand-card:hover{transform:translateY(-3px);box-shadow:0 22px 44px -22px rgba(26,22,16,.5)}
+.brand-card:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.brand-card .bg{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center}
+.brand-card .overlay{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(16,13,8,.15),rgba(16,13,8,.55) 58%,rgba(16,13,8,.9))}
+.brand-card .accent{position:absolute;left:0;right:0;bottom:0;height:3px;z-index:1;transform:scaleX(.4);transform-origin:left;transition:transform .2s ease}
+.brand-card:hover .accent{transform:scaleX(1)}
 
-.brand-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 24px 48px -12px rgba(15, 16, 17, 0.2);
-}
+.brand-card .badge{position:absolute;top:16px;left:16px;z-index:2;display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1a1610;background:linear-gradient(135deg,var(--goldS),var(--gold));padding:5px 10px;border-radius:99px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.brand-card .spec{position:absolute;top:16px;right:16px;z-index:2;max-width:52%;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#f3ecdd;background:rgba(255,255,255,.12);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.2);padding:4px 10px;border-radius:99px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-card .logo{position:absolute;bottom:16px;right:16px;z-index:2;width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:19px;color:#1a1610;background:linear-gradient(135deg,#fff,#f0e7d3);box-shadow:0 4px 12px rgba(0,0,0,.28);object-fit:cover}
+.brand-card .logo-img{background:#fff}
 
-.brand-card.featured {
-  grid-row: 1/3;
-}
+.brand-card .content{position:relative;z-index:2;padding:20px}
+.brand-card .nm{font-family:var(--serif);font-style:italic;font-weight:400;font-size:25px;color:#fff;letter-spacing:-.01em;line-height:1.02}
+.brand-card .meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:12px;font-size:12.5px;color:#e7dfcf}
+.brand-card .meta .m{display:inline-flex;align-items:center;gap:6px}
+.brand-card .meta .m svg{width:13px;height:13px;opacity:.85}
+.brand-card .meta .m.star{color:var(--goldS);font-weight:600}
+.brand-card .cta{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#f6efdf}
+.brand-card .cta .arw{transition:transform .2s ease}
+.brand-card:hover .cta .arw{transform:translateX(4px)}
 
-.brand-card.b2 {
-  background: linear-gradient(135deg, #c4b5fd, #7c3aed);
-}
+.brand-card.featured{grid-row:span 2}
+.brand-card.featured .logo{top:16px;right:16px;bottom:auto;width:52px;height:52px;font-size:23px;border-radius:13px}
+.brand-card.featured .content{padding:30px}
+.brand-card.featured .nm{font-size:40px}
+.brand-card.featured .quote{font-family:var(--serif);font-style:italic;font-size:23px;line-height:1.32;color:#f4ecdb;margin-top:14px;max-width:34ch;text-wrap:pretty}
+.brand-card.featured .quote::before{content:'\201C';color:var(--goldS)}
+.brand-card.featured .quote::after{content:'\201D';color:var(--goldS)}
+.brand-card .hoods{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.brand-card .hood{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.04em;color:#f2ead9;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:4px 11px;border-radius:99px}
 
-.brand-card.b3 {
-  background: linear-gradient(135deg, #fda4af, #dc2626);
+@media(max-width:900px){
+  .brands-grid{grid-template-columns:1fr 1fr}
+  .brand-card.featured{grid-column:span 2;grid-row:auto;min-height:300px}
+  .brands-section .sec-head{flex-direction:column;align-items:flex-start}
+  .brands-section .aside{text-align:left}
 }
-
-.brand-card.b4 {
-  background: linear-gradient(135deg, #a5f3fc, #0e7490);
-}
-
-.brand-card.b5 {
-  background: linear-gradient(135deg, #86efac, #15803d);
-}
-
-.brand-card .bg {
-  position: absolute;
-  inset: 0;
-  opacity: 0.92;
-}
-
-.brand-card .overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(15, 16, 17, 0.1) 50%, rgba(15, 16, 17, 0.78) 100%);
-  z-index: 1;
-}
-
-.brand-card .grain {
-  position: absolute;
-  inset: 0;
-  opacity: 0.2;
-  background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.15), transparent 60%);
-  mix-blend-mode: overlay;
-  z-index: 1;
-}
-
-.brand-card .badge {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 11px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  border-radius: 99px;
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--ink);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  z-index: 2;
-}
-
-.brand-card .badge.gold {
-  background: linear-gradient(135deg, var(--goldS), var(--gold));
-  color: var(--ink);
-}
-
-.brand-card .content {
-  position: absolute;
-  left: 22px;
-  right: 22px;
-  bottom: 22px;
-  color: #fff;
-  z-index: 2;
-}
-
-/* Logo discret au PIED de l'image (bas-droit), ne touche jamais le nom en bas-gauche. */
-.brand-card .logo {
-  position: absolute;
-  bottom: 18px;
-  right: 18px;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 12px;
-  letter-spacing: -0.02em;
-  backdrop-filter: blur(8px);
-  z-index: 2;
-  overflow: hidden;
-}
-
-.brand-card.featured .logo {
-  width: 42px;
-  height: 42px;
-  font-size: 14px;
-  border-radius: 12px;
-}
-
-.brand-card .content {
-  padding-right: 64px;
-}
-
-.brand-card .nm {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: 24px;
-  letter-spacing: -0.025em;
-  margin-bottom: 4px;
-}
-
-.brand-card.featured .nm {
-  font-size: 42px;
-  line-height: 1;
-}
-
-.brand-card .nm .it {
-  font-style: italic;
-}
-
-.brand-card .tag {
-  font-size: 12.5px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
-  margin-bottom: 12px;
-  letter-spacing: -0.005em;
-}
-
-.brand-card.featured .tag {
-  font-size: 14.5px;
-  margin-bottom: 16px;
-  max-width: 380px;
-  line-height: 1.5;
-}
-
-.brand-card .meta {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.92);
-  letter-spacing: 0.04em;
-}
-
-.brand-card .meta .dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.brand-card .meta .star {
-  color: var(--goldS);
-  font-weight: 800;
+@media(max-width:560px){
+  .brands-section{padding:48px 18px 60px}.brands-section h2{font-size:34px}
+  .brands-grid{grid-template-columns:1fr}.brand-card.featured{grid-column:auto}
 }
 
 /* Carousel */
@@ -1527,17 +1394,6 @@
   }
   .am-inner {
     grid-template-columns: 1fr;
-  }
-  .brands-grid {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-  .brand-card.featured {
-    grid-row: auto;
-    min-height: 320px;
-  }
-  .brand-card {
-    min-height: 240px;
   }
   .cs-grid {
     grid-template-columns: repeat(2, 1fr);

@@ -717,79 +717,93 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* PROPERTY MANAGERS GRID — marketplace Sojori uniquement */}
+      {/* PROPERTY MANAGERS GRID — marketplace Sojori uniquement (masqué en mode tenant) */}
       {!tenantActive && propertyManagers.length > 0 && (
-      <section className="section">
-        <div className="section-head">
+      <section className="brands-section">
+        <div className="sec-head">
           <div>
-            <div className="pretitle">Nos Property Managers</div>
-            <h2>
-              Partenaires <span className="it">sélectionnés</span>
-            </h2>
-            <div className="sub">
-              Gestionnaires vérifiés, spécialistes du Maroc. Réponse rapide, service impeccable, biens exclusifs.
-            </div>
+            <div className="kick">Conciergeries de confiance</div>
+            <h2>Partenaires <em>sélectionnés</em></h2>
           </div>
+          <p className="aside">
+            Des gestionnaires triés sur le volet, vérifiés par Sojori pour la qualité de leur accueil.
+          </p>
         </div>
 
-        {/* Brands Grid */}
         <div className="brands-grid">
-          {propertyManagers.map((pm, idx) => (
-            <Link
-              key={pm.slug || pm.id}
-              href={`/pm/${pm.slug}`}
-              className={`brand-card ${idx === 0 ? 'featured' : ''} ${idx === 1 ? 'b2' : ''} ${idx === 2 ? 'b3' : ''} ${idx === 3 ? 'b4' : ''} ${idx === 4 ? 'b5' : ''}`}
-            >
-              {/* Fond : visuels Sojori EN DUR (5 motifs or/encre homogènes) —
-                  la home garde l'identité sojori.com ; les photos du PM vivent
-                  sur sa vitrine /pm/<slug>. */}
-              <div
-                className="bg"
-                style={{
-                  backgroundImage: `url(/pm-cards/sojori-card-${(idx % 5) + 1}.png)`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
-              ></div>
-              <div className="overlay"></div>
-              <div className="grain"></div>
-              {pm.verified && <div className={`badge${idx === 0 ? ' gold' : ''}`}>✓ VÉRIFIÉ</div>}
-              {/* Logo discret en coin (sous le badge Vérifié s'il est présent) —
-                  jamais dans le bloc de contenu, pour ne pas concurrencer le nom. */}
-              <div className="logo">
+          {propertyManagers.map((pm, idx) => {
+            const featured = idx === 0;
+            const bg = `/pm-cards/sojori-card-${(idx % 5) + 1}.png`;
+            const accent = pm.brandColor
+              ? `linear-gradient(90deg, ${pm.brandColor.from}, ${pm.brandColor.to})`
+              : 'linear-gradient(90deg, var(--gold), var(--goldS))';
+
+            // Métriques dérivées uniquement de l'API — aucune donnée inventée
+            const countLabel =
+              typeof pm.listingCount === 'number' && pm.listingCount > 0
+                ? `${pm.listingCount} ${pm.listingCount > 1 ? 'adresses' : 'adresse'}`
+                : null;
+            const responseLabel = pm.responseTime
+              ? `répond en ${pm.responseTime.replace(/^<\s*/, 'moins de ').replace(/h/, ' h').trim()}`
+              : null;
+            const showRating = !!pm.rating && pm.rating > 0;
+            // Citation featured = description sinon tagline — jamais de texte fictif
+            const quote = pm.description || pm.tagline || null;
+
+            return (
+              <Link
+                key={pm.slug || pm.id}
+                href={`/pm/${pm.slug}`}
+                className={`brand-card${featured ? ' featured' : ''}`}
+                aria-label={pm.name}
+              >
+                <div className="bg" style={{ backgroundImage: `url(${bg})` }} />
+                <div className="overlay" />
+
+                {pm.verified === true && <span className="badge">✓ Vérifié</span>}
+                {!featured && pm.tagline && <span className="spec">{pm.tagline}</span>}
+
                 {pm.vitrineLogoUrl ? (
-                  <img
-                    src={pm.vitrineLogoUrl}
-                    alt=""
-                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                  />
+                  <img className="logo logo-img" src={pm.vitrineLogoUrl} alt="" />
                 ) : (
-                  pm.logoText || pm.name.slice(0, 2).toUpperCase()
+                  <span className="logo">{pm.logoText || pm.name.charAt(0)}</span>
                 )}
-              </div>
-              <div className="content">
-                <div className="nm">
-                  {pm.name.split(' ')[0]} <span className="it">{pm.name.split(' ').slice(1).join(' ')}</span>
+
+                <div className="content">
+                  <div className="nm">{pm.name}</div>
+
+                  {featured && quote && <p className="quote">{quote}</p>}
+                  {featured && pm.tagline && quote !== pm.tagline && (
+                    <div className="hoods"><span className="hood">{pm.tagline}</span></div>
+                  )}
+
+                  {(countLabel || responseLabel || showRating) && (
+                    <div className="meta">
+                      {countLabel && (
+                        <span className="m">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>
+                          {countLabel}
+                        </span>
+                      )}
+                      {responseLabel && (
+                        <span className="m">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                          {responseLabel}
+                        </span>
+                      )}
+                      {showRating && <span className="m star">★ {pm.rating!.toFixed(1)}</span>}
+                    </div>
+                  )}
+
+                  <span className="cta">
+                    {featured ? 'Découvrir la conciergerie' : 'Découvrir'} <span className="arw">→</span>
+                  </span>
                 </div>
-                <div className="tag">{pm.tagline || pm.description}</div>
-                <div className="meta">
-                  {pm.rating ? (
-                    <>
-                      <span className="star">★</span> {pm.rating}
-                      <span className="dot"></span>
-                    </>
-                  ) : null}
-                  {pm.listingCount} biens
-                  {pm.responseTime ? (
-                    <>
-                      <span className="dot"></span>
-                      {pm.responseTime}
-                    </>
-                  ) : null}
-                </div>
-              </div>
-            </Link>
-          ))}
+
+                <div className="accent" style={{ background: accent }} />
+              </Link>
+            );
+          })}
         </div>
       </section>
       )}
