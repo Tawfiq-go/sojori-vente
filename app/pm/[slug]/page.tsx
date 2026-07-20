@@ -64,6 +64,12 @@ export default function PMPage() {
   const brandTo = pm.brandColor?.to || '#c89b3c';
   const colors = ['', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
+  // Vitrine = contenu du PM : cover = photo principale de son premier listing,
+  // galerie = le reste de ses photos de listings (fallback : uploads du profil).
+  const listingPhotos = pmListings.flatMap((l) => l.images || []).filter(Boolean);
+  const heroCover = listingPhotos[0] || pm.coverUrl;
+  const galleryPhotos = listingPhotos.length > 1 ? listingPhotos.slice(1, 9) : (pm.images || []).slice(0, 8);
+
   return (
     <>
       <Navigation />
@@ -72,8 +78,8 @@ export default function PMPage() {
         {/* Hero Section */}
         <section
           style={{
-            background: pm.coverUrl
-              ? `linear-gradient(135deg, ${brandFrom}cc, ${brandTo}cc), url(${pm.coverUrl}) center/cover no-repeat`
+            background: heroCover
+              ? `linear-gradient(135deg, ${brandFrom}cc, ${brandTo}cc), url(${heroCover}) center/cover no-repeat`
               : `linear-gradient(135deg, ${brandFrom}, ${brandTo})`,
             padding: '80px 32px',
             position: 'relative',
@@ -246,11 +252,11 @@ export default function PMPage() {
           </div>
         </section>
 
-        {/* Gallery (uploaded PM photos) */}
-        {pm.images && pm.images.length > 0 && (
+        {/* Gallery — photos des listings du PM (le reste après la cover) */}
+        {galleryPhotos.length > 0 && (
           <section style={{ padding: '40px 32px 0', maxWidth: '1320px', margin: '0 auto' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
-              {pm.images.slice(0, 8).map((img, i) => (
+              {galleryPhotos.map((img, i) => (
                 <div
                   key={i}
                   style={{

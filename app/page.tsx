@@ -740,15 +740,16 @@ export default function HomePage() {
               href={`/pm/${pm.slug}`}
               className={`brand-card ${idx === 0 ? 'featured' : ''} ${idx === 1 ? 'b2' : ''} ${idx === 2 ? 'b3' : ''} ${idx === 3 ? 'b4' : ''} ${idx === 4 ? 'b5' : ''}`}
             >
+              {/* Fond : visuels Sojori EN DUR (5 motifs or/encre homogènes) —
+                  la home garde l'identité sojori.com ; les photos du PM vivent
+                  sur sa vitrine /pm/<slug>. */}
               <div
                 className="bg"
-                style={
-                  pm.coverUrl
-                    ? { backgroundImage: `url(${pm.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                    : pm.brandColor
-                      ? { background: `linear-gradient(135deg, ${pm.brandColor.from}, ${pm.brandColor.to})` }
-                      : undefined
-                }
+                style={{
+                  backgroundImage: `url(/pm-cards/sojori-card-${(idx % 5) + 1}.png)`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
               ></div>
               <div className="overlay"></div>
               <div className="grain"></div>

@@ -469,9 +469,10 @@
   z-index: 2;
 }
 
+/* Logo discret au PIED de l'image (bas-droit), ne touche jamais le nom en bas-gauche. */
 .brand-card .logo {
   position: absolute;
-  top: 18px;
+  bottom: 18px;
   right: 18px;
   width: 34px;
   height: 34px;
@@ -489,15 +490,15 @@
   overflow: hidden;
 }
 
-.brand-card .badge ~ .logo {
-  top: 60px;
-}
-
 .brand-card.featured .logo {
   width: 42px;
   height: 42px;
   font-size: 14px;
   border-radius: 12px;
+}
+
+.brand-card .content {
+  padding-right: 64px;
 }
 
 .brand-card .nm {
