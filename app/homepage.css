@@ -470,26 +470,34 @@
 }
 
 .brand-card .logo {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.95);
   color: var(--ink);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 12px;
   letter-spacing: -0.02em;
-  margin-bottom: 14px;
   backdrop-filter: blur(8px);
+  z-index: 2;
+  overflow: hidden;
+}
+
+.brand-card .badge ~ .logo {
+  top: 60px;
 }
 
 .brand-card.featured .logo {
-  width: 60px;
-  height: 60px;
-  font-size: 18px;
-  border-radius: 18px;
+  width: 42px;
+  height: 42px;
+  font-size: 14px;
+  border-radius: 12px;
 }
 
 .brand-card .nm {
