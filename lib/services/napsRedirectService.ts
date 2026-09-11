@@ -25,11 +25,14 @@ export interface GuestReservationPayload {
   clerkEnvironment?: 'development' | 'production'
   pricing: PriceBreakdown
   payment: {
-    method: 'card' | 'later'
+    method: 'card' | 'later' | 'cash' | 'bank_transfer'
     returnBaseUrl?: string
-    /** Annule l’ancienne résa UnPaid et en crée une nouvelle */
     replaceExisting?: boolean
+    payMode?: 'full' | 'deposit'
   }
+  source?: string
+  channelName?: string
+  bookingChannel?: 'sojori' | 'directBooking' | 'whatsapp' | 'marketplace'
 }
 
 export class UnpaidReservationExistsError extends Error {
@@ -92,7 +95,7 @@ export async function createGuestReservationWithNapsRedirect(
   const paymentUrl = result.data.paymentUrl as string | null
   if (payload.payment.method === 'card' && !paymentUrl) {
     throw new Error(
-      'Lien de paiement NAPS indisponible. Réessayez dans quelques instants ou choisissez un autre mode de paiement.',
+      'Page de paiement indisponible. Réessayez dans quelques instants ou choisissez un autre mode de paiement.',
     )
   }
 

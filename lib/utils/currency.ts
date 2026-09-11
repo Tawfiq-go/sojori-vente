@@ -16,7 +16,7 @@ export function convertFromMAD(
   targetCurrency: Currency
 ): number {
   if (targetCurrency === 'MAD') {
-    return amountInMAD;
+    return Math.round(amountInMAD);
   }
 
   const rate = EXCHANGE_RATES[targetCurrency];
@@ -87,6 +87,7 @@ export function formatPrice(
   originalAmount?: number
 ): string {
   const config = SUPPORTED_CURRENCIES[currency];
+  const displayAmount = currency === 'MAD' ? Math.round(amount) : amount;
 
   // Format with Intl.NumberFormat for proper locale
   const formatted = new Intl.NumberFormat(config.locale, {
@@ -94,7 +95,7 @@ export function formatPrice(
     currency: currency,
     minimumFractionDigits: currency === 'MAD' ? 0 : 2,
     maximumFractionDigits: currency === 'MAD' ? 0 : 2,
-  }).format(amount);
+  }).format(displayAmount);
 
   // Show original MAD price if requested and currency is not MAD
   if (showOriginal && currency !== 'MAD' && originalAmount) {

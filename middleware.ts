@@ -10,6 +10,13 @@ const isComingSoonBypass = createRouteMatcher(['/coming-soon(.*)']);
 const COMING_SOON = process.env.COMING_SOON === 'true';
 
 export default clerkMiddleware(async (auth, req) => {
+  const path = req.nextUrl.pathname;
+
+  // Proxy API dev local : pas de résolution tenant / Clerk inutile
+  if (path.startsWith('/api/sojori')) {
+    return NextResponse.next();
+  }
+
   if (COMING_SOON && !isComingSoonBypass(req)) {
     const url = req.nextUrl.clone();
     url.pathname = '/coming-soon';

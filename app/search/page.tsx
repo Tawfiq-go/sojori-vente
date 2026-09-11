@@ -7,6 +7,8 @@ import { useWishlistStore } from '@/lib/store/useBookingStore';
 import { useListings } from '@/lib/hooks/useListings';
 import { useAvailableCities } from '@/lib/hooks/useCities';
 import { listingDisplayPrice } from '@/lib/pricing/listingPrice';
+import { formatMadAmount } from '@/lib/utils/formatMad';
+import { listingRatingLabel } from '@/lib/utils/listingDisplay';
 import SearchNavBar, { formatGuestSummary } from '@/components/search/SearchNavBar';
 import SearchFiltersPanel from '@/components/search/SearchFiltersPanel';
 import SearchMapPanel from '@/components/search/SearchMapPanel';
@@ -760,10 +762,12 @@ function SearchContent() {
                       <div className="lc-info">
                         <div className="top">
                           <div className="nm">{listing.title}</div>
+                          {listingRatingLabel(listing.rating) && (
                           <div className="rating">
                             <span className="star">★</span>
-                            {listing.rating || 4.8}
+                            {listingRatingLabel(listing.rating)}
                           </div>
+                          )}
                         </div>
                         <div className="loc">
                           {neighborhood}, {listing.city}
@@ -774,7 +778,7 @@ function SearchContent() {
                           <span>{listing.maxGuests} voyageurs</span>
                         </div>
                         <div className="price">
-                          <b>{cardPrice(listing)} {listing.currency || 'MAD'}</b>
+                          <b>{formatMadAmount(cardPrice(listing))} {listing.currency || 'MAD'}</b>
                           <span className="per">/nuit</span>
                         </div>
                       </div>
@@ -857,10 +861,12 @@ function SearchContent() {
                           <div className="lc-info">
                             <div className="top">
                               <div className="nm">{listing.title}</div>
+                              {listingRatingLabel(listing.rating) && (
                               <div className="rating">
                                 <span className="star">★</span>
-                                {listing.rating || 4.8}
+                                {listingRatingLabel(listing.rating)}
                               </div>
+                              )}
                             </div>
                             <div className="loc">
                               {neighborhood}, {listing.city}
@@ -871,7 +877,7 @@ function SearchContent() {
                               <span>{listing.maxGuests} voyageurs</span>
                             </div>
                             <div className="price">
-                              <b>{cardPrice(listing)} {listing.currency || 'MAD'}</b>
+                              <b>{formatMadAmount(cardPrice(listing))} {listing.currency || 'MAD'}</b>
                               <span className="per">/nuit</span>
                             </div>
                           </div>
@@ -955,10 +961,12 @@ function SearchContent() {
                           <div className="lc-info">
                             <div className="top">
                               <div className="nm">{listing.title}</div>
+                              {listingRatingLabel(listing.rating) && (
                               <div className="rating">
                                 <span className="star">★</span>
-                                {listing.rating || 4.8}
+                                {listingRatingLabel(listing.rating)}
                               </div>
+                              )}
                             </div>
                             <div className="loc">
                               {neighborhood}, {listing.city}
@@ -969,7 +977,7 @@ function SearchContent() {
                               <span>{listing.maxGuests} voyageurs</span>
                             </div>
                             <div className="price">
-                              <b>{cardPrice(listing)} {listing.currency || 'MAD'}</b>
+                              <b>{formatMadAmount(cardPrice(listing))} {listing.currency || 'MAD'}</b>
                               <span className="per">/nuit</span>
                             </div>
                           </div>

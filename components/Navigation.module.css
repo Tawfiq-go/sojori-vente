@@ -1,0 +1,165 @@
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  background: rgba(250, 247, 240, 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(233, 227, 211, 0.5);
+  box-sizing: border-box;
+  min-height: 64px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  font-style: italic;
+  color: var(--ink);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 12px var(--gold);
+  flex-shrink: 0;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-left: 32px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink2);
+  flex-shrink: 0;
+}
+
+.navLinks a {
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.navLinks a:hover {
+  color: var(--ink);
+}
+
+.navRight {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.cmdK {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--card);
+  border: 1px solid var(--b);
+  border-radius: 99px;
+  font-size: 12px;
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.cmdK:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.cmdK kbd {
+  font-family: var(--mono);
+  font-size: 10px;
+  background: var(--paper2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--ink2);
+  font-weight: 700;
+  border: 1px solid var(--b);
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--b);
+  background: var(--card);
+  font-size: 14px;
+  transition: all 0.15s;
+  text-decoration: none;
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.iconBtn:hover {
+  border-color: var(--ink2);
+}
+
+.signedIn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.accountLink {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink2);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  .cmdK span:first-child {
+    display: none;
+  }
+
+  .navLinks {
+    gap: 18px;
+    margin-left: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  .nav {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .navLinks {
+    display: none;
+  }
+
+  .cmdK {
+    display: none;
+  }
+
+  .accountLink {
+    display: none;
+  }
+}

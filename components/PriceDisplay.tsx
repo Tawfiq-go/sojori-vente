@@ -1,6 +1,7 @@
 'use client';
 
 import { useCurrency } from '@/context/CurrencyContext';
+import { formatMadAmount } from '@/lib/utils/formatMad';
 import styles from './PriceDisplay.module.css';
 
 interface PriceDisplayProps {
@@ -64,7 +65,7 @@ export function PriceDisplay({
       {/* Show original MAD price when displaying converted currency */}
       {isConverted && showOriginal && (
         <div className={styles.original}>
-          ({priceInMAD} MAD)
+          ({formatMadAmount(priceInMAD)} MAD)
         </div>
       )}
 

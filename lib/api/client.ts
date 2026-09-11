@@ -3,9 +3,19 @@
  * Handles all communication with sojori-production microservices
  */
 
+import { getApiBaseUrl, isLocalDevHost, LOCAL_API_PROXY_PREFIX } from '@/lib/config/apiBase';
 import { logger } from '@/lib/utils/logger';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.sojori.com';
+const FETCH_TIMEOUT_MS = 20_000;
+
+function fetchTimeoutSignal(ms: number): AbortSignal {
+  if (typeof AbortSignal.timeout === 'function') {
+    return AbortSignal.timeout(ms);
+  }
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), ms);
+  return controller.signal;
+}
 
 interface ApiResponse<T> {
   success: boolean;
@@ -49,6 +59,34 @@ interface Listing {
   propertyManager?: PropertyManager | null;
   lat?: number;
   lng?: number;
+  directPayment?: {
+    methods?: ('card' | 'wire' | 'cash')[];
+    cashForReturningOnly?: boolean;
+    wire?: {
+      iban?: string;
+      bic?: string;
+      holder?: string;
+      bankName?: string;
+    } | null;
+    partialPayment?: {
+      card?: {
+        enabled?: boolean;
+        depositPercent?: number;
+        allowFullPayment?: boolean;
+      };
+      wire?: {
+        enabled?: boolean;
+        depositPercent?: number;
+        allowFullPayment?: boolean;
+      };
+    };
+  };
+  channelDiscounts?: {
+    sojori?: number;
+    directBooking?: number;
+    whatsapp?: number;
+    marketplace?: number;
+  };
 }
 
 interface City {
@@ -94,10 +132,8 @@ interface PropertyManagerPage {
 }
 
 class ApiClient {
-  private baseUrl: string;
-
-  constructor(baseUrl: string = API_BASE_URL) {
-    this.baseUrl = baseUrl;
+  private get baseUrl(): string {
+    return getApiBaseUrl();
   }
 
   /**
@@ -107,6 +143,8 @@ class ApiClient {
    */
   private withTenantScope(endpoint: string): string {
     if (typeof window === 'undefined') return endpoint;
+    // Dev LAN : toujours le catalogue marketplace complet (pas de ?pm= fantôme en session)
+    if (isLocalDevHost(window.location.hostname)) return endpoint;
     if (!/\/listing\/public\/(listings|cities)|\/listings\/search/.test(endpoint)) return endpoint;
     if (endpoint.includes('pm=')) return endpoint;
     try {
@@ -124,6 +162,14 @@ class ApiClient {
     }
   }
 
+  private resolveEndpoint(endpoint: string): string {
+    // Proxy local : /api/sojori + /api/v1/... → /api/sojori/v1/... (évite /api/api/v1)
+    if (this.baseUrl === LOCAL_API_PROXY_PREFIX && endpoint.startsWith('/api/')) {
+      return endpoint.slice(4);
+    }
+    return endpoint;
+  }
+
   /**
    * Generic fetch wrapper with error handling
    */
@@ -132,9 +178,10 @@ class ApiClient {
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
     try {
-      const url = `${this.baseUrl}${this.withTenantScope(endpoint)}`;
+      const url = `${this.baseUrl}${this.withTenantScope(this.resolveEndpoint(endpoint))}`;
       const response = await fetch(url, {
         ...options,
+        signal: options?.signal ?? fetchTimeoutSignal(FETCH_TIMEOUT_MS),
         headers: {
           'Content-Type': 'application/json',
           ...options?.headers,
@@ -149,6 +196,9 @@ class ApiClient {
       // Backend returns {success, data, count} - extract the data array
       return { success: true, data: json.data || json };
     } catch (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`[apiClient] ${endpoint}:`, error);
+      }
       logger.warn(`API Error [${endpoint}]:`, error);
       return {
         success: false,

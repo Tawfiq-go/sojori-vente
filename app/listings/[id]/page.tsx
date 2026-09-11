@@ -11,6 +11,7 @@ import { MoroccoMap } from '@/components/map';
 import { PriceDisplay } from '@/components/PriceDisplay';
 import { apiClient, type Listing } from '@/lib/api/client';
 import { listingDisplayPrice } from '@/lib/pricing/listingPrice';
+import { formatMadAmount } from '@/lib/utils/formatMad';
 import { logger } from '@/lib/utils/logger';
 import styles from './listing.module.css';
 
@@ -1196,7 +1197,7 @@ export default function ListingPage() {
                   <div className={styles.nm}>{sim.title}</div>
                   <div className={styles.lc}>{sim.neighborhood || sim.city}, {sim.city}</div>
                   <div className={styles.pr}>
-                    <b>{price} {sim.currency || 'MAD'}</b>
+                    <b>{formatMadAmount(price)} {sim.currency || 'MAD'}</b>
                     <span className={styles.per}> / nuit</span>
                   </div>
                 </Link>
@@ -1284,19 +1285,19 @@ export default function ListingPage() {
                       {Math.round(priceBreakdown.subtotal / selectedNights)} MAD × {selectedNights}{' '}
                       {selectedNights > 1 ? 'nuits' : 'nuit'}
                     </span>
-                    <span className={styles.v}>{priceBreakdown.subtotal.toFixed(0)} MAD</span>
+                    <span className={styles.v}>{formatMadAmount(priceBreakdown.subtotal)} MAD</span>
                   </div>
                   <div className={styles.bookLine}>
                     <span className={styles.u}>Frais de service</span>
-                    <span className={styles.v}>{priceBreakdown.serviceFee.toFixed(0)} MAD</span>
+                    <span className={styles.v}>{formatMadAmount(priceBreakdown.serviceFee)} MAD</span>
                   </div>
                   <div className={styles.bookLine}>
                     <span className={styles.u}>Taxe de séjour</span>
-                    <span className={styles.v}>{priceBreakdown.tax.toFixed(0)} MAD</span>
+                    <span className={styles.v}>{formatMadAmount(priceBreakdown.tax)} MAD</span>
                   </div>
                   <div className={`${styles.bookLine} ${styles.total}`}>
                     <span>Total</span>
-                    <span className={styles.v}>{priceBreakdown.total.toFixed(0)} MAD</span>
+                    <span className={styles.v}>{formatMadAmount(priceBreakdown.total)} MAD</span>
                   </div>
                 </div>
               ) : (

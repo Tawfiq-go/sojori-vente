@@ -8,8 +8,7 @@
  */
 
 import { readTenantCookie } from './tenantDomains'
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.sojori.com'
+import { getApiBaseUrl } from './config/apiBase'
 const SLUG_KEY = 'sojori_pm_preview'
 const CACHE_KEY = 'sojori_pm_public_cache'
 const CACHE_MS = 5 * 60 * 1000
@@ -72,7 +71,7 @@ export async function fetchTenantPublic(slug: string): Promise<TenantPublic | nu
   }
   try {
     const res = await fetch(
-      `${API_BASE}/api/v1/listing/public/property-managers/${encodeURIComponent(slug)}`,
+      `${getApiBaseUrl()}/v1/listing/public/property-managers/${encodeURIComponent(slug)}`,
     )
     if (!res.ok) return null
     const body = (await res.json()) as { data?: { propertyManager?: TenantPublic } }

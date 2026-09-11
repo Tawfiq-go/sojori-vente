@@ -19,7 +19,8 @@ export const TENANT_DOMAINS: Record<string, string> = {
 }
 
 /** Hôtes qui ne sont JAMAIS des tenants — sojori.com reste la marketplace. */
-const OWN_HOSTS = /(^|\.)sojori\.com$|\.vercel\.app$|^localhost$|^127\.0\.0\.1$/
+const OWN_HOSTS =
+  /(^|\.)sojori\.com$|\.vercel\.app$|^localhost$|^127\.0\.0\.1$|^10\.\d+\.\d+\.\d+$|^192\.168\.\d+\.\d+$|^172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+$/
 
 export let lastResolveDebug = ''
 

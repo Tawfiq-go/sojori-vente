@@ -18,7 +18,7 @@ import {
   validateExpiry,
   type CardData,
 } from '@/lib/utils/cardEncryption';
-import { logger } from '@/lib/utils/logger';
+import { formatMadAmount } from '@/lib/utils/formatMad';
 import { useUser } from '@clerk/nextjs';
 import {
   buildBookingProfilePayload,
@@ -27,7 +27,20 @@ import {
   type BookingProfileMetadata,
 } from '@/lib/clerk/bookingProfile';
 import { syncBookingProfileToClerk } from '@/lib/clerk/syncBookingProfile';
-import styles from './CheckoutFlow.module.css';
+import {
+  computeCheckoutAmount,
+  formatWireInstructions,
+  mapUiPaymentToApi,
+  resolvePartialForUiMethod,
+  resolvePublicDirectPayment,
+} from '@/lib/utils/directPayment';
+import { getTenantSlug } from '@/lib/tenantPreview';
+import {
+  clearCheckoutPending,
+  readCheckoutPending,
+  saveCheckoutPending,
+  shouldShowCheckoutPending,
+} from '@/lib/utils/checkoutPending';
 import '../../app/checkout-mvp.css';
 
 export default function CheckoutFlow({
@@ -57,6 +70,7 @@ export default function CheckoutFlow({
   const [phoneCountry, setPhoneCountry] = useState('+212');
   const [cardExpiry, setCardExpiry] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer' | 'cash'>('card');
+  const [payMode, setPayMode] = useState<'full' | 'deposit'>('full');
   const [data, setData] = useState<Partial<CheckoutData>>({
     traveler: {
       firstName: '',
@@ -76,6 +90,31 @@ export default function CheckoutFlow({
 
   // Fetch listing data for recap card
   const { listing } = useListing(listingId);
+  const directPaymentCfg = resolvePublicDirectPayment(listing?.directPayment);
+  const allowedMethods = directPaymentCfg.methods;
+  const activePartialCfg = resolvePartialForUiMethod(directPaymentCfg, paymentMethod);
+  const amountToPay = computeCheckoutAmount(pricing.total, directPaymentCfg, payMode, paymentMethod);
+  const showPartialChoice =
+    activePartialCfg.enabled &&
+    (paymentMethod === 'card' || paymentMethod === 'transfer');
+
+  useEffect(() => {
+    if (allowedMethods.includes('card')) {
+      setPaymentMethod('card');
+    } else if (allowedMethods.includes('wire')) {
+      setPaymentMethod('transfer');
+    } else if (allowedMethods.includes('cash')) {
+      setPaymentMethod('cash');
+    }
+  }, [listing?._id]);
+
+  useEffect(() => {
+    if (!activePartialCfg.enabled) {
+      setPayMode('full');
+    } else if (!activePartialCfg.allowFullPayment) {
+      setPayMode('deposit');
+    }
+  }, [listing?._id, paymentMethod, activePartialCfg.enabled, activePartialCfg.allowFullPayment]);
 
   useEffect(() => {
     if (!isUserLoaded) return;
@@ -113,20 +152,21 @@ export default function CheckoutFlow({
     return () => window.removeEventListener('pageshow', unlock);
   }, []);
 
-  // Résa déjà créée, paiement NAPS en attente (localStorage)
+  // Reprise paiement carte — uniquement si l'utilisateur a lancé le flux sur CE listing (session)
   useEffect(() => {
     let cancelled = false;
     async function loadPending() {
       try {
-        const pending = localStorage.getItem('pendingReservationNumber');
-        if (!pending) return;
+        const ctx = readCheckoutPending();
+        if (!shouldShowCheckoutPending(ctx, listingId, data.traveler?.email)) return;
+        const pending = ctx!.reservationNumber;
         const reservation = await getGuestReservationByNumber(pending);
         if (cancelled) return;
         if (
           reservation.paymentStatus === 'Paid' ||
           reservation.paymentStatus === 'paid'
         ) {
-          localStorage.removeItem('pendingReservationNumber');
+          clearCheckoutPending();
           setReservationNumber(reservation.reservationNumber);
           setCurrentStep(2);
           return;
@@ -135,7 +175,6 @@ export default function CheckoutFlow({
         setPendingPayment({
           reservationNumber: pending,
           paymentLink: reservation.paymentLink,
-          lastError: reservation.lastNapsError?.userMessage || null,
         });
       } catch {
         if (!cancelled) setProcessing(false);
@@ -145,7 +184,7 @@ export default function CheckoutFlow({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [listingId, data.traveler?.email]);
 
   const persistTravelerProfile = async (phoneFull: string) => {
     if (!isSignedIn) return;
@@ -177,7 +216,6 @@ export default function CheckoutFlow({
   const [pendingPayment, setPendingPayment] = useState<{
     reservationNumber: string
     paymentLink?: string | null
-    lastError?: string | null
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [priceChanged, setPriceChanged] = useState(false);
@@ -205,12 +243,26 @@ export default function CheckoutFlow({
     phoneCountryCode: phoneCountry,
   });
 
-  const buildGuestReservationPayload = (method: 'card' | 'later') => {
+  const buildGuestReservationPayload = (uiMethod: 'card' | 'transfer' | 'cash') => {
     const phoneFull = `${phoneCountry}${data.traveler?.phone}`;
+    const apiMethod = mapUiPaymentToApi(uiMethod);
+    const tenantSlug = typeof window !== 'undefined' ? getTenantSlug() : null;
+    const isPmDirectSite = Boolean(tenantSlug);
     return {
       listingId,
       checkIn: dateRange.checkIn.toISOString().split('T')[0],
       checkOut: dateRange.checkOut.toISOString().split('T')[0],
+      ...(isPmDirectSite
+        ? {
+            source: 'direct-booking',
+            channelName: 'Direct Booking',
+            bookingChannel: 'directBooking' as const,
+          }
+        : {
+            source: 'sojori-vente',
+            channelName: 'Sojori Marketplace',
+            bookingChannel: 'sojori' as const,
+          }),
       guests: {
         adults: guests.adults,
         children: guests.children || 0,
@@ -242,7 +294,10 @@ export default function CheckoutFlow({
         tax: pricing.tax,
         total: pricing.total,
       },
-      payment: { method },
+      payment: {
+        method: apiMethod,
+        payMode: uiMethod === 'card' || uiMethod === 'transfer' ? payMode : 'full',
+      },
     };
   };
 
@@ -250,7 +305,7 @@ export default function CheckoutFlow({
   const handleCardRedirectPayment = async (replaceExisting = false) => {
     const phoneFull = `${phoneCountry}${data.traveler?.phone}`;
     const payload = buildGuestReservationPayload('card');
-    payload.payment = { ...payload.payment, replaceExisting };
+    payload.payment = { ...payload.payment, method: 'card', replaceExisting };
 
     let result;
     try {
@@ -258,18 +313,18 @@ export default function CheckoutFlow({
     } catch (err) {
       if (err instanceof UnpaidReservationExistsError && !replaceExisting) {
         setProcessing(false);
+        const email = String(data.traveler?.email || '').trim();
+        saveCheckoutPending({
+          reservationNumber: err.reservationNumber,
+          listingId,
+          email: email || undefined,
+        });
         setPendingPayment({
           reservationNumber: err.reservationNumber,
           paymentLink: err.paymentUrl,
-          lastError: null,
         });
-        try {
-          localStorage.setItem('pendingReservationNumber', err.reservationNumber);
-        } catch {
-          /* ignore */
-        }
         setError(
-          `Paiement déjà en attente pour ces dates (${err.reservationNumber}). Reprenez le lien NAPS ou cliquez « Nouvelle tentative ».`,
+          'Une réservation est déjà en attente de paiement pour ces dates. Finalisez le paiement ci-dessous ou recommencez.',
         );
         return;
       }
@@ -278,17 +333,17 @@ export default function CheckoutFlow({
 
     await persistTravelerProfile(phoneFull);
 
-    try {
-      localStorage.setItem('pendingReservationNumber', result.reservationNumber);
-    } catch {
-      /* ignore */
-    }
+    saveCheckoutPending({
+      reservationNumber: result.reservationNumber,
+      listingId,
+      email: String(data.traveler?.email || '').trim() || undefined,
+    });
 
     if (!result.paymentUrl) {
-      throw new Error('Lien de paiement NAPS indisponible');
+      throw new Error('Impossible d’ouvrir la page de paiement. Réessayez ou choisissez un autre mode.');
     }
 
-    logger.debug('[CHECKOUT] Redirect NAPS', { reservationNumber: result.reservationNumber });
+    logger.debug('[CHECKOUT] Redirect secure payment', { reservationNumber: result.reservationNumber });
     window.location.href = result.paymentUrl;
   };
 
@@ -323,7 +378,7 @@ export default function CheckoutFlow({
 
     // 1. Create PaymentIntent (stores all data in backend DB before charging)
     const intent = await createPaymentIntent({
-      amount: Math.round(pricing.total * 100),
+      amount: Math.round(amountToPay * 100),
       currency: '504', // MAD (ISO numeric)
       context: { type: 'reservation', referenceId: listingId },
       guest: {
@@ -385,8 +440,9 @@ export default function CheckoutFlow({
   // Cash / transfer: deferred payment via guest API.
   const handleDeferredReservation = async () => {
     const phoneFull = `${phoneCountry}${data.traveler?.phone}`;
+    const uiMethod = paymentMethod === 'cash' ? 'cash' : 'transfer';
     const result = await createGuestReservationWithNapsRedirect(
-      buildGuestReservationPayload('later'),
+      buildGuestReservationPayload(uiMethod),
     );
 
     await persistTravelerProfile(phoneFull);
@@ -479,19 +535,17 @@ export default function CheckoutFlow({
                     marginBottom: '16px',
                     padding: '16px',
                     borderRadius: '12px',
-                    border: '1px solid #fbbf24',
-                    background: '#fef3c7',
-                    color: '#92400e',
+                    border: '1px solid var(--b)',
+                    background: 'var(--paper2)',
+                    color: 'var(--ink2)',
                     fontSize: '14px',
-                    lineHeight: 1.5,
+                    lineHeight: 1.55,
                   }}
                 >
-                  <strong>Paiement en attente</strong>
+                  <strong style={{ color: 'var(--ink)' }}>Réservation en attente de paiement</strong>
                   <div style={{ marginTop: '8px' }}>
-                    Réservation <b>{pendingPayment.reservationNumber}</b> — paiement NAPS non finalisé.
-                    {pendingPayment.lastError ? (
-                      <div style={{ marginTop: '6px' }}>Dernière erreur : {pendingPayment.lastError}</div>
-                    ) : null}
+                    Référence <b>{pendingPayment.reservationNumber}</b> — finalisez le paiement par carte pour
+                    confirmer votre séjour.
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
                     {pendingPayment.paymentLink ? (
@@ -510,26 +564,26 @@ export default function CheckoutFlow({
                           cursor: 'pointer',
                         }}
                       >
-                        Reprendre le paiement NAPS
+                        Finaliser le paiement
                       </button>
                     ) : null}
                     <button
                       type="button"
                       onClick={() => {
-                        localStorage.removeItem('pendingReservationNumber');
+                        clearCheckoutPending();
                         setPendingPayment(null);
                         setError(null);
                       }}
                       style={{
                         padding: '10px 16px',
                         background: 'transparent',
-                        border: '1px solid #92400e',
+                        border: '1px solid var(--b)',
                         borderRadius: '8px',
                         fontWeight: 600,
                         cursor: 'pointer',
                       }}
                     >
-                      Nouvelle tentative
+                      Recommencer
                     </button>
                   </div>
                 </div>
@@ -722,10 +776,12 @@ export default function CheckoutFlow({
               <div className={styles.card}>
                 <div className={styles.lbl}>Mode de paiement</div>
                 <p style={{ fontSize: '13px', color: 'var(--ink3)', marginBottom: '16px' }}>
-                  Paiement sécurisé · débité après confirmation de l'hôte sous 24h
+                  Choisissez comment régler votre séjour. Aucune donnée bancaire n&apos;est saisie sur cette page
+                  pour le paiement par carte.
                 </p>
 
                 {/* Option 1: Carte bancaire */}
+                {allowedMethods.includes('card') && (
                 <label
                   className={`${styles.payMethod} ${paymentMethod === 'card' ? styles.on : ''}`}
                   onClick={() => setPaymentMethod('card')}
@@ -741,8 +797,10 @@ export default function CheckoutFlow({
                     <span>AMEX</span>
                   </div>
                 </label>
+                )}
 
                 {/* Option 2: Virement bancaire */}
+                {allowedMethods.includes('wire') && (
                 <label
                   className={`${styles.payMethod} ${paymentMethod === 'transfer' ? styles.on : ''}`}
                   onClick={() => setPaymentMethod('transfer')}
@@ -754,8 +812,10 @@ export default function CheckoutFlow({
                     <div className={styles.pmDs}>Confirmation sous 24h</div>
                   </div>
                 </label>
+                )}
 
                 {/* Option 3: Cash */}
+                {allowedMethods.includes('cash') && (
                 <label
                   className={`${styles.payMethod} ${paymentMethod === 'cash' ? styles.on : ''}`}
                   onClick={() => setPaymentMethod('cash')}
@@ -764,32 +824,59 @@ export default function CheckoutFlow({
                   <span className={styles.radio} />
                   <div className={styles.pmInfo}>
                     <div className={styles.pmNm}>💵 Cash</div>
-                    <div className={styles.pmDs}>Paiement à l'arrivée</div>
+                    <div className={styles.pmDs}>
+                      {directPaymentCfg.cashForReturningOnly
+                        ? 'Réservé aux clients récurrents · paiement à l\'arrivée'
+                        : 'Paiement à l\'arrivée'}
+                    </div>
                   </div>
                 </label>
+                )}
 
-                {/* NAPS redirect — no card fields on our site (PCI SAQ A) */}
+                {showPartialChoice && (
+                  <div style={{ marginTop: '16px', padding: '12px', background: 'var(--paper2)', borderRadius: '8px' }}>
+                    <div style={{ fontWeight: 600, fontSize: '13px', marginBottom: '8px' }}>Montant à payer maintenant</div>
+                    {activePartialCfg.allowFullPayment && (
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', cursor: 'pointer' }}>
+                        <input
+                          type="radio"
+                          name="payMode"
+                          checked={payMode === 'full'}
+                          onChange={() => setPayMode('full')}
+                        />
+                        <span>Payer la totalité · {formatMadAmount(pricing.total)} MAD</span>
+                      </label>
+                    )}
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                      <input
+                        type="radio"
+                        name="payMode"
+                        checked={payMode === 'deposit'}
+                        onChange={() => setPayMode('deposit')}
+                      />
+                      <span>
+                        Acompte {activePartialCfg.depositPercent}% ·{' '}
+                        {formatMadAmount(computeCheckoutAmount(pricing.total, directPaymentCfg, 'deposit', paymentMethod))} MAD
+                        {payMode === 'deposit' ? ` (solde ${formatMadAmount(pricing.total - amountToPay)} MAD)` : ''}
+                      </span>
+                    </label>
+                  </div>
+                )}
+
                 {paymentMethod === 'card' && PAYMENT_MODE !== 'api' && (
                   <div
                     style={{
                       marginTop: '16px',
-                      padding: '16px',
+                      padding: '14px 16px',
                       background: 'var(--paper2)',
                       borderRadius: '8px',
-                      fontSize: '14px',
-                      lineHeight: '1.6',
+                      fontSize: '13px',
+                      lineHeight: 1.55,
+                      color: 'var(--ink2)',
                     }}
                   >
-                    <div style={{ fontWeight: 600, marginBottom: '8px' }}>
-                      Paiement sécurisé via NAPS
-                    </div>
-                    <div style={{ color: 'var(--ink2)', marginBottom: '12px' }}>
-                      Vous serez redirigé vers la page de paiement sécurisée NAPS pour saisir votre
-                      carte bancaire. Aucune donnée carte n&apos;est collectée sur Sojori.
-                    </div>
-                    <div className={styles.sslRow}>
-                      🔒 SSL · 3D Secure · Hébergé par NAPS (PCI DSS Level 1)
-                    </div>
+                    Après validation, vous serez redirigé vers une page de paiement sécurisée pour saisir votre
+                    carte bancaire et confirmer la réservation.
                   </div>
                 )}
 
@@ -859,7 +946,7 @@ export default function CheckoutFlow({
                         placeholder="MOHAMED BENALI"
                       />
                     </div>
-                    <div className={styles.sslRow}>🔒 Paiement sécurisé SSL · 3D Secure · PCI DSS Level 1</div>
+                    <div className={styles.sslRow}>Paiement sécurisé · authentification bancaire 3D Secure</div>
                   </div>
                 )}
 
@@ -873,10 +960,26 @@ export default function CheckoutFlow({
                     fontSize: '14px',
                     lineHeight: '1.6'
                   }}>
-                    <div style={{ fontWeight: 600, marginBottom: '8px' }}>📋 Informations de virement</div>
-                    <div style={{ color: 'var(--ink2)' }}>
-                      Les coordonnées bancaires vous seront envoyées par email après validation de votre réservation.
-                      Votre réservation sera confirmée après réception du virement sous 24h.
+                    <div style={{ fontWeight: 600, marginBottom: '8px' }}>📋 Coordonnées bancaires</div>
+                    {directPaymentCfg.wire?.iban ? (
+                      <pre style={{
+                        margin: 0,
+                        whiteSpace: 'pre-wrap',
+                        fontFamily: 'inherit',
+                        color: 'var(--ink)',
+                        fontWeight: 600,
+                      }}>
+                        {formatWireInstructions(directPaymentCfg.wire)}
+                      </pre>
+                    ) : (
+                      <div style={{ color: 'var(--ink2)' }}>
+                        Les coordonnées bancaires vous seront envoyées par email après validation de votre réservation.
+                      </div>
+                    )}
+                    <div style={{ color: 'var(--ink2)', marginTop: '8px' }}>
+                      {payMode === 'deposit' && activePartialCfg.enabled
+                        ? `Virement de ${formatMadAmount(amountToPay)} MAD (acompte). Réservation confirmée après réception sous 24h.`
+                        : 'Votre réservation sera confirmée après réception du virement sous 24h.'}
                     </div>
                   </div>
                 )}
@@ -977,7 +1080,7 @@ export default function CheckoutFlow({
                           color: 'var(--ink2)',
                           textDecoration: 'line-through'
                         }}>
-                          {pricing.total.toLocaleString('fr-FR')} MAD
+                          {formatMadAmount(pricing.total)} MAD
                         </div>
                       </div>
                       <div style={{
@@ -995,7 +1098,7 @@ export default function CheckoutFlow({
                           fontWeight: 700,
                           color: newPrice > pricing.total ? '#c33' : '#3c3'
                         }}>
-                          {newPrice.toLocaleString('fr-FR')} MAD
+                          {formatMadAmount(newPrice)} MAD
                         </div>
                       </div>
                     </div>
@@ -1054,12 +1157,12 @@ export default function CheckoutFlow({
               <div className={styles.nav}>
                 <button className={`${styles.btn} ${styles.next}`} onClick={handlePayment} disabled={processing} style={{ width: '100%' }}>
                   {processing
-                    ? '⏳ Traitement...'
+                    ? 'Traitement en cours…'
                     : paymentMethod === 'card' && PAYMENT_MODE !== 'api'
-                      ? `Continuer vers NAPS · ${pricing.total.toLocaleString('fr-FR')} MAD`
+                      ? `Continuer · ${formatMadAmount(amountToPay)} MAD`
                       : paymentMethod === 'card'
-                        ? `🔒 Payer ${pricing.total.toLocaleString('fr-FR')} MAD`
-                        : `Confirmer · ${pricing.total.toLocaleString('fr-FR')} MAD`}
+                        ? `Payer ${formatMadAmount(amountToPay)} MAD`
+                        : `Confirmer · ${formatMadAmount(amountToPay)} MAD`}
                 </button>
               </div>
             </div>
@@ -1144,7 +1247,7 @@ export default function CheckoutFlow({
                     <div className={styles.loc}>
                       📅 {dateRange.checkIn.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} →{' '}
                       {dateRange.checkOut.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} · 👥{' '}
-                      {guests.adults} ad · {guests.children} enf · 💰 {pricing.total.toLocaleString('fr-FR')} MAD
+                      {guests.adults} ad · {guests.children} enf · 💰 {formatMadAmount(pricing.total)} MAD
                     </div>
                   </div>
                 </div>

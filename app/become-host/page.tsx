@@ -51,16 +51,16 @@ export default function BecomeHostPage() {
                   </div>
                   <div className="bh-hero-trust">
                     <div className="bh-htr">
-                      <div className="v">142</div>
-                      <div className="l">PMs actifs</div>
+                      <div className="v">PM</div>
+                      <div className="l">Conciergeries partenaires</div>
                     </div>
                     <div className="bh-htr">
-                      <div className="v">4 200+</div>
-                      <div className="l">Biens gérés</div>
+                      <div className="v">Multi</div>
+                      <div className="l">Canaux & direct</div>
                     </div>
                     <div className="bh-htr">
-                      <div className="v">18k/mois</div>
-                      <div className="l">Réservations</div>
+                      <div className="v">24/7</div>
+                      <div className="l">Orchestration WA</div>
                     </div>
                   </div>
                 </div>
@@ -68,10 +68,10 @@ export default function BecomeHostPage() {
                 <div className="bh-hero-visual">
                   <div className="bh-hv-card">
                     <div className="bh-hv-head">
-                      <div className="logo">RL</div>
+                      <div className="logo">SJ</div>
                       <div className="ti">
-                        Riad Luxe
-                        <small>ORCHESTRATOR · DASHBOARD</small>
+                        Sojori Stays
+                        <small>ORCHESTRATOR · TABLEAU DE BORD</small>
                       </div>
                     </div>
                     <div className="bh-hv-stats">
@@ -262,7 +262,7 @@ export default function BecomeHostPage() {
                   <div className="bh-fl-col">
                     <h4>Plateforme</h4>
                     <ul>
-                      <li><Link href="https://sojori.com/demo">Orchestrator PMS</Link></li>
+                      <li><Link href="https://business.sojori.com">Orchestrator PMS</Link></li>
                       <li>WhatsApp Flows</li>
                       <li>Dynamic Pricing</li>
                       <li>Channel Manager</li>
@@ -273,7 +273,7 @@ export default function BecomeHostPage() {
                     <ul>
                       <li><button type="button" style={{ background: 'none', border: 0, color: 'inherit', cursor: 'pointer', padding: 0, font: 'inherit' }} onClick={() => openForm('pm')}>PM Professionnel</button></li>
                       <li><button type="button" style={{ background: 'none', border: 0, color: 'inherit', cursor: 'pointer', padding: 0, font: 'inherit' }} onClick={() => openForm('owner')}>Propriétaire</button></li>
-                      <li><Link href="https://sojori.com/demo">Demander une démo</Link></li>
+                      <li><Link href="https://business.sojori.com">Demander une présentation</Link></li>
                     </ul>
                   </div>
                   <div className="bh-fl-col">

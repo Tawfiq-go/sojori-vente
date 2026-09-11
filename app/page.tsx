@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { fetchTenantPublic, getTenantSlug, type TenantPublic } from '@/lib/tenantPreview';
 import SiteFooterSocial from '@/components/SiteFooterSocial';
 import { useState, useEffect, useRef } from 'react';
@@ -11,9 +12,11 @@ import { useFeaturedListings } from '@/lib/hooks/useListings';
 import { useAvailableCities, useHomepageCities } from '@/lib/hooks/useCities';
 import { apiClient, type PropertyManager } from '@/lib/api/client';
 import { listingDisplayPrice } from '@/lib/pricing/listingPrice';
+import { formatMadAmount } from '@/lib/utils/formatMad';
+import { listingRatingLabel, truncatePmText } from '@/lib/utils/listingDisplay';
 import './homepage.css';
 
-export default function HomePage() {
+function HomePageContent() {
   const searchParams = useSearchParams();
 
   // Initialize from URL params only (localStorage loaded in useEffect)
@@ -62,7 +65,7 @@ export default function HomePage() {
   const guestTriggerRef = useRef<HTMLDivElement>(null);
 
   // Fetch real data from backend
-  const { listings: apiListings, loading: loadingListings } = useFeaturedListings(10);
+  const { listings: apiListings, loading: loadingListings, error: listingsError } = useFeaturedListings(10);
   const { cities: apiCities, loading: loadingCities } = useAvailableCities();
   const { cities: homepageCities, loading: loadingHomepageCities } = useHomepageCities();
 
@@ -80,6 +83,17 @@ export default function HomePage() {
       active = false;
     };
   }, []);
+
+  const marketplaceStats = (() => {
+    const listingTotal = homepageCities.reduce((s, c) => s + (c.listingCount || 0), 0);
+    const pmTotal = propertyManagers.length;
+    const ratedPms = propertyManagers.filter((pm) => (pm.rating ?? 0) > 0);
+    const avgRating =
+      ratedPms.length > 0
+        ? ratedPms.reduce((s, pm) => s + (pm.rating ?? 0), 0) / ratedPms.length
+        : null;
+    return { listingTotal, pmTotal, avgRating };
+  })();
 
   // Production data only — no fake listing fallback
   const featuredListings = apiListings;
@@ -693,26 +707,32 @@ export default function HomePage() {
         </div>
 
         {/* Hero Stats — marketplace Sojori uniquement */}
-        {!tenantActive && (
+        {!tenantActive && (marketplaceStats.listingTotal > 0 || marketplaceStats.pmTotal > 0) && (
         <div className="hero-stats">
+          {marketplaceStats.listingTotal > 0 && (
           <div>
             <span className="hs-num">
-              <b>142</b> biens
+              <b>{marketplaceStats.listingTotal}</b> biens
             </span>{' '}
             · MARRAKECH · ESSAOUIRA · FÈS · CASA
           </div>
+          )}
+          {marketplaceStats.pmTotal > 0 && (
           <div>
             <span className="hs-num">
-              <b>5</b> PMs vérifiés
+              <b>{marketplaceStats.pmTotal}</b> PM{marketplaceStats.pmTotal > 1 ? 's' : ''} vérifié{marketplaceStats.pmTotal > 1 ? 's' : ''}
             </span>{' '}
             · RÉPONSE {'<'} 2H
           </div>
+          )}
+          {marketplaceStats.avgRating != null && marketplaceStats.avgRating > 0 && (
           <div>
             <span className="hs-num">
-              <b>4.8</b> note moyenne
+              <b>{marketplaceStats.avgRating.toFixed(1)}</b> note moyenne
             </span>{' '}
-            · 12 847 AVIS
+            · PARTENAIRES SOJORI
           </div>
+          )}
         </div>
         )}
       </section>
@@ -748,7 +768,7 @@ export default function HomePage() {
               : null;
             const showRating = !!pm.rating && pm.rating > 0;
             // Citation featured = description sinon tagline — jamais de texte fictif
-            const quote = pm.description || pm.tagline || null;
+            const quote = truncatePmText(pm.description || pm.tagline);
 
             return (
               <Link
@@ -829,6 +849,12 @@ export default function HomePage() {
             <div style={{ padding: '60px', textAlign: 'center', width: '100%', color: 'var(--ink3)' }}>
               Chargement des biens...
             </div>
+          ) : featuredListings.length === 0 ? (
+            <div style={{ padding: '60px', textAlign: 'center', width: '100%', color: 'var(--ink3)' }}>
+              {listingsError
+                ? 'Impossible de charger les biens. Vérifiez votre connexion et rechargez la page.'
+                : 'Aucun bien disponible pour le moment.'}
+            </div>
           ) : (
             featuredListings.map((listing, idx) => {
               // Handle both API and mockup data structures
@@ -890,15 +916,17 @@ export default function HomePage() {
                   <div className="car-info">
                     <div className="top">
                       <div className="nm">{listing.title}</div>
+                      {listingRatingLabel(listing.rating) && (
                       <div className="rating">
-                        <span className="star">★</span> {listing.rating || 4.8}
+                        <span className="star">★</span> {listingRatingLabel(listing.rating)}
                       </div>
+                      )}
                     </div>
                     <div className="loc">
                       {listing.neighborhood || listing.city}, {listing.city.charAt(0).toUpperCase() + listing.city.slice(1)}
                     </div>
                     <div className="price">
-                      <b>{cardPrice(listing)} {listing.currency || 'MAD'}</b>
+                      <b>{formatMadAmount(cardPrice(listing))} {listing.currency || 'MAD'}</b>
                       <span className="per">/ nuit</span>
                     </div>
                   </div>
@@ -952,7 +980,7 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* AI Chat Mockup */}
+          {/* Aperçu visuel — pas de résultats fictifs */}
           <div className="am-chat">
             <div className="am-chat-head">
               <div className="av">✨</div>
@@ -968,19 +996,12 @@ export default function HomePage() {
               </div>
               <div className="am-msg b">
                 <div className="am-bub">
-                  Parfait ! J'ai trouvé 12 riads correspondant à vos critères. Voici ma sélection :
+                  Je croise vos critères avec les biens disponibles sur Sojori et les conciergeries partenaires.
+                  Lancez la recherche pour voir les résultats en direct.
                 </div>
                 <div className="am-tool-chip">
                   <div className="ic">🔍</div>
                   RECHERCHE · MARRAKECH · 6 PERS · PISCINE
-                </div>
-                <div className="am-result">
-                  <div className="ph"></div>
-                  <div className="info">
-                    <div className="nm">Riad de la Bahia</div>
-                    <div className="meta">Médina · 8 pers · ★ 4.9</div>
-                    <div className="price">189€/nuit</div>
-                  </div>
                 </div>
               </div>
               <div className="am-typing">
@@ -1178,5 +1199,34 @@ export default function HomePage() {
         Sojori AI<div className="ic">✨</div>
       </button>
     </>
+  );
+}
+
+function HomePageFallback() {
+  return (
+    <>
+      <Navigation />
+      <div
+        className="hero"
+        style={{
+          minHeight: '70vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--ink3)',
+          fontSize: 15,
+        }}
+      >
+        Chargement…
+      </div>
+    </>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<HomePageFallback />}>
+      <HomePageContent />
+    </Suspense>
   );
 }

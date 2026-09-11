@@ -6,7 +6,19 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   // Clerk prod keys + localhost (allowed_origins côté Clerk Dashboard/API)
-  allowedDevOrigins: ['localhost:6001', '127.0.0.1:6001'],
+  allowedDevOrigins: [
+    'localhost',
+    '127.0.0.1',
+    'localhost:4001',
+    '127.0.0.1:4001',
+    'localhost:6001',
+    '127.0.0.1:6001',
+    '172.20.10.2',
+    '172.20.10.2:4001',
+    '192.168.*',
+    '10.*',
+    '172.*',
+  ],
 
   // Turbopack for faster development
   turbopack: {},
@@ -43,42 +55,37 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['@clerk/nextjs', 'lucide-react'],
   },
 
-  // Headers for security and performance
+  // Headers for security and performance (HSTS etc. uniquement en prod — casse le dev HTTP/LAN)
   async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
-          },
+    const isProd = process.env.NODE_ENV === 'production';
+    const baseHeaders = [
+      { key: 'X-DNS-Prefetch-Control', value: 'on' },
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
+    ];
+    const prodOnlyHeaders = isProd
+      ? [
           {
             key: 'Strict-Transport-Security',
             value: 'max-age=63072000; includeSubDomains; preload',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
           },
           {
             key: 'Content-Security-Policy',
             value:
               "frame-ancestors 'self' https://app.sojori.com http://127.0.0.1:3001 http://localhost:3001",
           },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
-        ],
+        ]
+      : [];
+
+    return [
+      {
+        source: '/:path*',
+        headers: [...baseHeaders, ...prodOnlyHeaders],
       },
       // Cache static assets aggressively
       {

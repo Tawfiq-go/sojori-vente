@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { formatMadAmount } from '@/lib/utils/formatMad';
 import styles from './AvailabilityCalendar.module.css';
 
 export interface DayPricing {
@@ -341,33 +342,33 @@ export default function AvailabilityCalendar({
                         {Math.round(pricing.subtotal / pricing.nights)} {currency} × {pricing.nights}{' '}
                         {pricing.nights > 1 ? 'nuits' : 'nuit'}
                       </span>
-                      <span className={styles.value}>{pricing.subtotal} {currency}</span>
+                      <span className={styles.value}>{formatMadAmount(pricing.subtotal)} {currency}</span>
                     </div>
                   )}
 
                   <div className={`${styles.bdLine} ${styles.sub}`}>
                     <span>Sous-total</span>
-                    <span className={styles.value}>{pricing.subtotal} {currency}</span>
+                    <span className={styles.value}>{formatMadAmount(pricing.subtotal)} {currency}</span>
                   </div>
 
                   <div className={styles.bdLine}>
                     <span>Frais de service ({serviceFeePercent}%)</span>
-                    <span className={styles.value}>{pricing.serviceFee} {currency}</span>
+                    <span className={styles.value}>{formatMadAmount(pricing.serviceFee)} {currency}</span>
                   </div>
 
                   <div className={styles.bdLine}>
                     <span>Taxe de séjour ({taxPercent}%)</span>
-                    <span className={styles.value}>{pricing.tax} {currency}</span>
+                    <span className={styles.value}>{formatMadAmount(pricing.tax)} {currency}</span>
                   </div>
 
                   <div className={`${styles.bdLine} ${styles.total}`}>
                     <span>TOTAL</span>
-                    <span className={styles.value}>{pricing.total} {currency}</span>
+                    <span className={styles.value}>{formatMadAmount(pricing.total)} {currency}</span>
                   </div>
                 </div>
 
                 <button type="button" className={styles.recapCta}>
-                  Réserver · {pricing.total} {currency}
+                  Réserver · {formatMadAmount(pricing.total)} {currency}
                 </button>
               </>
             )}

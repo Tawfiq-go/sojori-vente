@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { apiClient, type PropertyManager, type Listing } from '@/lib/api/client';
 import { listingDisplayPrice } from '@/lib/pricing/listingPrice';
+import { formatMadAmount } from '@/lib/utils/formatMad';
 
 export default function PMPage() {
   const params = useParams();
@@ -497,7 +498,7 @@ export default function PMPage() {
                         return price > 0 ? (
                           <>
                             <span style={{ fontSize: '16px', fontWeight: '700', letterSpacing: '-0.01em' }}>
-                              {price} {listing.currency || 'MAD'}
+                              {formatMadAmount(price)} {listing.currency || 'MAD'}
                             </span>
                             <span style={{ color: 'var(--ink3)', fontSize: '13px', fontWeight: '500' }}>
                               /nuit

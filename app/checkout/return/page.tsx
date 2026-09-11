@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { PAYMENT_MODE } from '@/lib/config/payment';
 import { getPaymentIntent } from '@/lib/services/paymentService';
 import { getGuestReservationByNumber } from '@/lib/services/napsRedirectService';
+import { clearCheckoutPending, readCheckoutPending } from '@/lib/utils/checkoutPending';
 
 type PageStatus = 'loading' | 'success' | 'error';
 
@@ -18,43 +19,38 @@ function CheckoutReturnPage() {
   useEffect(() => {
     const reservationFromQuery = searchParams.get('reservationNumber');
     const failed = searchParams.get('status') === 'failed';
-    const repauto = searchParams.get('repauto');
 
     async function verifyRedirectReturn() {
+      const ctx = readCheckoutPending();
       const reservationNumber =
-        reservationFromQuery || localStorage.getItem('pendingReservationNumber');
+        reservationFromQuery || ctx?.reservationNumber || null;
 
       if (!reservationNumber) {
         throw new Error('Aucune réservation en attente trouvée');
       }
 
       if (failed) {
-        localStorage.removeItem('pendingReservationNumber');
-        const detail = repauto
-          ? ` (code NAPS ${repauto})`
-          : '';
-        throw new Error(`Le paiement a été refusé ou annulé sur la page NAPS${detail}`);
+        clearCheckoutPending();
+        throw new Error('Le paiement n’a pas abouti. Vous pouvez réessayer depuis le checkout.');
       }
 
-      // Poll: NAPS callback may arrive slightly after browser redirect
+      // Poll: confirmation bancaire peut arriver quelques secondes après le retour navigateur
       let attempts = 0;
       while (attempts < 8) {
         const reservation = await getGuestReservationByNumber(reservationNumber);
         if (reservation.paymentStatus === 'Paid' || reservation.paymentStatus === 'paid') {
           setReservationNumber(reservation.reservationNumber);
           setStatus('success');
-          localStorage.removeItem('pendingReservationNumber');
+          clearCheckoutPending();
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, 1000));
         attempts++;
       }
 
-      localStorage.removeItem('pendingReservationNumber');
-      const lastErr = (await getGuestReservationByNumber(reservationNumber)).lastNapsError?.userMessage;
+      clearCheckoutPending();
       throw new Error(
-        lastErr ||
-          'Paiement non confirmé. Le callback NAPS est peut-être en retard ou le 3DS a échoué côté banque.',
+        'Paiement non confirmé pour le moment. Si le débit apparaît sur votre relevé, contactez-nous avec votre référence.',
       );
     }
 
@@ -224,9 +220,9 @@ function CheckoutReturnPage() {
               border: '1px solid #fbbf24',
             }}
           >
-            <p style={{ color: '#92400e', margin: 0 }}>
-              Votre paiement a été accepté par NAPS. La confirmation finale arrive en quelques
-              secondes — vous recevrez un email avec votre numéro de réservation.
+            <p style={{ color: 'var(--ink2)', margin: 0 }}>
+              Votre paiement est en cours de validation. Vous recevrez un email de confirmation avec votre
+              numéro de réservation dans quelques instants.
             </p>
           </div>
         )}
