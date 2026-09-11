@@ -4,7 +4,9 @@
 
 import { MetadataRoute } from 'next';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://sojori.com';
+// 2026-09-11 : le site de location déménage de sojori.com (repris par le
+// SaaS) vers book.sojori.com. Le repli suit la nouvelle adresse.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://book.sojori.com';
 
 export default function robots(): MetadataRoute.Robots {
   return {

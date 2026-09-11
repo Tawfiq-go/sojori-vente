@@ -86,21 +86,21 @@ export const metadata: Metadata = {
 };
 
 // Organization JSON-LD volontairement minimal — l'entité "Sojori" canonique vit sur
-// business.sojori.com (logiciel B2B). sojori.com n'est qu'un produit rattaché
+// sojori.com (logiciel B2B). book.sojori.com n'est qu'un produit rattaché
 // (marketplace grand public), référencé ici via sameAs plutôt que dupliqué en detail
-// (adresse/contactPoint complets restent uniquement sur business.sojori.com).
+// (adresse/contactPoint complets restent uniquement sur sojori.com).
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Sojori',
-  url: 'https://business.sojori.com',
+  url: 'https://sojori.com',
   sameAs: [
     SITE_URL,
     'https://www.linkedin.com/company/108488739',
     'https://instagram.com/sojoriapp',
   ],
   description:
-    "Sojori est une entreprise de technologie hôtelière. sojori.com est sa marketplace de location courte durée au Maroc (riads, villas, appartements) ; business.sojori.com est sa plateforme de gestion locative pour property managers professionnels.",
+    "Sojori est une entreprise de technologie hôtelière. sojori.com est sa plateforme de gestion locative pour property managers professionnels ; book.sojori.com est sa marketplace de location courte durée au Maroc (riads, villas, appartements).",
 };
 
 const websiteJsonLd = {
@@ -111,7 +111,7 @@ const websiteJsonLd = {
   publisher: {
     '@type': 'Organization',
     name: 'Sojori',
-    url: 'https://business.sojori.com',
+    url: 'https://sojori.com',
   },
 };
 
