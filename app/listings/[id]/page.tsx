@@ -456,7 +456,7 @@ export default function ListingPage() {
           Photos
         </a>
         <a href="#amenities">Équipements</a>
-        <a href="#calendar">Disponibilités</a>
+        <a href="#availability">Disponibilités</a>
         <a href="#location">Emplacement</a>
         <a href="#reviews">Avis</a>
         <div className={styles.priceMini}>
@@ -1209,7 +1209,7 @@ export default function ListingPage() {
           </div>
 
           {/* ─── BOOKING CARD ─── */}
-          <div className={styles.bookCol} id="calendar">
+          <div className={styles.bookCol}>
             <div className={styles.bookCard}>
               <div className={styles.bookPrice}>
                 <PriceDisplay
