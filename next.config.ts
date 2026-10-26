@@ -72,7 +72,7 @@ const nextConfig: NextConfig = {
           {
             key: 'Content-Security-Policy',
             value:
-              "frame-ancestors 'self' https://app.sojori.com http://127.0.0.1:3001 http://localhost:3001 http://localhost:3002",
+              "frame-ancestors 'self' https://app.sojori.com http://127.0.0.1:3001 http://localhost:3001",
           },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           {
