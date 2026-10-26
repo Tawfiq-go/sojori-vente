@@ -8,8 +8,8 @@
  */
 import { useEffect } from 'react'
 
-/** Les origines qui peuvent déjà encadrer le site (frame-ancestors de next.config.ts), pas plus. */
-const ORIGINES = new Set(['https://app.sojori.com', 'http://localhost:3001', 'http://127.0.0.1:3001'])
+/** Les origines qui peuvent encadrer le site (frame-ancestors de next.config.ts), pas plus. */
+const ORIGINES = new Set(['https://app.sojori.com', 'https://admin.sojori.com'])
 
 export function AnnotationApercu() {
   useEffect(() => {
