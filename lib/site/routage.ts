@@ -7,7 +7,11 @@
 import type { Langue } from './types'
 
 const SITE_API = (process.env.SITE_API_URL || 'https://api.sojori.com/api/v1/public/sites').replace(/\/+$/, '')
+/** Un site publié se relit chaque minute ; un PM sans site, toutes les 10 minutes (revue de #17 :
+ * sinon chaque domaine sans site attend jusqu'à 2,5 s par minute). 500 domaines au plus en mémoire. */
 const CACHE_MS = 60_000
+const CACHE_NEGATIF_MS = 10 * 60_000
+const CACHE_MAX = 500
 
 export type PagesDuSite = { pages: string[]; langues: { defaut: Langue; actives: Langue[] } }
 
@@ -15,7 +19,7 @@ const cache = new Map<string, { valeur: PagesDuSite | null; at: number }>()
 
 export async function pagesDuSite(slug: string): Promise<PagesDuSite | null> {
   const lu = cache.get(slug)
-  if (lu && Date.now() - lu.at < CACHE_MS) return lu.valeur
+  if (lu && Date.now() - lu.at < (lu.valeur ? CACHE_MS : CACHE_NEGATIF_MS)) return lu.valeur
   let valeur: PagesDuSite | null = null
   try {
     const r = await fetch(`${SITE_API}/pm/${encodeURIComponent(slug)}`, { signal: AbortSignal.timeout(2500) })
@@ -29,6 +33,12 @@ export async function pagesDuSite(slug: string): Promise<PagesDuSite | null> {
   } catch {
     // srv-site injoignable : le site du PM reste celui d'avant, rien ne casse.
   }
+  cache.delete(slug)
   cache.set(slug, { valeur, at: Date.now() })
+  while (cache.size > CACHE_MAX) {
+    const plusAncien = cache.keys().next().value
+    if (plusAncien === undefined) break
+    cache.delete(plusAncien)
+  }
   return valeur
 }
