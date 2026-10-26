@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { AnnotationApercu } from '@/components/site/AnnotationApercu'
 import { SitePm } from '@/components/site/SitePm'
 import { lireApercu } from '@/lib/site/api'
 import { lireCible } from '@/lib/site/route'
@@ -27,12 +28,15 @@ export default async function ApercuDuSite(props: Props) {
   const page = site.spec.pages.find((p) => p.chemin === cible.chemin)
   if (!page) notFound()
   return (
-    <SitePm
-      site={site}
-      slug={slug}
-      base={`/site-apercu/${encodeURIComponent(jeton)}/${encodeURIComponent(slug)}`}
-      langue={cible.langue}
-      page={page}
-    />
+    <>
+      <SitePm
+        site={site}
+        slug={slug}
+        base={`/site-apercu/${encodeURIComponent(jeton)}/${encodeURIComponent(slug)}`}
+        langue={cible.langue}
+        page={page}
+      />
+      <AnnotationApercu />
+    </>
   )
 }

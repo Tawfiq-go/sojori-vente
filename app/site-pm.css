@@ -410,3 +410,12 @@
   padding: 0 16px;
   font-family: system-ui, sans-serif;
 }
+
+/* Mode Annoter de l'aperçu (lot 4) : la section survolée est entourée, le clic la désigne. */
+.site-pm.annoter [data-section] {
+  cursor: crosshair;
+}
+.site-pm.annoter [data-section]:hover {
+  outline: 2px dashed #c2410c;
+  outline-offset: 4px;
+}
