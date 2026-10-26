@@ -27,6 +27,13 @@ const MOTS = {
   },
   hebergement: { fr: 'Site hébergé par Sojori.', en: 'Site hosted by Sojori.', ar: 'الموقع مستضاف لدى Sojori.' },
   apercu: { fr: 'Aperçu — non publié', en: 'Preview — not published', ar: 'معاينة — غير منشور' },
+  ecrireWhatsapp: { fr: 'Nous écrire sur WhatsApp', en: 'Message us on WhatsApp', ar: 'راسلنا عبر واتساب' },
+  bonjourWhatsapp: {
+    fr: 'Bonjour, je vous écris depuis votre site.',
+    en: 'Hello, I am writing to you from your website.',
+    ar: 'مرحبًا، أكتب إليكم من موقعكم.',
+  },
+  formulaire: { fr: 'Formulaire de contact', en: 'Contact form', ar: 'استمارة التواصل' },
 } as const
 
 export const mot = (cle: keyof typeof MOTS, langue: Langue) => MOTS[cle][langue]

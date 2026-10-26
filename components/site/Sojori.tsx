@@ -112,10 +112,54 @@ function Legal({ s, ctx }: { s: Extract<Section, { niveau: 'sojori' }>; ctx: Con
   )
 }
 
+/**
+ * Contact : le WhatsApp du compte du PM (décision de Tawfiq, 27/10/2026) et le formulaire de sa page
+ * de contact, relié à son CRM (anti-spam et plafond côté srv-crm). Les deux sont figés à la mise en
+ * ligne ; l'aperçu montre le numéro d'aujourd'hui.
+ */
+function Contact({ s, ctx }: { s: Extract<Section, { niveau: 'sojori' }>; ctx: Contexte }) {
+  const { whatsapp, formulaire } = ctx.site.contact ?? { whatsapp: null, formulaire: null }
+  const avecWhatsapp = s.reglages.whatsapp !== false && Boolean(whatsapp)
+  const avecFormulaire = s.reglages.formulaire !== false && Boolean(formulaire)
+  const titre = typeof s.reglages.titre === 'string' ? s.reglages.titre : ''
+  if (!avecWhatsapp && !avecFormulaire && !ctx.site.apercu) return null
+  return (
+    <section className="section contact" data-section={s.id} id={s.id}>
+      {titre && <h2>{titre}</h2>}
+      {avecWhatsapp && (
+        <a
+          className="bouton contact__whatsapp"
+          href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(mot('bonjourWhatsapp', ctx.langue))}`}
+          target="_blank"
+          rel="noopener nofollow"
+        >
+          {mot('ecrireWhatsapp', ctx.langue)}
+        </a>
+      )}
+      {avecFormulaire && (
+        <iframe
+          className="contact__formulaire"
+          src={formulaire as string}
+          title={mot('formulaire', ctx.langue)}
+          loading="lazy"
+        />
+      )}
+      {ctx.site.apercu && !avecFormulaire && s.reglages.formulaire !== false && (
+        <p className="a-venir">
+          Le formulaire de votre page de contact s’affichera ici à la mise en ligne, si votre page de
+          contact est en ligne.
+        </p>
+      )}
+      {ctx.site.apercu && !avecWhatsapp && s.reglages.whatsapp !== false && (
+        <p className="a-venir">Aucun numéro sur votre compte : le bouton WhatsApp n’apparaîtra pas.</p>
+      )}
+    </section>
+  )
+}
+
 const A_VENIR: Record<string, string> = {
   avis: 'les avis de vos voyageurs',
   faq: 'vos questions fréquentes',
-  contact: 'votre contact WhatsApp et le formulaire',
   carte: 'la carte de vos logements',
   experiences: 'vos expériences et services',
   recherche: 'la recherche par dates',
@@ -125,11 +169,12 @@ const A_VENIR: Record<string, string> = {
 export async function BlocSojori({ s, ctx }: { s: Extract<Section, { niveau: 'sojori' }>; ctx: Contexte }) {
   if (s.type === 'logements') return <Logements s={s} ctx={ctx} />
   if (s.type === 'legal') return <Legal s={s} ctx={ctx} />
+  if (s.type === 'contact') return <Contact s={s} ctx={ctx} />
   // Pas encore branché : rien pour les visiteurs, une place visible dans l'aperçu.
   if (!ctx.site.apercu) return null
   return (
     <section className="section a-venir" data-section={s.id} id={s.id}>
-      Bloc « {s.type} » : {A_VENIR[s.type] ?? 'bientôt'} s’afficheront ici.
+      Bloc « {s.type} » à venir : {A_VENIR[s.type] ?? 'bientôt'}.
     </section>
   )
 }
