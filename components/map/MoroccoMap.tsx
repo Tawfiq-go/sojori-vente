@@ -13,6 +13,7 @@ import {
   clampToMoroccoBounds,
 } from '@/lib/geo/moroccoCities';
 import styles from './MoroccoMap.module.css';
+import { FOND_DE_CARTE } from '@/lib/geo/fondDeCarte';
 
 interface MoroccoMapProps {
   city?: string;
@@ -114,12 +115,13 @@ export function MoroccoMap({
         minZoom={MOROCCO_MAP_MIN_ZOOM}
         maxZoom={MOROCCO_MAP_MAX_ZOOM}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
-          maxZoom={19}
-        />
+        {FOND_DE_CARTE && (
+          <TileLayer
+            attribution={FOND_DE_CARTE.attribution}
+            url={FOND_DE_CARTE.url}
+            maxZoom={FOND_DE_CARTE.maxZoom}
+          />
+        )}
 
         <Marker position={[coords.lat, coords.lng]} icon={customIcon}>
           <Popup className={styles.popup}>

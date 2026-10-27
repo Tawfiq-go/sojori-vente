@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 6001",
+    "prebuild": "node scripts/garde-fond-de-carte.mjs",
     "build": "next build",
     "start": "next start -p 6001",
     "lint": "eslint",

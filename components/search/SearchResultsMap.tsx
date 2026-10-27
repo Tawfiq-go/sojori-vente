@@ -15,6 +15,7 @@ import {
 } from '@/lib/geo/moroccoCities';
 import SearchMapListingPreview from './SearchMapListingPreview';
 import styles from './SearchResultsMap.module.css';
+import { FOND_DE_CARTE } from '@/lib/geo/fondDeCarte';
 
 export type SearchMapListing = {
   id: string;
@@ -468,12 +469,13 @@ export default function SearchResultsMap({
         className={styles.map}
       >
         <MapRefCapture mapRef={mapRef} />
-        <TileLayer
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
-          maxZoom={19}
-        />
+        {FOND_DE_CARTE && (
+          <TileLayer
+            attribution={FOND_DE_CARTE.attribution}
+            url={FOND_DE_CARTE.url}
+            maxZoom={FOND_DE_CARTE.maxZoom}
+          />
+        )}
         <FitBounds points={points} fitKey={fitKey} />
         <MapResize trigger={mapKey} />
         <MapZoomTracker onZoom={setZoom} />
