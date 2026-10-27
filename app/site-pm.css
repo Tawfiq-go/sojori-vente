@@ -1,0 +1,421 @@
+/* Le site d'un PM (agent Site web) : tout est enfermé dans .site-pm, rien ne déborde sur sojori-vente. */
+.site-pm, .site-pm *,
+.site-pm *::before,
+.site-pm *::after {
+  box-sizing: border-box;
+}
+.site-pm {
+  margin: 0;
+  background: var(--fond, #fbf8f2);
+  color: var(--texte, #2a2522);
+  font-family: var(--police-texte, system-ui, sans-serif);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.site-pm img,
+.site-pm video {
+  display: block;
+  max-width: 100%;
+}
+.site-pm h1,
+.site-pm h2,
+.site-pm h3 {
+  font-family: var(--police-titres, Georgia, serif);
+  line-height: 1.15;
+  margin: 0 0 16px;
+  font-weight: 600;
+}
+.site-pm h1 {
+  font-size: clamp(34px, 6vw, 60px);
+}
+.site-pm h2 {
+  font-size: clamp(26px, 4vw, 38px);
+}
+.site-pm a {
+  color: var(--accent);
+}
+.site-pm .muet {
+  opacity: 0.75;
+}
+.site-pm .multiligne {
+  white-space: pre-line;
+}
+
+.site-pm .bouton {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 12px 22px;
+  min-height: 44px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--fond);
+  font-weight: 600;
+  text-decoration: none;
+}
+.site-pm .bouton:hover {
+  filter: brightness(1.08);
+}
+
+.site-pm .bandeau-apercu {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 6px 16px;
+  background: #c2410c;
+  color: #fff;
+  font: 600 13px/1.4 system-ui, sans-serif;
+  text-align: center;
+}
+
+/* En-tête et pied */
+.site-pm .entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  padding: 16px clamp(16px, 4vw, 48px);
+}
+.site-pm .entete__nom {
+  font-family: var(--police-titres);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  margin-inline-end: auto;
+}
+.site-pm .entete__nom img {
+  height: 40px;
+  width: auto;
+}
+.site-pm .entete__menu,
+.site-pm .entete__langues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+}
+.site-pm .entete__menu a,
+.site-pm .entete__langues a {
+  color: inherit;
+  text-decoration: none;
+  padding: 6px 0;
+}
+.site-pm .entete__menu a[aria-current],
+.site-pm .entete__langues a[aria-current] {
+  color: var(--accent);
+  font-weight: 600;
+}
+.site-pm .pied {
+  margin-top: var(--espace);
+  padding: 32px clamp(16px, 4vw, 48px);
+  border-top: 1px solid var(--accent-doux);
+  font-size: 14px;
+}
+.site-pm .pied__liens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.site-pm .pied__liens a {
+  color: inherit;
+}
+
+/* Sections : une largeur de lecture, l'espacement du thème */
+.site-pm .section {
+  max-width: 1200px;
+  margin: var(--espace) auto 0;
+  padding: 0 clamp(16px, 4vw, 48px);
+}
+
+/* Bandeau */
+.site-pm .bandeau {
+  position: relative;
+}
+.site-pm .bandeau--plein_ecran {
+  max-width: none;
+  margin-top: 0;
+  padding: 0;
+  min-height: 72vh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: var(--texte);
+}
+.site-pm .bandeau--plein_ecran .bandeau__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.78;
+}
+.site-pm .bandeau--plein_ecran::after {
+  /* Un voile en bas de l'image : le titre reste lisible sur une photo claire. */
+  content: '';
+  position: absolute;
+  inset: 40% 0 0;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.55), transparent);
+}
+.site-pm .bandeau--plein_ecran .bandeau__texte {
+  position: relative;
+  z-index: 1;
+  padding: clamp(24px, 6vw, 72px);
+  color: #fff;
+  max-width: 760px;
+}
+.site-pm .bandeau--moitie {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+  align-items: center;
+}
+.site-pm .bandeau--moitie .bandeau__media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--arrondi);
+}
+.site-pm .bandeau--texte_seul .bandeau__texte {
+  max-width: 760px;
+}
+.site-pm .bandeau__sous {
+  font-size: 18px;
+}
+
+/* Texte et image */
+.site-pm .texteImage {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+  align-items: center;
+}
+.site-pm .texteImage__media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--arrondi);
+}
+.site-pm .texteImage--image_droite .texteImage__media {
+  order: 2;
+}
+.site-pm .texteImage--image_dessus {
+  grid-template-columns: 1fr;
+}
+
+/* Galerie */
+.site-pm .galerie__grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.site-pm .galerie__media {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--arrondi);
+}
+.site-pm .galerie--mosaique .galerie__media:nth-child(5n + 1) {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+.site-pm .galerie--carrousel .galerie__grille {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+.site-pm .galerie--carrousel .galerie__media {
+  flex: 0 0 min(80%, 420px);
+  scroll-snap-align: start;
+}
+
+/* Chiffres, témoignages, équipe */
+.site-pm .chiffres__liste,
+.site-pm .temoignages__liste,
+.site-pm .equipe__liste {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+.site-pm .chiffres__item strong {
+  display: block;
+  font-family: var(--police-titres);
+  font-size: 40px;
+  color: var(--accent);
+}
+.site-pm .chiffres--cartes .chiffres__item,
+.site-pm .temoignages--cartes .temoignages__item {
+  padding: 20px;
+  border-radius: var(--arrondi);
+  background: var(--accent-doux);
+}
+.site-pm .temoignages__item {
+  margin: 0;
+}
+.site-pm .temoignages__item blockquote {
+  margin: 0 0 8px;
+  font-style: italic;
+}
+.site-pm .temoignages--citation .temoignages__liste {
+  grid-template-columns: 1fr;
+  max-width: 760px;
+  font-size: 22px;
+}
+.site-pm .equipe__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.site-pm .equipe__photo {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--arrondi);
+}
+
+/* Appel */
+.site-pm .appel__boite {
+  padding: clamp(24px, 5vw, 56px);
+  border-radius: var(--arrondi);
+  background: var(--accent-doux);
+  text-align: center;
+}
+
+/* Logements (bloc Sojori) */
+.site-pm .logements__liste {
+  display: grid;
+  grid-template-columns: repeat(var(--colonnes, 3), minmax(0, 1fr));
+  gap: 20px;
+}
+@media (max-width: 900px) {
+  .site-pm .logements__liste {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .site-pm .logements__liste {
+    grid-template-columns: 1fr;
+  }
+}
+.site-pm .logements--carrousel .logements__liste {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+.site-pm .logements--carrousel .logement-carte {
+  flex: 0 0 min(80%, 340px);
+  scroll-snap-align: start;
+}
+.site-pm .logements--liste .logements__liste {
+  grid-template-columns: 1fr;
+}
+.site-pm .logements--liste .logement-carte {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+.site-pm .logements--liste .logement-carte img {
+  flex: 0 1 320px;
+  min-width: 0;
+}
+.site-pm .logements--liste .logement-carte__texte {
+  flex: 1 1 240px;
+}
+.site-pm .logement-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+.site-pm .logement-carte img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--arrondi);
+}
+.site-pm .logement-carte__texte {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Page d'un logement */
+.site-pm .page-logement h1 {
+  font-size: clamp(28px, 4vw, 44px);
+}
+.site-pm .page-logement__photos img:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+.site-pm .page-logement__photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+}
+.site-pm .page-logement__photos img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--arrondi);
+}
+.site-pm .page-logement__corps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+.site-pm .page-logement__corps > div {
+  flex: 999 1 420px;
+  min-width: 0;
+}
+.site-pm .page-logement__reserver {
+  flex: 1 1 260px;
+  align-self: flex-start;
+  padding: 20px;
+  border-radius: var(--arrondi);
+  background: var(--accent-doux);
+}
+.site-pm .page-logement__equipements {
+  columns: 2 220px;
+  padding-inline-start: 18px;
+}
+
+/* Mentions légales */
+.site-pm .legal__liste {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 20px;
+}
+.site-pm .legal__liste div {
+  display: contents;
+}
+.site-pm .legal__liste dt {
+  font-weight: 600;
+}
+.site-pm .legal__liste dd {
+  margin: 0;
+}
+
+/* Un bloc pas encore branché (aperçu seulement) */
+.site-pm .a-venir {
+  padding: 18px;
+  border: 2px dashed var(--accent);
+  border-radius: var(--arrondi);
+  font-size: 14px;
+}
+
+.site-pm .introuvable {
+  max-width: 640px;
+  margin: 15vh auto;
+  padding: 0 16px;
+  font-family: system-ui, sans-serif;
+}
+
+/* Mode Annoter de l'aperçu (lot 4) : la section survolée est entourée, le clic la désigne. */
+.site-pm.annoter [data-section] {
+  cursor: crosshair;
+}
+.site-pm.annoter [data-section]:hover {
+  outline: 2px dashed #c2410c;
+  outline-offset: 4px;
+}

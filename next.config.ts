@@ -72,7 +72,9 @@ const nextConfig: NextConfig = {
           {
             key: 'Content-Security-Policy',
             value:
-              "frame-ancestors 'self' https://app.sojori.com http://127.0.0.1:3001 http://localhost:3001",
+              // Seules les adresses réelles du tableau de bord encadrent un site de PM (aperçu « Site web ») :
+              // jamais localhost en production (revue de #17, go de Tawfiq du 26/10/2026).
+              "frame-ancestors 'self' https://app.sojori.com https://admin.sojori.com",
           },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           {

@@ -1,5 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { estUnCheminDuSite } from '@/lib/site/route';
+import { pagesDuSite } from '@/lib/site/routage';
 import { TENANT_COOKIE, lastResolveDebug, resolveTenantFromHost } from '@/lib/tenantDomains';
 
 /** Seules ces routes exigent une session — tout le reste (homepage, listings…) reste public. */
@@ -15,6 +17,11 @@ export default clerkMiddleware(async (auth, req) => {
   // Proxy API dev local : pas de résolution tenant / Clerk inutile
   if (path.startsWith('/api/sojori')) {
     return NextResponse.next();
+  }
+
+  // Le site d'un PM ne s'ouvre que sur SON domaine (réécriture plus bas), jamais en direct.
+  if (path === '/site-pm' || path.startsWith('/site-pm/')) {
+    return new NextResponse('Not found', { status: 404 });
   }
 
   if (COMING_SOON && !isComingSoonBypass(req)) {
@@ -47,6 +54,18 @@ export default clerkMiddleware(async (auth, req) => {
       const redirect = NextResponse.redirect(url);
       redirect.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
       return redirect;
+    }
+    // Site composé par l'agent Site web : ses pages viennent de sa fiche publiée (srv-site) ;
+    // logements, réservation et compte restent les pages de sojori-vente.
+    const site = await pagesDuSite(tenant);
+    if (site && estUnCheminDuSite(path, site.pages, site.langues)) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/site-pm/${tenant}${path === '/' ? '' : path}`;
+      const rw = NextResponse.rewrite(url);
+      rw.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
+      rw.headers.set('x-pm-resolve', lastResolveDebug || 'static');
+      rw.headers.set('x-pm-site', 'fiche');
+      return rw;
     }
     const res = NextResponse.next();
     res.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });

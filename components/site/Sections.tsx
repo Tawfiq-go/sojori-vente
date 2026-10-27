@@ -1,0 +1,169 @@
+/**
+ * Les sections d'une page : bibliothèque (mise en page commune, variantes), sur mesure (HTML et CSS
+ * déjà filtrés et préparés par srv-site) et blocs Sojori (données en direct). Chaque section porte
+ * `data-section` : l'écran « Site web » s'en sert pour annoter (lot 4). Rendu serveur seulement.
+ */
+import { lien } from '@/lib/site/route'
+import { t } from '@/lib/site/texte'
+import type { Langue, Media, Section, SitePublic } from '@/lib/site/types'
+import { BlocSojori } from './Sojori'
+
+export type Contexte = {
+  site: SitePublic
+  /** Le slug du PM : la liste publique de ses logements (`?pm=`). */
+  slug: string
+  /** '' sur le domaine du PM ; `/site-apercu/<jeton>` dans l'aperçu. */
+  base: string
+  langue: Langue
+  defaut: Langue
+}
+
+function MediaVue({ ref_, site, className, alt }: { ref_: unknown; site: SitePublic; className?: string; alt?: string }) {
+  const m: Media | undefined = typeof ref_ === 'string' ? site.medias[ref_] : undefined
+  if (!m) return null
+  if (m.type === 'video')
+    return <video className={className} src={m.url} autoPlay muted loop playsInline aria-label={alt || m.alt || ''} />
+  return <img className={className} src={m.url} alt={alt || m.alt || ''} loading="lazy" />
+}
+
+/** Un lien de la fiche : interne (/chemin), ancre (#…), ou externe (https, mailto, tel). */
+function href(cible: unknown, ctx: Contexte): string | undefined {
+  if (typeof cible !== 'string' || !cible) return undefined
+  if (cible.startsWith('/')) return lien(ctx.base, ctx.langue, ctx.defaut, cible.slice(1))
+  return cible
+}
+
+function Bouton({ texte, cible, ctx }: { texte: unknown; cible: unknown; ctx: Contexte }) {
+  const libelle = t(texte, ctx.langue, ctx.defaut)
+  const h = href(cible, ctx)
+  if (!libelle || !h) return null
+  const externe = /^https:/i.test(h)
+  return (
+    <a className="bouton" href={h} {...(externe ? { target: '_blank', rel: 'noopener nofollow' } : {})}>
+      {libelle}
+    </a>
+  )
+}
+
+const elements = (v: unknown): Array<Record<string, unknown>> =>
+  Array.isArray(v) ? v.filter((x): x is Record<string, unknown> => Boolean(x) && typeof x === 'object') : []
+
+function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque' }>; ctx: Contexte }) {
+  const c = s.contenu
+  const tx = (k: string) => t(c[k], ctx.langue, ctx.defaut)
+  const classe = `section ${s.type} ${s.type}--${s.variante}`
+  switch (s.type) {
+    case 'bandeau':
+      return (
+        <section className={classe} data-section={s.id} id={s.id}>
+          {s.variante !== 'texte_seul' && <MediaVue ref_={c.media} site={ctx.site} className="bandeau__media" />}
+          <div className="bandeau__texte">
+            {tx('titre') && <h1>{tx('titre')}</h1>}
+            {tx('sousTitre') && <p className="bandeau__sous">{tx('sousTitre')}</p>}
+            <Bouton texte={c.bouton} cible={c.lien} ctx={ctx} />
+          </div>
+        </section>
+      )
+    case 'texteImage':
+      return (
+        <section className={classe} data-section={s.id} id={s.id}>
+          <MediaVue ref_={c.media} site={ctx.site} className="texteImage__media" />
+          <div className="texteImage__texte">
+            {tx('titre') && <h2>{tx('titre')}</h2>}
+            {tx('texte') && <p className="multiligne">{tx('texte')}</p>}
+            <Bouton texte={c.bouton} cible={c.lien} ctx={ctx} />
+          </div>
+        </section>
+      )
+    case 'galerie':
+      return (
+        <section className={classe} data-section={s.id} id={s.id}>
+          {tx('titre') && <h2>{tx('titre')}</h2>}
+          <div className="galerie__grille">
+            {(Array.isArray(c.medias) ? c.medias : []).map((m) => (
+              <MediaVue key={String(m)} ref_={m} site={ctx.site} className="galerie__media" />
+            ))}
+          </div>
+        </section>
+      )
+    case 'chiffres':
+      return (
+        <section className={classe} data-section={s.id} id={s.id}>
+          {tx('titre') && <h2>{tx('titre')}</h2>}
+          <div className="chiffres__liste">
+            {elements(c.elements).map((e, i) => (
+              <div key={i} className="chiffres__item">
+                <strong>{t(e.valeur, ctx.langue, ctx.defaut)}</strong>
+                <span>{t(e.libelle, ctx.langue, ctx.defaut)}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+    case 'temoignages':
+      return (
+        <section className={classe} data-section={s.id} id={s.id}>
+          {tx('titre') && <h2>{tx('titre')}</h2>}
+          <div className="temoignages__liste">
+            {elements(c.elements).map((e, i) => (
+              <figure key={i} className="temoignages__item">
+                <blockquote>{t(e.texte, ctx.langue, ctx.defaut)}</blockquote>
+                <figcaption>{t(e.auteur, ctx.langue, ctx.defaut)}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )
+    case 'appel':
+      return (
+        <section className={classe} data-section={s.id} id={s.id}>
+          <div className="appel__boite">
+            {tx('titre') && <h2>{tx('titre')}</h2>}
+            {tx('texte') && <p>{tx('texte')}</p>}
+            <Bouton texte={c.bouton} cible={c.lien} ctx={ctx} />
+          </div>
+        </section>
+      )
+    case 'equipe':
+      return (
+        <section className={classe} data-section={s.id} id={s.id}>
+          {tx('titre') && <h2>{tx('titre')}</h2>}
+          <div className="equipe__liste">
+            {elements(c.elements).map((e, i) => (
+              <div key={i} className="equipe__item">
+                <MediaVue ref_={e.photo} site={ctx.site} className="equipe__photo" alt={t(e.nom, ctx.langue, ctx.defaut)} />
+                <strong>{t(e.nom, ctx.langue, ctx.defaut)}</strong>
+                <span>{t(e.role, ctx.langue, ctx.defaut)}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+    default:
+      return null
+  }
+}
+
+/** Sur mesure : HTML filtré à l'écriture et préparé par srv-site (médias, CSS enfermé). */
+function Mesure({ s, ctx }: { s: Extract<Section, { niveau: 'mesure' }>; ctx: Contexte }) {
+  const html = t(s.html, ctx.langue, ctx.defaut)
+  if (!html) return null
+  return (
+    <section className="section mesure" data-section={s.id} id={s.id}>
+      {s.css && <style>{s.css}</style>}
+      <div dangerouslySetInnerHTML={{ __html: html }} />
+    </section>
+  )
+}
+
+export function Sections({ sections, ctx }: { sections: Section[]; ctx: Contexte }) {
+  return (
+    <>
+      {sections.map((s) => {
+        if (s.niveau === 'bibliotheque') return <Bibliotheque key={s.id} s={s} ctx={ctx} />
+        if (s.niveau === 'mesure') return <Mesure key={s.id} s={s} ctx={ctx} />
+        return <BlocSojori key={s.id} s={s} ctx={ctx} />
+      })}
+    </>
+  )
+}
