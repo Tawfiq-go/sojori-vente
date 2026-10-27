@@ -33,13 +33,27 @@ function href(cible: unknown, ctx: Contexte): string | undefined {
   return cible
 }
 
-function Bouton({ texte, cible, ctx }: { texte: unknown; cible: unknown; ctx: Contexte }) {
+function Bouton({
+  texte,
+  cible,
+  ctx,
+  second = false,
+}: {
+  texte: unknown
+  cible: unknown
+  ctx: Contexte
+  second?: boolean
+}) {
   const libelle = t(texte, ctx.langue, ctx.defaut)
   const h = href(cible, ctx)
   if (!libelle || !h) return null
   const externe = /^https:/i.test(h)
   return (
-    <a className="bouton" href={h} {...(externe ? { target: '_blank', rel: 'noopener nofollow' } : {})}>
+    <a
+      className={second ? 'bouton bouton--second' : 'bouton'}
+      href={h}
+      {...(externe ? { target: '_blank', rel: 'noopener nofollow' } : {})}
+    >
       {libelle}
     </a>
   )
@@ -48,20 +62,40 @@ function Bouton({ texte, cible, ctx }: { texte: unknown; cible: unknown; ctx: Co
 const elements = (v: unknown): Array<Record<string, unknown>> =>
   Array.isArray(v) ? v.filter((x): x is Record<string, unknown> => Boolean(x) && typeof x === 'object') : []
 
+/** Un ou deux boutons (le second en contour), alignés. */
+function Actions({ c, ctx }: { c: Record<string, unknown>; ctx: Contexte }) {
+  if (!c.bouton && !c.bouton2) return null
+  return (
+    <div className="actions">
+      <Bouton texte={c.bouton} cible={c.lien} ctx={ctx} />
+      <Bouton texte={c.bouton2} cible={c.lien2} ctx={ctx} second />
+    </div>
+  )
+}
+
 function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque' }>; ctx: Contexte }) {
   const c = s.contenu
   const tx = (k: string) => t(c[k], ctx.langue, ctx.defaut)
   const classe = `section ${s.type} ${s.type}--${s.variante}`
+  const surTitre = tx('surTitre') ? <p className="sur-titre">{tx('surTitre')}</p> : null
   switch (s.type) {
     case 'bandeau':
       return (
         <section className={classe} data-section={s.id} id={s.id}>
           {s.variante !== 'texte_seul' && <MediaVue ref_={c.media} site={ctx.site} className="bandeau__media" />}
           <div className="bandeau__texte">
+            {surTitre}
             {tx('titre') && <h1>{tx('titre')}</h1>}
             {tx('sousTitre') && <p className="bandeau__sous">{tx('sousTitre')}</p>}
-            <Bouton texte={c.bouton} cible={c.lien} ctx={ctx} />
+            <Actions c={c} ctx={ctx} />
           </div>
+          {elements(c.infos).length > 0 && (
+            <ul className="bandeau__infos">
+              {elements(c.infos).map((e, i) => (
+                <li key={i}>{t(e.texte, ctx.langue, ctx.defaut)}</li>
+              ))}
+            </ul>
+          )}
         </section>
       )
     case 'texteImage':
@@ -69,6 +103,7 @@ function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque'
         <section className={classe} data-section={s.id} id={s.id}>
           <MediaVue ref_={c.media} site={ctx.site} className="texteImage__media" />
           <div className="texteImage__texte">
+            {surTitre}
             {tx('titre') && <h2>{tx('titre')}</h2>}
             {tx('texte') && <p className="multiligne">{tx('texte')}</p>}
             <Bouton texte={c.bouton} cible={c.lien} ctx={ctx} />
@@ -89,7 +124,9 @@ function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque'
     case 'chiffres':
       return (
         <section className={classe} data-section={s.id} id={s.id}>
+          {surTitre}
           {tx('titre') && <h2>{tx('titre')}</h2>}
+          {tx('texte') && <p className="chiffres__texte multiligne">{tx('texte')}</p>}
           <div className="chiffres__liste">
             {elements(c.elements).map((e, i) => (
               <div key={i} className="chiffres__item">
@@ -118,9 +155,10 @@ function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque'
       return (
         <section className={classe} data-section={s.id} id={s.id}>
           <div className="appel__boite">
+            {surTitre}
             {tx('titre') && <h2>{tx('titre')}</h2>}
             {tx('texte') && <p>{tx('texte')}</p>}
-            <Bouton texte={c.bouton} cible={c.lien} ctx={ctx} />
+            <Actions c={c} ctx={ctx} />
           </div>
         </section>
       )
