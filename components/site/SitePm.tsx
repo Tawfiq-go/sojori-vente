@@ -9,6 +9,7 @@ import { lienPolices, variablesDuTheme } from '@/lib/site/theme'
 import type { Langue, Page, SitePublic } from '@/lib/site/types'
 import { Sections } from './Sections'
 import '@/app/site-pm.css'
+import '@/app/site-styles.css'
 
 export function SitePm({
   site,
@@ -29,7 +30,13 @@ export function SitePm({
   const l = (lg: Langue, chemin: string) => lien(base, lg, defaut, chemin)
   const ctx = { site, slug, base, langue, defaut }
   return (
-    <div className="site-pm" dir={langue === 'ar' ? 'rtl' : 'ltr'} lang={langue} style={variablesDuTheme(site.spec.theme)}>
+    <div
+      className="site-pm"
+      data-style={site.spec.theme.style ?? 'classique'}
+      dir={langue === 'ar' ? 'rtl' : 'ltr'}
+      lang={langue}
+      style={variablesDuTheme(site.spec.theme)}
+    >
       <link rel="stylesheet" href={lienPolices(site.spec.theme)} />
       {site.apercu && <div className="bandeau-apercu">{mot('apercu', langue)}</div>}
       <header className="entete">

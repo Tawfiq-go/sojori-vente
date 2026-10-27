@@ -29,6 +29,8 @@ export type SiteSpec = {
     polices: { titres: string; texte: string }
     arrondi: 'aucun' | 'doux' | 'rond'
     densite: 'aeree' | 'normale' | 'serree'
+    /** Direction artistique (absente = classique). */
+    style?: 'classique' | 'editorial' | 'riad' | 'minimal' | 'luxe'
   }
   langues: { defaut: Langue; actives: Langue[] }
   pages: Page[]
