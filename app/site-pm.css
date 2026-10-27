@@ -560,3 +560,10 @@
   outline: 2px dashed #c2410c;
   outline-offset: 4px;
 }
+
+/* Aperçu vivant : la section que l'agent vient de changer est soulignée un instant (sojori:voir). */
+.site-pm .vient-de-changer {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+  transition: outline-color 0.6s;
+}

@@ -1,17 +1,21 @@
 'use client'
 
 /**
- * Le mode Annoter de l'aperçu (lot 4) : l'écran « Site web » du tableau de bord l'allume par
- * postMessage ; un clic sur le site ne suit plus le lien, il renvoie la page et la section visées
- * (`data-page`, `data-section`) à l'écran, qui en fait une note pour le chat. Seulement depuis les
- * origines du tableau de bord, et seulement dans l'aperçu.
+ * Le pont entre l'aperçu et le tableau de bord, par postMessage, seulement depuis ses origines :
+ *  - `sojori:annoter` (lot 4) : un clic ne suit plus le lien, il renvoie la page et la section visées
+ *    (`data-page`, `data-section`) à l'écran, qui en fait une note pour le chat ;
+ *  - `sojori:rafraichir` (aperçu vivant, Tawfiq 27/10/2026 « comme Lovable ») : relit le brouillon
+ *    sans recharger le cadre — même page, même défilement ;
+ *  - `sojori:voir` {sectionId} : amène la section à l'écran et la souligne un instant.
  */
+import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 /** Les origines qui peuvent encadrer le site (frame-ancestors de next.config.ts), pas plus. */
 const ORIGINES = new Set(['https://app.sojori.com', 'https://admin.sojori.com'])
 
 export function AnnotationApercu() {
+  const router = useRouter()
   useEffect(() => {
     let parent: string | null = null
     const racine = document.querySelector('.site-pm')
@@ -35,8 +39,20 @@ export function AnnotationApercu() {
     }
     const surMessage = (e: MessageEvent) => {
       if (!ORIGINES.has(e.origin)) return
-      const d = e.data as { type?: unknown; actif?: unknown } | null
-      if (!d || d.type !== 'sojori:annoter') return
+      const d = e.data as { type?: unknown; actif?: unknown; sectionId?: unknown } | null
+      if (!d) return
+      if (d.type === 'sojori:rafraichir') {
+        router.refresh()
+        return
+      }
+      if (d.type === 'sojori:voir' && typeof d.sectionId === 'string' && /^[a-z0-9]{4,24}$/.test(d.sectionId)) {
+        const cible = document.querySelector(`[data-section="${d.sectionId}"]`)
+        cible?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        cible?.classList.add('vient-de-changer')
+        window.setTimeout(() => cible?.classList.remove('vient-de-changer'), 2400)
+        return
+      }
+      if (d.type !== 'sojori:annoter') return
       parent = d.actif === true ? e.origin : null
       racine?.classList.toggle('annoter', Boolean(parent))
     }
@@ -46,6 +62,6 @@ export function AnnotationApercu() {
       window.removeEventListener('message', surMessage)
       document.removeEventListener('click', surClic, true)
     }
-  }, [])
+  }, [router])
   return null
 }
