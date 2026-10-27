@@ -44,6 +44,8 @@ export type SitePublic = {
   medias: Record<string, Media>
   /** Les mentions légales de la version publiée (raison sociale, ICE, RC, adresse…). */
   mentions: Record<string, string> | null
+  /** Le bloc « contact » : numéro WhatsApp (chiffres, pour wa.me) et formulaire de la page de contact du PM. */
+  contact?: { whatsapp: string | null; formulaire: string | null }
   version: number | null
   apercu: boolean
 }

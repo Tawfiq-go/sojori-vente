@@ -213,6 +213,10 @@
   object-fit: cover;
   border-radius: var(--arrondi);
 }
+.site-pm .galerie--mosaique .galerie__grille {
+  /* Les grandes photos laissent des trous : les petites viennent les combler (recette du 27/10). */
+  grid-auto-flow: dense;
+}
 .site-pm .galerie--mosaique .galerie__media:nth-child(5n + 1) {
   grid-column: span 2;
   grid-row: span 2;
@@ -394,6 +398,21 @@
 }
 .site-pm .legal__liste dd {
   margin: 0;
+}
+
+/* Contact : bouton WhatsApp, puis le formulaire de la page de contact (srv-crm) */
+.site-pm .contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+.site-pm .contact__formulaire {
+  width: 100%;
+  min-height: 640px;
+  border: 0;
+  border-radius: var(--arrondi);
+  background: #fff;
 }
 
 /* Un bloc pas encore branché (aperçu seulement) */
