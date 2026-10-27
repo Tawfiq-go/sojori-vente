@@ -38,6 +38,9 @@ const MOTS = {
   depart: { fr: 'Départ', en: 'Check-out', ar: 'المغادرة' },
   adultes: { fr: 'Voyageurs', en: 'Guests', ar: 'الضيوف' },
   rechercher: { fr: 'Voir les disponibilités', en: 'Check availability', ar: 'تحقق من التوفر' },
+  questionsFrequentes: { fr: 'Questions fréquentes', en: 'Frequently asked questions', ar: 'أسئلة شائعة' },
+  nosExperiences: { fr: 'Expériences et services', en: 'Experiences and services', ar: 'تجارب وخدمات' },
+  surDevis: { fr: 'Sur devis', en: 'On request', ar: 'حسب الطلب' },
   surLaCarte: { fr: 'Nos logements sur la carte', en: 'Our homes on the map', ar: 'مساكننا على الخريطة' },
 } as const
 

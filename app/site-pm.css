@@ -479,6 +479,64 @@
   font: inherit;
 }
 
+/* Questions fréquentes */
+.site-pm .faq__liste {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 860px;
+}
+.site-pm .faq__item {
+  padding: 14px 18px;
+  border-radius: var(--arrondi);
+  background: var(--accent-doux);
+}
+.site-pm .faq__item summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.site-pm .faq__item p {
+  margin: 10px 0 0;
+}
+
+/* Expériences */
+.site-pm .experiences__liste {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+.site-pm .experiences--liste .experiences__liste {
+  grid-template-columns: 1fr;
+}
+.site-pm .experience {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.site-pm .experiences--liste .experience {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.site-pm .experience img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--arrondi);
+}
+.site-pm .experiences--liste .experience img {
+  flex: 0 1 280px;
+}
+.site-pm .experience__texte {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 240px;
+}
+.site-pm .experience__texte p {
+  margin: 0;
+}
+
 /* Un bloc pas encore branché (aperçu seulement) */
 .site-pm .a-venir {
   padding: 18px;
