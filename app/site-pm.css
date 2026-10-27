@@ -415,6 +415,70 @@
   background: #fff;
 }
 
+/* Avis des voyageurs */
+.site-pm .avis__liste {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+.site-pm .avis--carrousel .avis__liste {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+.site-pm .avis--carrousel .avis__item {
+  flex: 0 0 min(85%, 360px);
+  scroll-snap-align: start;
+}
+.site-pm .avis__item {
+  margin: 0;
+  padding: 20px;
+  border-radius: var(--arrondi);
+  background: var(--accent-doux);
+}
+.site-pm .avis__item blockquote {
+  margin: 8px 0;
+  font-style: italic;
+}
+.site-pm .avis__note {
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+
+/* Carte des logements */
+.site-pm .carte__cadre {
+  height: 440px;
+  border-radius: var(--arrondi);
+  overflow: hidden;
+}
+
+/* Recherche par dates */
+.site-pm .recherche__barre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  padding: 20px;
+  border-radius: var(--arrondi);
+  background: var(--accent-doux);
+}
+.site-pm .recherche__barre label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 150px;
+  font-size: 14px;
+}
+.site-pm .recherche__barre input {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--accent);
+  border-radius: calc(var(--arrondi) / 2);
+  background: var(--fond);
+  color: var(--texte);
+  font: inherit;
+}
+
 /* Un bloc pas encore branché (aperçu seulement) */
 .site-pm .a-venir {
   padding: 18px;
