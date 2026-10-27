@@ -46,6 +46,9 @@ export type SitePublic = {
   mentions: Record<string, string> | null
   /** Le bloc « contact » : numéro WhatsApp (chiffres, pour wa.me) et formulaire de la page de contact du PM. */
   contact?: { whatsapp: string | null; formulaire: string | null }
+  /** Les questions fréquentes validées du PM et ses expériences actives, figées à la mise en ligne. */
+  faq?: Array<{ question: string; reponse: string }>
+  experiences?: Array<{ titre: string; description?: string; prix?: number; devise?: string; photo?: string }>
   version: number | null
   apercu: boolean
 }

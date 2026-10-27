@@ -252,9 +252,72 @@ function Recherche({ s, ctx }: { s: Extract<Section, { niveau: 'sojori' }>; ctx:
   )
 }
 
+/** Questions fréquentes : les réponses par défaut du PM validées par un humain, figées à la mise en ligne. */
+function QuestionsFrequentes({ s, ctx }: { s: Extract<Section, { niveau: 'sojori' }>; ctx: Contexte }) {
+  const faq = (ctx.site.faq ?? []).slice(0, Math.min(20, Math.max(3, nombre(s.reglages.nombre, 8))))
+  const titre = typeof s.reglages.titre === 'string' ? s.reglages.titre : mot('questionsFrequentes', ctx.langue)
+  if (!faq.length) {
+    return ctx.site.apercu ? (
+      <section className="section a-venir" data-section={s.id} id={s.id}>
+        Vos questions fréquentes validées s’afficheront ici à la mise en ligne.
+      </section>
+    ) : null
+  }
+  return (
+    <section className="section faq" data-section={s.id} id={s.id}>
+      {titre && <h2>{titre}</h2>}
+      <div className="faq__liste">
+        {faq.map((q) => (
+          <details key={q.question} className="faq__item">
+            <summary>{q.question}</summary>
+            <p className="multiligne">{q.reponse}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+/** Expériences : les expériences actives du PM, figées à la mise en ligne. */
+function Experiences({ s, ctx }: { s: Extract<Section, { niveau: 'sojori' }>; ctx: Contexte }) {
+  const liste = ctx.site.experiences ?? []
+  const titre = typeof s.reglages.titre === 'string' ? s.reglages.titre : mot('nosExperiences', ctx.langue)
+  const variante = s.reglages.variante === 'liste' ? 'liste' : 'grille'
+  if (!liste.length) {
+    return ctx.site.apercu ? (
+      <section className="section a-venir" data-section={s.id} id={s.id}>
+        Vos expériences actives s’afficheront ici à la mise en ligne.
+      </section>
+    ) : null
+  }
+  return (
+    <section className={`section experiences experiences--${variante}`} data-section={s.id} id={s.id}>
+      {titre && <h2>{titre}</h2>}
+      <div className="experiences__liste">
+        {liste.map((e) => (
+          <article key={e.titre} className="experience">
+            {e.photo && <img src={e.photo} alt={e.titre} loading="lazy" />}
+            <div className="experience__texte">
+              <strong>{e.titre}</strong>
+              {e.description && <p className="muet">{e.description}</p>}
+              <span>
+                {e.prix != null ? (
+                  <>
+                    {mot('aPartirDe', ctx.langue)} <b>{prix(e.prix, e.devise || 'MAD', ctx.langue)}</b>
+                  </>
+                ) : (
+                  mot('surDevis', ctx.langue)
+                )}
+              </span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 const A_VENIR: Record<string, string> = {
-  faq: 'vos questions fréquentes',
-  experiences: 'vos expériences et services',
   logement: 'la page d’un logement',
 }
 
@@ -265,6 +328,8 @@ export async function BlocSojori({ s, ctx }: { s: Extract<Section, { niveau: 'so
   if (s.type === 'avis') return <AvisVoyageurs s={s} ctx={ctx} />
   if (s.type === 'carte') return <CarteDesLogements s={s} ctx={ctx} />
   if (s.type === 'recherche') return <Recherche s={s} ctx={ctx} />
+  if (s.type === 'faq') return <QuestionsFrequentes s={s} ctx={ctx} />
+  if (s.type === 'experiences') return <Experiences s={s} ctx={ctx} />
   // Pas encore branché : rien pour les visiteurs, une place visible dans l'aperçu.
   if (!ctx.site.apercu) return null
   return (
