@@ -34,6 +34,11 @@ const MOTS = {
     ar: 'مرحبًا، أكتب إليكم من موقعكم.',
   },
   formulaire: { fr: 'Formulaire de contact', en: 'Contact form', ar: 'استمارة التواصل' },
+  arrivee: { fr: 'Arrivée', en: 'Check-in', ar: 'الوصول' },
+  depart: { fr: 'Départ', en: 'Check-out', ar: 'المغادرة' },
+  adultes: { fr: 'Voyageurs', en: 'Guests', ar: 'الضيوف' },
+  rechercher: { fr: 'Voir les disponibilités', en: 'Check availability', ar: 'تحقق من التوفر' },
+  surLaCarte: { fr: 'Nos logements sur la carte', en: 'Our homes on the map', ar: 'مساكننا على الخريطة' },
 } as const
 
 export const mot = (cle: keyof typeof MOTS, langue: Langue) => MOTS[cle][langue]

@@ -63,4 +63,20 @@ export type Logement = {
   images?: string[]
   description?: string
   amenities?: string[]
+  /** Coordonnées de srv-listing ; un logement sans coordonnées n'a ni l'une ni l'autre (jamais 0,0). */
+  lat?: number
+  lng?: number
+  rating?: number
+  reviewCount?: number
+}
+
+/** Un avis de voyageur, tel que `GET /api/v1/guest/listings/:id/reviews` le rend (PII déjà retirées). */
+export type Avis = {
+  id: string
+  prenom: string
+  note: number | null
+  texte: string
+  plateforme?: string
+  date?: string
+  logement: string
 }
