@@ -23,7 +23,14 @@ export type Page = {
 
 export type SiteSpec = {
   v: 1
-  identite: { nom: string; logo?: string }
+  identite: {
+    nom: string
+    logo?: string
+    /** L'en-tête : logo seul (défaut s'il y a un logo), logo et nom, nom seul. */
+    affichage?: 'logo' | 'logo_nom' | 'nom'
+    /** Le bouton WhatsApp flottant, au numéro du bloc contact. */
+    whatsappFlottant?: boolean
+  }
   theme: {
     couleurs: { fond: string; texte: string; accent: string; accentDoux: string }
     polices: { titres: string; texte: string }
