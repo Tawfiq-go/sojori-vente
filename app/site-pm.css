@@ -568,6 +568,20 @@
   outline-offset: 4px;
 }
 
+/* Un texte modifiable sur place (data-champ) : souligné au survol ; en cours de saisie, encadré. */
+.site-pm.annoter [data-champ]:hover {
+  outline: 1px dotted #c2410c;
+  outline-offset: 2px;
+  cursor: text;
+}
+.site-pm .en-edition,
+.site-pm.annoter .en-edition:hover {
+  outline: 2px solid #c2410c;
+  outline-offset: 3px;
+  cursor: text;
+  caret-color: #c2410c;
+}
+
 /* Aperçu vivant : la section que l'agent vient de changer est soulignée un instant (sojori:voir). */
 .site-pm .vient-de-changer {
   outline: 3px solid var(--accent);
