@@ -5,9 +5,11 @@ const ESPACE = { aeree: '96px', normale: '64px', serree: '40px' } as const
 
 /** Les variables CSS du thème : toutes les sections les lisent, blocs Sojori compris. */
 export function variablesDuTheme(theme: SiteSpec['theme']): Record<string, string> {
+  // Immersif : toujours sombre (fond presque noir, texte clair) ; l'accent reste celui du PM.
+  const sombre = theme.style === 'immersif'
   return {
-    '--fond': theme.couleurs.fond,
-    '--texte': theme.couleurs.texte,
+    '--fond': sombre ? '#0d0c0b' : theme.couleurs.fond,
+    '--texte': sombre ? '#f4efe7' : theme.couleurs.texte,
     '--accent': theme.couleurs.accent,
     '--accent-doux': theme.couleurs.accentDoux,
     '--police-titres': `'${theme.polices.titres}', Georgia, serif`,

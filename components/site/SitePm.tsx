@@ -7,9 +7,14 @@ import { lien } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
 import { lienPolices, variablesDuTheme } from '@/lib/site/theme'
 import type { Langue, Page, SitePublic } from '@/lib/site/types'
+import { AssistantSite } from './AssistantSite'
+import { Reseaux, WhatsappFlottant } from './Reseaux'
 import { Sections } from './Sections'
 import '@/app/site-pm.css'
 import '@/app/site-styles.css'
+
+/** Le jeton de l'aperçu, lu dans le préfixe de ses liens (`/site-apercu/<jeton>/<slug>`). */
+const jetonDe = (base: string) => decodeURIComponent(base.split('/')[2] ?? '')
 
 export function SitePm({
   site,
@@ -27,12 +32,16 @@ export function SitePm({
   const { defaut, actives } = site.spec.langues
   const legal = site.spec.pages.find((p) => p.sections.some((s) => s.niveau === 'sojori' && s.type === 'legal'))
   const logo = site.spec.identite.logo ? site.medias[site.spec.identite.logo] : undefined
+  // L'en-tête : logo seul (défaut quand il y en a un), logo et nom, ou nom seul (28/10/2026).
+  const affichage = site.spec.identite.affichage ?? 'logo'
+  const whatsapp = site.spec.identite.whatsappFlottant ? site.contact?.whatsapp : null
   const l = (lg: Langue, chemin: string) => lien(base, lg, defaut, chemin)
   const ctx = { site, slug, base, langue, defaut }
   return (
     <div
       className="site-pm"
       data-style={site.spec.theme.style ?? 'classique'}
+      data-anim={site.spec.theme.animations ?? 'douces'}
       dir={langue === 'ar' ? 'rtl' : 'ltr'}
       lang={langue}
       style={variablesDuTheme(site.spec.theme)}
@@ -40,8 +49,11 @@ export function SitePm({
       <link rel="stylesheet" href={lienPolices(site.spec.theme)} />
       {site.apercu && <div className="bandeau-apercu">{mot('apercu', langue)}</div>}
       <header className="entete">
-        <a className="entete__nom" href={l(langue, '')}>
-          {logo ? <img src={logo.url} alt={site.spec.identite.nom} /> : site.spec.identite.nom}
+        <a className="entete__nom" href={l(langue, '')} data-affichage={affichage}>
+          {affichage !== 'nom' && logo && (
+            <img src={logo.url} alt={affichage === 'logo' ? site.spec.identite.nom : ''} />
+          )}
+          {(affichage !== 'logo' || !logo) && <span>{site.spec.identite.nom}</span>}
         </a>
         <nav className="entete__menu" aria-label="Menu">
           {site.spec.pages
@@ -68,14 +80,19 @@ export function SitePm({
       <footer className="pied">
         {t(site.spec.piedDePage.texte, langue, defaut) && <p>{t(site.spec.piedDePage.texte, langue, defaut)}</p>}
         <div className="pied__liens">
-          {(site.spec.piedDePage.reseaux ?? []).map((r) => (
-            <a key={r.type} href={r.url} target="_blank" rel="noopener nofollow">
-              {r.type}
-            </a>
-          ))}
+          <Reseaux reseaux={site.spec.piedDePage.reseaux ?? []} />
           {legal && <a href={l(langue, legal.chemin)}>{mot('mentions', langue)}</a>}
         </div>
       </footer>
+      {whatsapp && <WhatsappFlottant numero={whatsapp} langue={langue} />}
+      {site.spec.identite.assistant && (
+        <AssistantSite
+          cible={site.apercu ? { jeton: jetonDe(base) } : { slug }}
+          langue={langue}
+          whatsapp={site.contact?.whatsapp}
+          suffixe={base ? `?pm=${encodeURIComponent(slug)}` : ''}
+        />
+      )}
     </div>
   )
 }
