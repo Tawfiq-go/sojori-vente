@@ -7,10 +7,14 @@ import { lien } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
 import { lienPolices, variablesDuTheme } from '@/lib/site/theme'
 import type { Langue, Page, SitePublic } from '@/lib/site/types'
+import { AssistantSite } from './AssistantSite'
 import { Reseaux, WhatsappFlottant } from './Reseaux'
 import { Sections } from './Sections'
 import '@/app/site-pm.css'
 import '@/app/site-styles.css'
+
+/** Le jeton de l'aperçu, lu dans le préfixe de ses liens (`/site-apercu/<jeton>/<slug>`). */
+const jetonDe = (base: string) => decodeURIComponent(base.split('/')[2] ?? '')
 
 export function SitePm({
   site,
@@ -81,6 +85,14 @@ export function SitePm({
         </div>
       </footer>
       {whatsapp && <WhatsappFlottant numero={whatsapp} langue={langue} />}
+      {site.spec.identite.assistant && (
+        <AssistantSite
+          cible={site.apercu ? { jeton: jetonDe(base) } : { slug }}
+          langue={langue}
+          whatsapp={site.contact?.whatsapp}
+          suffixe={base ? `?pm=${encodeURIComponent(slug)}` : ''}
+        />
+      )}
     </div>
   )
 }

@@ -30,6 +30,8 @@ export type SiteSpec = {
     affichage?: 'logo' | 'logo_nom' | 'nom'
     /** Le bouton WhatsApp flottant, au numéro du bloc contact. */
     whatsappFlottant?: boolean
+    /** L'espace IA du site (bulle de Réservation directe), si le PM l'a allumé. */
+    assistant?: boolean
   }
   theme: {
     couleurs: { fond: string; texte: string; accent: string; accentDoux: string }

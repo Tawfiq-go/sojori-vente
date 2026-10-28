@@ -42,6 +42,30 @@ const MOTS = {
   nosExperiences: { fr: 'Expériences et services', en: 'Experiences and services', ar: 'تجارب وخدمات' },
   surDevis: { fr: 'Sur devis', en: 'On request', ar: 'حسب الطلب' },
   surLaCarte: { fr: 'Nos logements sur la carte', en: 'Our homes on the map', ar: 'مساكننا على الخريطة' },
+  // L'espace IA du site (28/10/2026)
+  assistantOuvrir: { fr: 'Poser une question', en: 'Ask a question', ar: 'اطرح سؤالاً' },
+  assistantTitre: { fr: 'Votre séjour, en direct', en: 'Your stay, booked direct', ar: 'إقامتك، مباشرة' },
+  assistantAccueil: {
+    fr: 'Bonjour ! Dites-moi vos dates et le nombre de voyageurs : je vous montre ce qui est libre, avec le prix exact.',
+    en: 'Hello! Tell me your dates and how many guests: I will show you what is available, with the exact price.',
+    ar: 'مرحبًا! أخبرني بتواريخك وعدد الضيوف: سأعرض عليك المتاح بالسعر الدقيق.',
+  },
+  assistantSaisie: { fr: 'Écrivez ou dictez…', en: 'Type or dictate…', ar: 'اكتب أو أملِ…' },
+  assistantEnvoyer: { fr: 'Envoyer', en: 'Send', ar: 'إرسال' },
+  assistantDicter: { fr: 'Dicter', en: 'Dictate', ar: 'إملاء' },
+  assistantEcoute: { fr: 'J’écoute… touchez pour terminer', en: 'Listening… tap to finish', ar: 'أستمع… المس للإنهاء' },
+  assistantLire: { fr: 'Lire les réponses à voix haute', en: 'Read answers aloud', ar: 'قراءة الردود بصوت عالٍ' },
+  assistantFermer: { fr: 'Fermer', en: 'Close', ar: 'إغلاق' },
+  assistantConfirmer: { fr: 'Confirmer la réservation', en: 'Confirm the booking', ar: 'تأكيد الحجز' },
+  assistantEcarter: { fr: 'Non merci', en: 'No thanks', ar: 'لا، شكرًا' },
+  assistantPayer: { fr: 'Payer en ligne', en: 'Pay online', ar: 'الدفع عبر الإنترنت' },
+  assistantPour: { fr: 'pour', en: 'for', ar: 'لـ' },
+  assistantNuits: { fr: 'nuits', en: 'nights', ar: 'ليالٍ' },
+  assistantErreur: {
+    fr: 'Je n’arrive pas à répondre pour l’instant. Réessayez, ou écrivez-nous sur WhatsApp.',
+    en: 'I cannot answer right now. Please try again, or message us on WhatsApp.',
+    ar: 'لا أستطيع الرد الآن. حاول مجددًا أو راسلنا عبر واتساب.',
+  },
 } as const
 
 export const mot = (cle: keyof typeof MOTS, langue: Langue) => MOTS[cle][langue]
