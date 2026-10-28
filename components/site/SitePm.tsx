@@ -37,6 +37,7 @@ export function SitePm({
     <div
       className="site-pm"
       data-style={site.spec.theme.style ?? 'classique'}
+      data-anim={site.spec.theme.animations ?? 'douces'}
       dir={langue === 'ar' ? 'rtl' : 'ltr'}
       lang={langue}
       style={variablesDuTheme(site.spec.theme)}

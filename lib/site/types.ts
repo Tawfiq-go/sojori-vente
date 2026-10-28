@@ -37,7 +37,9 @@ export type SiteSpec = {
     arrondi: 'aucun' | 'doux' | 'rond'
     densite: 'aeree' | 'normale' | 'serree'
     /** Direction artistique (absente = classique). */
-    style?: 'classique' | 'editorial' | 'riad' | 'minimal' | 'luxe'
+    style?: 'classique' | 'editorial' | 'riad' | 'minimal' | 'luxe' | 'moderne' | 'immersif'
+    /** Le mouvement au défilement (absent = douces ; rien en classique). */
+    animations?: 'aucune' | 'douces'
   }
   langues: { defaut: Langue; actives: Langue[] }
   pages: Page[]

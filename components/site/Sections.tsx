@@ -20,11 +20,37 @@ export type Contexte = {
   defaut: Langue
 }
 
-function MediaVue({ ref_, site, className, alt }: { ref_: unknown; site: SitePublic; className?: string; alt?: string }) {
+function MediaVue({
+  ref_,
+  site,
+  className,
+  alt,
+  attente,
+}: {
+  ref_: unknown
+  site: SitePublic
+  className?: string
+  alt?: string
+  /** L'image montrée le temps que la vidéo se charge (bandeau, `imageAttente`). */
+  attente?: unknown
+}) {
   const m: Media | undefined = typeof ref_ === 'string' ? site.medias[ref_] : undefined
   if (!m) return null
+  const poster = typeof attente === 'string' ? site.medias[attente] : undefined
   if (m.type === 'video')
-    return <video className={className} src={m.url} autoPlay muted loop playsInline aria-label={alt || m.alt || ''} />
+    return (
+      <video
+        className={className}
+        src={m.url}
+        poster={poster?.type === 'image' ? poster.url : undefined}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-label={alt || m.alt || ''}
+      />
+    )
   return <img className={className} src={m.url} alt={alt || m.alt || ''} loading="lazy" />
 }
 
@@ -92,7 +118,9 @@ function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque'
     case 'bandeau':
       return (
         <section className={classe} data-section={s.id} id={s.id}>
-          {s.variante !== 'texte_seul' && <MediaVue ref_={c.media} site={ctx.site} className="bandeau__media" />}
+          {s.variante !== 'texte_seul' && (
+            <MediaVue ref_={c.media} site={ctx.site} className="bandeau__media" attente={c.imageAttente} />
+          )}
           <div className="bandeau__texte">
             {surTitre}
             {tx('titre') && <h1 data-champ="titre">{tx('titre')}</h1>}

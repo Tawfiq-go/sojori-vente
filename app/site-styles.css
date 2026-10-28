@@ -522,3 +522,325 @@
   color: var(--accent);
   border-color: var(--accent);
 }
+
+/* ═══════════════════ Phase 2 : « design ultra moderne » (Tawfiq, 28/10/2026) ═══════════════════
+ *  - moderne  : grands titres serrés et gras, en-tête en pilule de verre, bandeau en carte arrondie,
+ *               cartes douces, dégradés d'accent, chiffres en dégradé ;
+ *  - immersif : fond sombre, bandeau cinéma plein écran, images bord à bord, surfaces de verre.
+ *  - Mouvement : les sections apparaissent au défilement (CSS seul, animation-timeline), sauf
+ *    `data-anim="aucune"` ou si le visiteur réduit les animations.
+ */
+
+/* ───────────────────────── moderne ───────────────────────── */
+.site-pm[data-style='moderne'] h1,
+.site-pm[data-style='moderne'] h2,
+.site-pm[data-style='moderne'] h3 {
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+}
+.site-pm[data-style='moderne'] h2 {
+  font-size: clamp(36px, 5.6vw, 76px);
+}
+.site-pm[data-style='moderne'] .sur-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.site-pm[data-style='moderne'] .sur-titre::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.site-pm[data-style='moderne'] .entete {
+  margin: 12px clamp(8px, 2vw, 24px) 0;
+  padding: 12px 14px 12px 24px;
+  border-radius: 999px;
+  top: 12px;
+  border: 1px solid color-mix(in srgb, var(--texte) 10%, transparent);
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.06);
+  background: color-mix(in srgb, var(--fond) 72%, transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+}
+.site-pm[data-style='moderne'] .entete__menu {
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+.site-pm[data-style='moderne'] .entete__menu a[aria-current] {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--texte);
+  color: var(--fond);
+}
+.site-pm[data-style='moderne'] .bouton {
+  border-radius: 999px;
+  border: 0;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #ff7a59));
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--accent) 35%, transparent);
+  font-weight: 600;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.site-pm[data-style='moderne'] .bouton:hover {
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #ff7a59));
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.site-pm[data-style='moderne'] .bouton--second {
+  background: color-mix(in srgb, var(--texte) 6%, transparent);
+  color: var(--texte);
+  box-shadow: none;
+  border: 1px solid color-mix(in srgb, var(--texte) 18%, transparent);
+}
+.site-pm[data-style='moderne'] .bouton--second:hover {
+  background: var(--texte);
+  color: var(--fond);
+  box-shadow: none;
+}
+.site-pm[data-style='moderne'] .bandeau--plein_ecran {
+  margin: 12px clamp(8px, 2vw, 24px) 0;
+  min-height: min(88vh, 820px);
+  border-radius: 32px;
+  overflow: hidden;
+}
+.site-pm[data-style='moderne'] .bandeau--plein_ecran .bandeau__texte {
+  padding-bottom: 112px;
+}
+.site-pm[data-style='moderne'] .bandeau--plein_ecran h1 {
+  font-size: clamp(52px, 9vw, 132px);
+  letter-spacing: -0.055em;
+}
+.site-pm[data-style='moderne'] .bandeau--plein_ecran .sur-titre {
+  background: rgb(255 255 255 / 0.16);
+  backdrop-filter: blur(8px);
+}
+.site-pm[data-style='moderne'] .bandeau--plein_ecran .sur-titre::before {
+  background: #fff;
+}
+.site-pm[data-style='moderne'] .bandeau--plein_ecran .bouton--second {
+  background: rgb(255 255 255 / 0.12);
+  border-color: rgb(255 255 255 / 0.35);
+  backdrop-filter: blur(8px);
+}
+.site-pm[data-style='moderne'] .bandeau__infos {
+  /* À gauche : le bouton WhatsApp flottant occupe le coin bas droit. */
+  left: clamp(20px, 5vw, 64px);
+  right: auto;
+  bottom: 28px;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 0;
+  background: none;
+  border: 0;
+  backdrop-filter: none;
+}
+.site-pm[data-style='moderne'] .bandeau__infos li {
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.14);
+  border: 1px solid rgb(255 255 255 / 0.25);
+  backdrop-filter: blur(12px);
+}
+.site-pm[data-style='moderne'] .texteImage__media,
+.site-pm[data-style='moderne'] .galerie__media,
+.site-pm[data-style='moderne'] .logement-carte,
+.site-pm[data-style='moderne'] .equipe__photo {
+  border-radius: 28px;
+}
+.site-pm[data-style='moderne'] .galerie--mosaique .galerie__media {
+  border-radius: 22px;
+}
+.site-pm[data-style='moderne'] .chiffres__liste {
+  gap: 14px;
+  border: 0;
+}
+.site-pm[data-style='moderne'] .chiffres__item,
+.site-pm[data-style='moderne'] .chiffres__item + .chiffres__item {
+  padding: 32px 28px;
+  border: 0;
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--texte) 5%, transparent);
+}
+.site-pm[data-style='moderne'] .chiffres__item strong {
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--texte)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.site-pm[data-style='moderne'] .avis__item,
+.site-pm[data-style='moderne'] .temoignages__item {
+  border: 0;
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--texte) 4%, transparent);
+}
+.site-pm[data-style='moderne'] .logement-carte {
+  background: color-mix(in srgb, var(--texte) 3%, transparent);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+.site-pm[data-style='moderne'] .logement-carte:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.12);
+}
+.site-pm[data-style='moderne'] .appel--bandeau .appel__boite {
+  border-radius: 36px;
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--accent) 85%, #fff) 0%, transparent 55%),
+    radial-gradient(120% 140% at 100% 100%, color-mix(in srgb, var(--accent) 70%, #000) 0%, transparent 60%),
+    var(--accent);
+}
+
+/* ───────────────────────── immersif ───────────────────────── */
+.site-pm[data-style='immersif'] {
+  background: var(--fond);
+  color: var(--texte);
+}
+.site-pm[data-style='immersif'] h1,
+.site-pm[data-style='immersif'] h2 {
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+.site-pm[data-style='immersif'] h2 {
+  font-size: clamp(40px, 6.4vw, 92px);
+}
+.site-pm[data-style='immersif'] .entete {
+  background: color-mix(in srgb, #0d0c0b 55%, transparent);
+  border-bottom: 1px solid rgb(255 255 255 / 0.06);
+}
+.site-pm[data-style='immersif'] .entete__nom {
+  color: var(--texte);
+}
+.site-pm[data-style='immersif'] .bandeau--plein_ecran {
+  min-height: 100vh;
+  align-items: center;
+  text-align: center;
+}
+.site-pm[data-style='immersif'] .bandeau--plein_ecran::after {
+  background:
+    radial-gradient(80% 60% at 50% 45%, rgb(13 12 11 / 0.15), rgb(13 12 11 / 0.7)),
+    linear-gradient(180deg, rgb(13 12 11 / 0.2), rgb(13 12 11 / 0.92));
+}
+.site-pm[data-style='immersif'] .bandeau--plein_ecran .bandeau__texte {
+  padding-bottom: 0;
+}
+.site-pm[data-style='immersif'] .bandeau--plein_ecran h1 {
+  margin-inline: auto;
+  font-size: clamp(56px, 10vw, 150px);
+}
+.site-pm[data-style='immersif'] .bandeau__sous {
+  margin-inline: auto;
+}
+.site-pm[data-style='immersif'] .actions {
+  justify-content: center;
+}
+.site-pm[data-style='immersif'] .bandeau--plein_ecran::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 96px;
+  width: 1px;
+  height: 56px;
+  background: linear-gradient(180deg, transparent, #fff);
+  animation: site-defiler 2.2s ease-in-out infinite;
+}
+@keyframes site-defiler {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translateY(-8px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(8px);
+  }
+}
+.site-pm[data-style='immersif'] .bouton--second {
+  color: var(--texte);
+}
+.site-pm[data-style='immersif'] .bouton--second:hover {
+  background: var(--texte);
+  color: #0d0c0b;
+}
+.site-pm[data-style='immersif'] .texteImage__media {
+  aspect-ratio: 3 / 4;
+  filter: saturate(0.9) contrast(1.05);
+}
+.site-pm[data-style='immersif'] .galerie--mosaique {
+  max-width: none;
+  padding: 0;
+}
+.site-pm[data-style='immersif'] .galerie--mosaique h2 {
+  padding: 0 clamp(20px, 5vw, 64px);
+}
+.site-pm[data-style='immersif'] .galerie--mosaique .galerie__grille {
+  gap: 4px;
+}
+.site-pm[data-style='immersif'] .chiffres__item strong {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--texte);
+}
+.site-pm[data-style='immersif'] .chiffres__liste,
+.site-pm[data-style='immersif'] .chiffres__item + .chiffres__item {
+  border-color: rgb(255 255 255 / 0.12);
+}
+.site-pm[data-style='immersif'] .avis__item,
+.site-pm[data-style='immersif'] .temoignages__item,
+.site-pm[data-style='immersif'] .logement-carte {
+  background: rgb(255 255 255 / 0.04);
+  border: 1px solid rgb(255 255 255 / 0.08);
+}
+.site-pm[data-style='immersif'] .pied {
+  border-top-color: rgb(255 255 255 / 0.1);
+}
+.site-pm[data-style='immersif'] .reseaux__lien {
+  border-color: rgb(255 255 255 / 0.18);
+}
+
+/* ───────────────── Mouvement : apparition au défilement ───────────────── */
+@keyframes site-apparition {
+  from {
+    opacity: 0;
+    transform: translateY(56px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@supports (animation-timeline: view()) {
+  .site-pm:not([data-style='classique']):not([data-anim='aucune']) main > .section:not(.bandeau) {
+    animation: site-apparition linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+  .site-pm:not([data-style='classique']):not([data-anim='aucune']) .galerie__media,
+  .site-pm:not([data-style='classique']):not([data-anim='aucune']) .logement-carte {
+    animation: site-apparition linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 70%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-pm *,
+  .site-pm *::before,
+  .site-pm *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
