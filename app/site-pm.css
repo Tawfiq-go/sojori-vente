@@ -561,10 +561,12 @@
 }
 
 /* Mode Annoter de l'aperçu (lot 4) : la section survolée est entourée, le clic la désigne. */
-.site-pm.annoter [data-section] {
+.site-pm.annoter [data-section],
+.site-pm.annoter [data-bloc] {
   cursor: crosshair;
 }
-.site-pm.annoter [data-section]:hover {
+.site-pm.annoter [data-section]:hover,
+.site-pm.annoter [data-bloc]:hover {
   outline: 2px dashed #c2410c;
   outline-offset: 4px;
 }

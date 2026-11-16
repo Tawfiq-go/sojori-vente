@@ -3,7 +3,10 @@
 /**
  * Le pont entre l'aperçu et le tableau de bord, par postMessage, seulement depuis ses origines :
  *  - `sojori:annoter` (lot 4) : un clic ne suit plus le lien, il renvoie la page et la section visées
- *    (`data-page`, `data-section`) à l'écran, qui en fait une note pour le chat ;
+ *    (`data-page`, `data-section`) à l'écran, qui en fait une note pour le chat. Mode « Modification » (Tawfiq,
+ *    16/11/2026 : « bouton modifier comme moteur réservation pour modifier le bloc ») : la note porte aussi la sorte
+ *    du bloc (`sorte` : `bandeau`, `logements`, `faq`…), et l'en-tête et le pied de page (`data-bloc`) se désignent
+ *    comme les sections (sans `sectionId` : ils sont communs à toutes les pages) ;
  *  - `sojori:rafraichir` (aperçu vivant, Tawfiq 27/10/2026 « comme Lovable ») : relit le brouillon
  *    sans recharger le cadre — même page, même défilement ;
  *  - `sojori:voir` {sectionId} : amène la section à l'écran et la souligne un instant.
@@ -49,12 +52,14 @@ export function AnnotationApercu() {
         e.preventDefault()
         return
       }
-      const section = (e.target as Element | null)?.closest('[data-section]')
+      const section = (e.target as Element | null)?.closest('[data-section], [data-bloc]')
       if (!section) return
       e.preventDefault()
       e.stopPropagation()
       const titre = section.querySelector('h1, h2, h3, strong')?.textContent?.trim()
       const classe = String(section.className).split(' ').find((c) => c && c !== 'section') ?? ''
+      const bloc = section.getAttribute('data-bloc')
+      const sorte = bloc ?? (classe && classe !== 'a-venir' ? classe : null)
       const champ = (e.target as Element).closest('[data-champ]')
       const dansSection = champ && section.contains(champ) ? champ : null
       window.parent.postMessage(
@@ -62,7 +67,8 @@ export function AnnotationApercu() {
           type: 'sojori:note',
           pageId: section.closest('[data-page]')?.getAttribute('data-page') ?? null,
           sectionId: section.getAttribute('data-section'),
-          quoi: [classe, titre ? `« ${titre.slice(0, 40)} »` : ''].filter(Boolean).join(' '),
+          sorte,
+          quoi: [bloc ?? classe, titre ? `« ${titre.slice(0, 40)} »` : ''].filter(Boolean).join(' '),
           ...(dansSection
             ? { champ: dansSection.getAttribute('data-champ'), texte: texteDe(dansSection).slice(0, 2000) }
             : {}),

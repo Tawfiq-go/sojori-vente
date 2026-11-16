@@ -49,7 +49,7 @@ export function SitePm({
       <link rel="stylesheet" href={lienPolices(site.spec.theme)} />
       {/* Pas de bandeau « Aperçu — non publié » (Tawfiq, 16/11/2026) : l'écran Site web du dashboard dit déjà
           « Brouillon — pas encore en ligne » au-dessus du cadre, et le bandeau masquait l'en-tête du site. */}
-      <header className="entete">
+      <header className="entete" data-bloc="entete">
         <a className="entete__nom" href={l(langue, '')} data-affichage={affichage}>
           {affichage !== 'nom' && logo && (
             <img src={logo.url} alt={affichage === 'logo' ? site.spec.identite.nom : ''} />
@@ -84,7 +84,7 @@ export function SitePm({
       <main data-page={page.id}>
         <Sections sections={page.sections} ctx={ctx} />
       </main>
-      <footer className="pied">
+      <footer className="pied" data-bloc="pied">
         {t(site.spec.piedDePage.texte, langue, defaut) && <p>{t(site.spec.piedDePage.texte, langue, defaut)}</p>}
         <div className="pied__liens">
           <Reseaux reseaux={site.spec.piedDePage.reseaux ?? []} />
