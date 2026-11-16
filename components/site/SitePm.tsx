@@ -64,6 +64,12 @@ export function SitePm({
               </a>
             ))}
         </nav>
+        {site.spec.identite.reserver && (
+          // « Réserver » : la recherche de réservation du PM (le moteur), limitée à ses logements (`?pm=` dans l'aperçu).
+          <a className="bouton entete__reserver" href={`/search${base ? `?pm=${encodeURIComponent(slug)}` : ''}`}>
+            {mot('reserver', langue)}
+          </a>
+        )}
         {actives.length > 1 && (
           <nav className="entete__langues" aria-label="Langue">
             {actives.map((lg) => (
