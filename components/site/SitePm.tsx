@@ -47,7 +47,8 @@ export function SitePm({
       style={variablesDuTheme(site.spec.theme)}
     >
       <link rel="stylesheet" href={lienPolices(site.spec.theme)} />
-      {site.apercu && <div className="bandeau-apercu">{mot('apercu', langue)}</div>}
+      {/* Pas de bandeau « Aperçu — non publié » (Tawfiq, 16/11/2026) : l'écran Site web du dashboard dit déjà
+          « Brouillon — pas encore en ligne » au-dessus du cadre, et le bandeau masquait l'en-tête du site. */}
       <header className="entete">
         <a className="entete__nom" href={l(langue, '')} data-affichage={affichage}>
           {affichage !== 'nom' && logo && (
