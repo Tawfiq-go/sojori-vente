@@ -8,7 +8,7 @@
 import { lien } from '@/lib/site/route'
 import { t } from '@/lib/site/texte'
 import type { Langue, Media, Section, SitePublic } from '@/lib/site/types'
-import { BlocSojori } from './Sojori'
+import { BarreRecherche, BlocSojori, FondLogement } from './Sojori'
 
 export type Contexte = {
   site: SitePublic
@@ -115,12 +115,17 @@ function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque'
     </p>
   ) : null
   switch (s.type) {
-    case 'bandeau':
+    case 'bandeau': {
+      // `plein_ecran_recherche` : le plein écran, avec la recherche de dates (comme le moteur) dans le premier écran.
+      const recherche = s.variante === 'plein_ecran_recherche'
       return (
-        <section className={classe} data-section={s.id} id={s.id}>
-          {s.variante !== 'texte_seul' && (
-            <MediaVue ref_={c.media} site={ctx.site} className="bandeau__media" attente={c.imageAttente} />
-          )}
+        <section className={recherche ? `${classe} bandeau--plein_ecran bandeau--recherche` : classe} data-section={s.id} id={s.id}>
+          {s.variante !== 'texte_seul' &&
+            (c.media === 'logement:auto' ? (
+              <FondLogement ctx={ctx} className="bandeau__media" />
+            ) : (
+              <MediaVue ref_={c.media} site={ctx.site} className="bandeau__media" attente={c.imageAttente} />
+            ))}
           <div className="bandeau__texte">
             {surTitre}
             {tx('titre') && <h1 data-champ="titre">{tx('titre')}</h1>}
@@ -130,6 +135,7 @@ function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque'
               </p>
             )}
             <Actions c={c} ctx={ctx} />
+            {recherche && <BarreRecherche ctx={ctx} />}
           </div>
           {elements(c.infos).length > 0 && (
             <ul className="bandeau__infos">
@@ -142,6 +148,7 @@ function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque'
           )}
         </section>
       )
+    }
     case 'texteImage':
       return (
         <section className={classe} data-section={s.id} id={s.id}>

@@ -925,3 +925,99 @@
     height: calc(100vh - 170px);
   }
 }
+
+/* Bouton « Réserver » de l'en-tête (`identite.reserver`) : à la fin de la ligne, avant les langues. */
+.site-pm .entete__reserver {
+  padding: 10px 22px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+/* Premier écran avec la recherche de dates (bandeau `plein_ecran_recherche`) : la barre est dans le bandeau, comme dans le moteur.
+   Sélecteurs à 4 classes : ils l'emportent sur la barre « à plat » des styles modernes (site-styles.css, chargé après). */
+.site-pm .bandeau--recherche .bandeau__texte .recherche__barre {
+  margin-top: 28px;
+  padding: 14px 16px 14px 20px;
+  gap: 8px 18px;
+  max-width: 900px;
+  align-items: flex-end;
+  color: #1c1a17;
+  background: rgb(255 255 255 / 0.96);
+  border: 0;
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.3);
+}
+.site-pm .bandeau--recherche .bandeau__texte .recherche__barre label {
+  flex: 1 1 130px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b655b;
+}
+.site-pm .bandeau--recherche .bandeau__texte .recherche__barre input {
+  border: 0;
+  border-bottom: 1px solid #ddd6ca;
+  border-radius: 0;
+  padding: 6px 0;
+  min-height: 36px;
+  font-size: 16px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #1c1a17;
+  background: transparent;
+}
+.site-pm .bandeau--recherche .bandeau__texte .recherche__barre .bouton {
+  flex: 0 0 auto;
+}
+/* Avec la barre dans le bandeau, le titre ne peut pas être géant : il laisse la place à la recherche. */
+.site-pm.site-pm .bandeau--recherche .bandeau__texte h1 {
+  font-size: clamp(40px, 6.4vw, 92px);
+  letter-spacing: -0.04em;
+  max-width: 900px;
+}
+/* Sans photo (aucun logement photographié) : un fond de la couleur du site plutôt qu'un aplat noir. */
+.site-pm .bandeau--recherche:not(:has(.bandeau__media)) {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, #000), color-mix(in srgb, var(--accent) 45%, #14100c));
+}
+@media (max-width: 700px) {
+  .site-pm .bandeau--recherche .bandeau__texte {
+    padding-bottom: 28px;
+  }
+  .site-pm .bandeau--recherche .bandeau__texte .recherche__barre .bouton {
+    flex: 1 1 100%;
+  }
+  .site-pm .entete__reserver {
+    padding: 8px 16px;
+  }
+}
+
+/* Téléphone, en-tête avec le bouton « Réserver » : nom + bouton sur la première ligne, le menu défile dessous (sinon trois lignes de liens
+   dans une pilule). Réservé aux sites qui ont ce bouton : l'en-tête des autres sites ne change pas. */
+@media (max-width: 700px) {
+  .site-pm .entete:has(.entete__reserver) {
+    border-radius: 28px;
+    gap: 8px 12px;
+  }
+  .site-pm .entete:has(.entete__reserver) .entete__nom {
+    margin-inline-end: auto;
+  }
+  .site-pm .entete:has(.entete__reserver) .entete__reserver {
+    order: 2;
+  }
+  .site-pm .entete:has(.entete__reserver) .entete__menu {
+    order: 3;
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: 4px 16px;
+    padding-bottom: 2px;
+  }
+  .site-pm .entete:has(.entete__reserver) .entete__menu a {
+    white-space: nowrap;
+  }
+  .site-pm .entete:has(.entete__reserver) .entete__langues {
+    order: 2;
+  }
+}

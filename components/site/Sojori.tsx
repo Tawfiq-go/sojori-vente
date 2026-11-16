@@ -5,6 +5,7 @@
  * Un bloc pas encore branché ne s'affiche que dans l'aperçu, avec ce qu'il deviendra.
  */
 import { lireAvis, lireLogements } from '@/lib/site/api'
+import { plusBeauLogement } from '@/lib/site/logements'
 import { mot, prix } from '@/lib/site/texte'
 import type { Logement, Section } from '@/lib/site/types'
 import { CarteSite } from './CarteSite'
@@ -225,11 +226,8 @@ async function CarteDesLogements({ s, ctx }: { s: Extract<Section, { niveau: 'so
  * Recherche : dates et voyageurs, puis la recherche de sojori-vente, limitée aux logements du PM
  * (cookie du domaine ; `pm` dans l'aperçu). Un simple formulaire GET : rien côté navigateur.
  */
-function Recherche({ s, ctx }: { s: Extract<Section, { niveau: 'sojori' }>; ctx: Contexte }) {
-  const titre = typeof s.reglages.titre === 'string' ? s.reglages.titre : ''
+export function BarreRecherche({ ctx }: { ctx: Contexte }) {
   return (
-    <section className="section recherche" data-section={s.id} id={s.id}>
-      {titre && <h2>{titre}</h2>}
       <form className="recherche__barre" action="/search" method="get">
         {ctx.base && <input type="hidden" name="pm" value={ctx.slug} />}
         <label>
@@ -248,8 +246,28 @@ function Recherche({ s, ctx }: { s: Extract<Section, { niveau: 'sojori' }>; ctx:
           {mot('rechercher', ctx.langue)}
         </button>
       </form>
+  )
+}
+
+function Recherche({ s, ctx }: { s: Extract<Section, { niveau: 'sojori' }>; ctx: Contexte }) {
+  const titre = typeof s.reglages.titre === 'string' ? s.reglages.titre : ''
+  return (
+    <section className="section recherche" data-section={s.id} id={s.id}>
+      {titre && <h2>{titre}</h2>}
+      <BarreRecherche ctx={ctx} />
     </section>
   )
+}
+
+/**
+ * La photo plein écran du premier écran quand le bandeau demande `logement:auto` : celle du plus beau
+ * logement du PM, lue en direct (la fiche ne recopie aucune photo). Sans logement photographié : rien,
+ * le bandeau garde sa couleur.
+ */
+export async function FondLogement({ ctx, className }: { ctx: Contexte; className: string }) {
+  const l = plusBeauLogement(await lireLogements(ctx.slug))
+  if (!l?.images?.[0]) return null
+  return <img className={className} src={l.images[0]} alt={l.title} fetchPriority="high" />
 }
 
 /** Questions fréquentes : les réponses par défaut du PM validées par un humain, figées à la mise en ligne. */
