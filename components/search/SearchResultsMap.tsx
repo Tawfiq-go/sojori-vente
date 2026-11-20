@@ -471,7 +471,6 @@ export default function SearchResultsMap({
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          subdomains="abcd"
           maxZoom={19}
         />
         <FitBounds points={points} fitKey={fitKey} />
