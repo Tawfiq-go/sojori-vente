@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation'
 import { AnnotationApercu } from '@/components/site/AnnotationApercu'
 import { CadreSite, CHEMIN_RESERVER } from '@/components/site/Chrome'
 import { Reservation } from '@/components/site/Reservation'
+import { metaMarqueBlanche } from '@/lib/site/meta'
+import { Villa } from '@/components/site/Villa'
+import { lireVilla } from '@/lib/site/logement'
 import { SitePm } from '@/components/site/SitePm'
 import { lireApercu } from '@/lib/site/api'
 import { lireCible } from '@/lib/site/route'
@@ -20,6 +23,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const { jeton } = await props.params
   const site = await lireApercu(jeton)
   return {
+    ...(site ? metaMarqueBlanche(site, `Aperçu · ${site.spec.identite.nom}`) : {}),
     title: site ? `Aperçu · ${site.spec.identite.nom}` : 'Aperçu',
     robots: { index: false, follow: false },
   }
@@ -37,6 +41,16 @@ export default async function ApercuDuSite(props: Props) {
     return (
       <CadreSite site={site} base={base} langue={cible.langue} chemin={CHEMIN_RESERVER}>
         <Reservation site={site} slug={slug} base={base} langue={cible.langue} valeurs={valeurs} />
+      </CadreSite>
+    )
+  }
+  // `/reserver/<id>` : la fiche d'une villa DE CE PM, dans son cadre (404 pour tout autre logement).
+  if (cible.chemin.startsWith(`${CHEMIN_RESERVER}/`)) {
+    const villa = await lireVilla(slug, cible.chemin.slice(CHEMIN_RESERVER.length + 1))
+    if (!villa) notFound()
+    return (
+      <CadreSite site={site} base={base} langue={cible.langue} chemin={cible.chemin}>
+        <Villa site={site} base={base} langue={cible.langue} villa={villa} />
       </CadreSite>
     )
   }

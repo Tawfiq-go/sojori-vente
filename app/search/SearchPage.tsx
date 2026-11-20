@@ -46,7 +46,15 @@ import type { PropertyManager } from "@/lib/api/client";
 import { logger } from "@/lib/utils/logger";
 import "./search.css";
 
-function SearchContent({ pm, integre = false }: { pm?: string; integre?: boolean }) {
+function SearchContent({
+  pm,
+  integre = false,
+  prefixeLogement,
+}: {
+  pm?: string;
+  integre?: boolean;
+  prefixeLogement?: string;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const city = searchParams.get("city");
@@ -829,7 +837,9 @@ function SearchContent({ pm, integre = false }: { pm?: string; integre?: boolean
                         const neighborhood =
                           (listing as any).neighborhood || listing.city;
 
-                        const listingUrl = buildListingUrl(listingId);
+                        const listingUrl = prefixeLogement
+                          ? `${prefixeLogement}/${encodeURIComponent(listingId)}`
+                          : buildListingUrl(listingId);
 
                         const coverImage = listing.images?.find(Boolean) || "";
 
@@ -1217,7 +1227,12 @@ function SearchContent({ pm, integre = false }: { pm?: string; integre?: boolean
 export default function SearchPage({
   pm,
   integre = false,
-}: { pm?: string; integre?: boolean } = {}) {
+  prefixeLogement,
+}: {
+  pm?: string;
+  integre?: boolean;
+  prefixeLogement?: string;
+} = {}) {
   return (
     <Suspense
       fallback={
@@ -1234,7 +1249,7 @@ export default function SearchPage({
         </div>
       }
     >
-      <SearchContent pm={pm} integre={integre} />
+      <SearchContent pm={pm} integre={integre} prefixeLogement={prefixeLogement} />
     </Suspense>
   );
 }

@@ -25,5 +25,7 @@ export function lien(base: string, langue: Langue, defaut: Langue, chemin: strin
 /** Les chemins (avec ou sans langue) que le site d'un PM sert : le reste reste à sojori-vente. */
 export function estUnCheminDuSite(chemin: string, pages: string[], langues: { defaut: Langue; actives: Langue[] }): boolean {
   const segments = chemin.split('/').filter(Boolean)
-  return pages.includes(lireCible(segments, langues).chemin)
+  const { chemin: c } = lireCible(segments, langues)
+  // La réservation du site (dates → logements du PM) et la fiche d'une villa : des pages du site, pas de la plateforme.
+  return pages.includes(c) || c === 'reserver' || /^reserver\/[A-Za-z0-9:_-]+$/.test(c)
 }

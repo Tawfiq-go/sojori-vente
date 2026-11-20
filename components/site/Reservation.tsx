@@ -47,7 +47,7 @@ export function Reservation({
         </form>
       </section>
       <section className="section mesure">
-        <SearchPage pm={slug} integre />
+        <SearchPage pm={slug} integre prefixeLogement={action} />
       </section>
     </>
   )
