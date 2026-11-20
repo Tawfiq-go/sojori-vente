@@ -7,6 +7,7 @@
  * Un seul composant pour le site publié, le domaine du client et l'aperçu du brouillon : même rendu partout.
  * Tout est lu côté serveur avec le périmètre du PM (`lib/site/moteur.ts`) ; rien du marché Sojori n'y entre.
  */
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { lireVilla } from '@/lib/site/logement'
 import { lireSejour, lireType, lireTypes, formaterPrix } from '@/lib/site/moteur'
@@ -49,13 +50,14 @@ export async function Parcours({
   const { defaut } = site.spec.langues
   const l = (c: string) => lien(base, langue, defaut, c)
   const sejour = lireSejour(valeurs)
+  const visiteur = ((await headers()).get('x-forwarded-for') ?? '').split(',')[0].trim()
   const qs = sejour ? `?checkIn=${sejour.arrivee}&checkOut=${sejour.depart}&adults=${sejour.voyageurs}` : ''
   const [id, etape, ...reste] = sousChemin.split('/').filter(Boolean)
   if (reste.length > 0 || (etape !== undefined && etape !== 'paiement' && etape !== 'confirmation')) notFound()
 
   // ─── /reserver : la liste ───
   if (!id) {
-    const types = await lireTypes(slug, sejour)
+    const types = await lireTypes(slug, sejour, visiteur)
     const aDesDates = Boolean(valeurs.checkIn || valeurs.checkOut)
     const maxVoy = Math.max(...types.map((x) => x.voyageurs ?? 0), 4)
     return (
@@ -84,7 +86,7 @@ export async function Parcours({
   }
 
   // ─── /reserver/<id>… : un type de CE PM, sinon 404 ───
-  const [type, villa] = await Promise.all([lireType(slug, id, sejour), lireVilla(slug, id)])
+  const [type, villa] = await Promise.all([lireType(slug, id, sejour, visiteur), lireVilla(slug, id)])
   if (!type || !villa) notFound()
 
   if (!etape) return <FicheType site={site} base={base} langue={langue} type={type} villa={villa} sejour={sejour} valeurs={valeurs} />

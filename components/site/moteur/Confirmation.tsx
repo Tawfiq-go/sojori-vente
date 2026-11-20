@@ -31,11 +31,11 @@ export function Confirmation({ langue, typeId, accueil, demo, recap }: { langue:
     <div className="moteur-confirmation">
       <div className="moteur-confirmation__tete">
         <h1>{mm('confirmeTitre', langue, { p: lu.prenom })}</h1>
-        <p className="moteur-confirmation__sous">{mm('confirmeSousTitre', langue)}</p>
+        <p className="moteur-confirmation__sous">{mm(demo ? 'confirmeSousTitreDemo' : 'confirmeSousTitre', langue)}</p>
         <p className="moteur-confirmation__ref">
           {mm('reference', langue)} <b>{lu.reference}</b>
         </p>
-        <p>{mm('confirmeMail', langue, { e: lu.email })}</p>
+        <p>{mm(demo ? 'confirmeMailDemo' : 'confirmeMail', langue, { e: lu.email })}</p>
         {demo && <p className="moteur-confirmation__demo">{mm('demoNote', langue)}</p>}
       </div>
       {recap}

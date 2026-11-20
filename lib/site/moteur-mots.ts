@@ -83,6 +83,12 @@ const M = {
   confirmeSousTitre: { fr: 'Votre séjour est confirmé.', en: 'Your stay is confirmed.', ar: 'تم تأكيد إقامتك.' },
   reference: { fr: 'Référence', en: 'Reference', ar: 'المرجع' },
   confirmeMail: { fr: 'Un e-mail de confirmation est envoyé à {e}.', en: 'A confirmation email is sent to {e}.', ar: 'تم إرسال رسالة تأكيد إلى {e}.' },
+  confirmeMailDemo: {
+    fr: 'À la vraie réservation, un e-mail de confirmation serait envoyé à {e}.',
+    en: 'On a real booking, a confirmation email would be sent to {e}.',
+    ar: 'عند الحجز الفعلي، سيُرسل بريد تأكيد إلى {e}.',
+  },
+  confirmeSousTitreDemo: { fr: 'Voici votre séjour, tel qu’il serait confirmé.', en: 'Here is your stay, as it would be confirmed.', ar: 'هذه إقامتك كما سيتم تأكيدها.' },
   demoNote: {
     fr: 'Démonstration — aucune réservation n’est enregistrée, aucun paiement n’est pris et aucun e-mail n’est envoyé.',
     en: 'Demonstration — no booking is saved, no payment is taken and no email is sent.',

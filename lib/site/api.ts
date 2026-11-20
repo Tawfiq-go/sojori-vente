@@ -28,6 +28,22 @@ export const lireSitePm = cache((slug: string) =>
   lire(`pm/${encodeURIComponent(slug)}`, { next: { revalidate: 60, tags: [`site-pm:${slug}`] } }),
 )
 
+/**
+ * Le propriétaire que le jeton d'aperçu autorise (srv-site `/apercu/:jeton/proprietaire`, jeton seule entrée), ou `null`
+ * (jeton expiré, site inconnu, srv-site muet). Sert à LIER le slug de l'adresse au jeton : un jeton valide n'ouvre que les
+ * logements de SON propriétaire.
+ */
+export const lireProprietaireApercu = cache(async (jeton: string): Promise<string | null> => {
+  try {
+    const r = await fetch(`${SITE_API}/apercu/${encodeURIComponent(jeton)}/proprietaire`, { cache: 'no-store', signal: AbortSignal.timeout(4000) })
+    if (!r.ok) return null
+    const corps = (await r.json()) as { success?: boolean; data?: { ownerId?: unknown } }
+    return corps.success && typeof corps.data?.ownerId === 'string' && corps.data.ownerId ? corps.data.ownerId : null
+  } catch {
+    return null
+  }
+})
+
 export const lireApercu = cache((jeton: string) => lire(`apercu/${encodeURIComponent(jeton)}`, { cache: 'no-store' }))
 
 /** srv-listing rend 0 quand il n'a pas de coordonnées : un tel logement n'a pas de place sur la carte. */
@@ -49,6 +65,7 @@ export const lireLogements = cache(async (slug: string): Promise<Logement[]> => 
     const corps = (await r.json()) as { data?: Array<Record<string, unknown>> }
     return (corps.data ?? []).map((l) => ({
       id: String(l.id ?? l._id ?? ''),
+      ...(typeof l.pmId === 'string' && l.pmId ? { pmId: l.pmId } : {}),
       title: String(l.title ?? ''),
       city: typeof l.city === 'string' ? l.city : undefined,
       pricePerNight: typeof l.pricePerNight === 'number' ? l.pricePerNight : undefined,

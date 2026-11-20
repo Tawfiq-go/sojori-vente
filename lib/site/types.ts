@@ -71,6 +71,8 @@ export type SitePublic = {
 /** Un logement tel que la liste publique de srv-listing le rend (`?pm=<slug>`). */
 export type Logement = {
   id: string
+  /** Le propriétaire du logement (srv-listing `pmId`). */
+  pmId?: string
   title: string
   city?: string
   pricePerNight?: number
