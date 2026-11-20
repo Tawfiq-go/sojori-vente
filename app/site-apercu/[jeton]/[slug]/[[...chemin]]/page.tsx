@@ -23,6 +23,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     ...(site ? metaMarqueBlanche(site, `Aperçu · ${site.spec.identite.nom}`) : metaNeutre('Aperçu')),
     title: site ? `Aperçu · ${site.spec.identite.nom}` : 'Aperçu',
+    // Jamais l'adresse canonique de la plateforme (layout racine) ni celle de l'aperçu (elle porte le jeton).
+    alternates: { canonical: null },
     robots: { index: false, follow: false },
   }
 }

@@ -76,7 +76,7 @@
 }
 
 /* La liste : une carte par type */
-.site-pm .moteur-liste {
+.site-pm .section.moteur-liste {
   display: grid;
   gap: 40px;
   margin-top: 32px;
@@ -454,7 +454,7 @@
 }
 
 @media (max-width: 900px) {
-  .site-pm .moteur-liste {
+  .site-pm .section.moteur-liste {
     margin-top: 28px;
     gap: 28px;
   }
@@ -506,6 +506,17 @@
     grid-template-columns: 1fr;
   }
   .site-pm .moteur-champs__large {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Le panneau de la fiche : une colonne, les dates ne sont plus tronquées. */
+  .site-pm .moteur-devis .moteur-sejour {
+    grid-template-columns: 1fr;
+  }
+  .site-pm .moteur-devis .moteur-sejour label:nth-child(3),
+  .site-pm .moteur-devis .moteur-sejour .bouton {
     grid-column: auto;
   }
 }
