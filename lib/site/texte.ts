@@ -16,6 +16,8 @@ const MOTS = {
   chambres: { fr: 'chambres', en: 'bedrooms', ar: 'غرف' },
   reserver: { fr: 'Réserver', en: 'Book', ar: 'احجز' },
   voir: { fr: 'Voir', en: 'View', ar: 'عرض' },
+  reserverSur: { fr: 'Villas & suites', en: 'Villas & suites', ar: 'فيلات وأجنحة' },
+  reserverTitre: { fr: 'Réservez votre séjour', en: 'Book your stay', ar: 'احجز إقامتك' },
   villaDescription: { fr: 'À propos', en: 'About', ar: 'نبذة' },
   villaEmplacement: { fr: 'Emplacement', en: 'Location', ar: 'الموقع' },
   villaZoneApprox: { fr: 'Zone approximative — l’adresse exacte est donnée à la réservation.', en: 'Approximate area — the exact address is given when you book.', ar: 'منطقة تقريبية — يُعطى العنوان الدقيق عند الحجز.' },

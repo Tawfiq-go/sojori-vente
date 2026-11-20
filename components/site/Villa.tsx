@@ -35,6 +35,7 @@ export function Villa({
         <span aria-hidden="true">›</span>
         <span aria-current="page">{villa.titre}</span>
       </nav>
+      <p className="recherche__script">{site.spec.identite.nom}</p>
       <h1>{villa.titre}</h1>
       <p className="villa__specs">
         {[

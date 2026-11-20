@@ -27,7 +27,8 @@ export function Reservation({
   return (
     <>
       <section className="section recherche recherche--page">
-        <h1>{mot('reserver', langue)}</h1>
+        <p className="recherche__script">{mot('reserverSur', langue)}</p>
+        <h1>{mot('reserverTitre', langue)}</h1>
         <form className="recherche__barre" action={action} method="get">
           <label>
             <span>{mot('arrivee', langue)}</span>
