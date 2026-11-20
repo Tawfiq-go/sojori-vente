@@ -2,10 +2,8 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { AnnotationApercu } from '@/components/site/AnnotationApercu'
 import { CadreSite, CHEMIN_RESERVER } from '@/components/site/Chrome'
-import { Reservation } from '@/components/site/Reservation'
+import { Parcours } from '@/components/site/moteur/Parcours'
 import { metaMarqueBlanche } from '@/lib/site/meta'
-import { Villa } from '@/components/site/Villa'
-import { lireVilla } from '@/lib/site/logement'
 import { SitePm } from '@/components/site/SitePm'
 import { lireApercu } from '@/lib/site/api'
 import { lireCible } from '@/lib/site/route'
@@ -35,22 +33,12 @@ export default async function ApercuDuSite(props: Props) {
   if (!site) notFound()
   const cible = lireCible(chemin, site.spec.langues)
   const base = `/site-apercu/${encodeURIComponent(jeton)}/${encodeURIComponent(slug)}`
-  // `/reserver` : la page de réservation du site (dates → logements de ce PM), dans son cadre.
-  if (cible.chemin === CHEMIN_RESERVER) {
+  // `/reserver…` : le parcours de réservation du site (liste, fiche, paiement, confirmation), dans son cadre.
+  if (cible.chemin === CHEMIN_RESERVER || cible.chemin.startsWith(`${CHEMIN_RESERVER}/`)) {
     const valeurs = await props.searchParams
     return (
-      <CadreSite site={site} base={base} langue={cible.langue} chemin={CHEMIN_RESERVER}>
-        <Reservation site={site} slug={slug} base={base} langue={cible.langue} valeurs={valeurs} />
-      </CadreSite>
-    )
-  }
-  // `/reserver/<id>` : la fiche d'une villa DE CE PM, dans son cadre (404 pour tout autre logement).
-  if (cible.chemin.startsWith(`${CHEMIN_RESERVER}/`)) {
-    const villa = await lireVilla(slug, cible.chemin.slice(CHEMIN_RESERVER.length + 1))
-    if (!villa) notFound()
-    return (
       <CadreSite site={site} base={base} langue={cible.langue} chemin={cible.chemin}>
-        <Villa site={site} base={base} langue={cible.langue} villa={villa} />
+        <Parcours site={site} slug={slug} base={base} langue={cible.langue} sousChemin={cible.chemin.slice(CHEMIN_RESERVER.length + 1)} valeurs={valeurs} />
       </CadreSite>
     )
   }

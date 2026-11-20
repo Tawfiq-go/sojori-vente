@@ -1,0 +1,486 @@
+/* Le moteur de réservation DU site d'un PM : liste par type de chambre, fiche + devis, paiement, confirmation.
+   Rien de propre à la plateforme : tout vient des variables du thème du client (--fond, --texte, --accent,
+   --accent-doux, --police-titres, --arrondi, --espace) posées par CadreSite. */
+
+.site-pm .moteur-entete {
+  text-align: center;
+  max-width: 980px;
+}
+.site-pm .moteur-entete__accent {
+  margin: 0 0 4px;
+  font-family: var(--police-titres);
+  font-style: italic;
+  font-size: clamp(18px, 2.2vw, 24px);
+  color: var(--accent);
+}
+.site-pm[data-style='minimal'] .moteur-entete__accent {
+  font-family: 'Great Vibes', Georgia, 'Times New Roman', serif;
+  font-style: normal;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.1;
+}
+.site-pm .moteur-entete h1 {
+  margin-bottom: 12px;
+}
+.site-pm .moteur-entete__sous {
+  margin: 0 auto 32px;
+  max-width: 560px;
+  color: color-mix(in srgb, var(--texte) 70%, transparent);
+}
+
+/* Dates et voyageurs */
+.site-pm .moteur-sejour {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--texte) 14%, transparent);
+  border-radius: var(--arrondi);
+  background: color-mix(in srgb, var(--fond) 94%, var(--texte));
+  text-align: left;
+}
+.site-pm .moteur-sejour label {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--texte) 65%, transparent);
+}
+.site-pm .moteur-sejour input,
+.site-pm .moteur-sejour select,
+.site-pm .moteur-champs input {
+  min-height: 48px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--texte) 20%, transparent);
+  border-radius: var(--arrondi);
+  background: var(--fond);
+  color: var(--texte);
+  font: inherit;
+  font-size: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.site-pm .moteur-sejour .bouton {
+  margin: 0;
+  min-height: 48px;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.site-pm .moteur-alerte {
+  margin: 18px 0 0;
+  padding: 12px 16px;
+  border-left: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  text-align: left;
+  font-size: 14px;
+}
+
+/* La liste : une carte par type */
+.site-pm .moteur-liste {
+  display: grid;
+  gap: 40px;
+  margin-top: calc(var(--espace) * 0.6);
+  max-width: 1240px;
+}
+.site-pm .moteur-carte {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--texte) 12%, transparent);
+  border-radius: var(--arrondi);
+  background: color-mix(in srgb, var(--fond) 97%, var(--texte));
+}
+.site-pm .moteur-carte[data-etat]:not([data-etat='libre']) .moteur-carte__photos {
+  filter: saturate(0.55);
+  opacity: 0.85;
+}
+.site-pm .moteur-carte__photos {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 4px;
+  min-height: 440px;
+  background: color-mix(in srgb, var(--texte) 8%, transparent);
+}
+.site-pm .moteur-carte__photos--vide {
+  display: block;
+}
+.site-pm .moteur-carte__photos img {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+}
+.site-pm .moteur-carte__photos img:first-child {
+  grid-row: span 2;
+}
+.site-pm .moteur-carte__photos[data-nombre='1'] {
+  grid-template-columns: 1fr;
+}
+.site-pm .moteur-carte__photos[data-nombre='1'] img:first-child {
+  grid-row: auto;
+}
+.site-pm .moteur-carte__photos[data-nombre='2'] {
+  grid-template-rows: 1fr;
+}
+.site-pm .moteur-carte__photos[data-nombre='2'] img:first-child {
+  grid-row: auto;
+}
+.site-pm .moteur-carte__photos img:nth-child(n + 4) {
+  display: none;
+}
+.site-pm .moteur-carte__corps {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(22px, 2.6vw, 36px);
+}
+.site-pm .moteur-carte__etab {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.site-pm .moteur-carte__nom {
+  margin: 0 0 6px;
+  font-size: clamp(26px, 2.8vw, 36px);
+}
+.site-pm .moteur-carte__nom a {
+  color: inherit;
+  text-decoration: none;
+}
+.site-pm .moteur-carte__specs {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: color-mix(in srgb, var(--texte) 68%, transparent);
+}
+.site-pm .moteur-carte__description {
+  display: -webkit-box;
+  margin: 0 0 16px;
+  overflow: hidden;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  font-size: 15px;
+  line-height: 1.65;
+  white-space: pre-line;
+}
+.site-pm .moteur-carte__equipements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.site-pm .moteur-carte__equipements li {
+  padding: 3px 11px;
+  border: 1px solid color-mix(in srgb, var(--texte) 16%, transparent);
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: color-mix(in srgb, var(--texte) 78%, transparent);
+}
+.site-pm .moteur-carte__prix {
+  display: grid;
+  gap: 4px;
+  padding-top: 20px;
+  border-top: 1px solid color-mix(in srgb, var(--texte) 12%, transparent);
+}
+.site-pm .moteur-carte__prix p {
+  margin: 0;
+}
+.site-pm .moteur-carte__duree {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--texte) 62%, transparent);
+}
+.site-pm .moteur-carte__total {
+  font-family: var(--police-titres);
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.1;
+}
+.site-pm .moteur-carte__total--nuit {
+  font-size: 26px;
+}
+.site-pm .moteur-carte__total small {
+  font-family: var(--police-texte);
+  font-size: 13px;
+  color: color-mix(in srgb, var(--texte) 62%, transparent);
+}
+.site-pm .moteur-carte__detail {
+  font-size: 13px;
+  color: color-mix(in srgb, var(--texte) 65%, transparent);
+}
+.site-pm .moteur-carte__indispo {
+  font-style: italic;
+  color: color-mix(in srgb, var(--texte) 70%, transparent);
+}
+.site-pm .moteur-carte__prix .bouton {
+  justify-self: start;
+  margin-top: 12px;
+  padding-inline: 32px;
+}
+
+/* Fiche + devis */
+.site-pm .moteur-fiche .moteur-carte__etab {
+  margin-bottom: 4px;
+}
+.site-pm .moteur-devis {
+  gap: 18px;
+}
+.site-pm .moteur-devis h2 {
+  margin: 0;
+  font-size: 24px;
+}
+.site-pm .moteur-devis .moteur-sejour {
+  grid-template-columns: 1fr 1fr;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.site-pm .moteur-devis .moteur-sejour label:nth-child(3),
+.site-pm .moteur-devis .moteur-sejour .bouton {
+  grid-column: span 2;
+}
+.site-pm .moteur-devis .moteur-sejour .bouton {
+  width: 100%;
+  background: transparent;
+  color: var(--texte);
+  border: 1px solid color-mix(in srgb, var(--texte) 30%, transparent);
+}
+.site-pm .moteur-devis__prix {
+  display: grid;
+  gap: 12px;
+}
+.site-pm .moteur-devis dl,
+.site-pm .moteur-recap dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+.site-pm .moteur-devis dl > div,
+.site-pm .moteur-recap dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14.5px;
+}
+.site-pm .moteur-devis dt,
+.site-pm .moteur-recap dt {
+  color: color-mix(in srgb, var(--texte) 68%, transparent);
+}
+.site-pm .moteur-devis dd,
+.site-pm .moteur-recap dd {
+  margin: 0;
+  text-align: end;
+}
+.site-pm .moteur-devis__total,
+.site-pm .moteur-recap__total {
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--texte) 14%, transparent);
+  font-family: var(--police-titres);
+  font-size: 22px !important;
+}
+.site-pm .moteur-devis__total dt,
+.site-pm .moteur-recap__total dt {
+  color: var(--texte);
+}
+.site-pm .moteur-devis__suite {
+  display: block;
+  margin: 0;
+  text-align: center;
+}
+.site-pm .moteur-devis__ecrire {
+  font-size: 13.5px;
+  text-align: center;
+}
+
+/* Paiement et confirmation */
+.site-pm .moteur-etape {
+  max-width: 1100px;
+}
+.site-pm .moteur-etape h1 {
+  font-size: clamp(28px, 3.6vw, 44px);
+  margin-bottom: 28px;
+}
+.site-pm .moteur-etape__grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 48px;
+  align-items: start;
+}
+.site-pm .moteur-paiement {
+  display: grid;
+  gap: 28px;
+}
+.site-pm .moteur-paiement h2 {
+  font-size: 22px;
+  margin-bottom: 14px;
+}
+.site-pm .moteur-champs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.site-pm .moteur-champs label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+.site-pm .moteur-champs__large {
+  grid-column: span 2;
+}
+.site-pm .moteur-paiement__mode {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  border: 1px solid var(--accent);
+  border-radius: var(--arrondi);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+.site-pm .moteur-paiement__mode p {
+  margin: 2px 0 0;
+  font-size: 13.5px;
+  color: color-mix(in srgb, var(--texte) 70%, transparent);
+}
+.site-pm .moteur-paiement__radio {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  border: 5px solid var(--accent);
+  border-radius: 50%;
+  background: var(--fond);
+}
+.site-pm .moteur-paiement .bouton {
+  justify-self: start;
+  margin: 0;
+  border: 0;
+  padding-inline: 36px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+.site-pm .moteur-paiement .bouton[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+.site-pm .moteur-recap {
+  position: sticky;
+  top: 96px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--texte) 14%, transparent);
+  border-radius: var(--arrondi);
+  background: color-mix(in srgb, var(--fond) 96%, var(--texte));
+}
+.site-pm .moteur-recap img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+.site-pm .moteur-recap__corps {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+}
+.site-pm .moteur-recap h2 {
+  margin: 0;
+  font-size: 24px;
+}
+.site-pm .moteur-confirmation {
+  display: grid;
+  gap: 28px;
+  justify-items: center;
+  text-align: center;
+}
+.site-pm .moteur-confirmation__tete {
+  max-width: 640px;
+}
+.site-pm .moteur-confirmation__sous {
+  font-family: var(--police-titres);
+  font-size: clamp(20px, 2.4vw, 28px);
+  margin: 0 0 14px;
+}
+.site-pm .moteur-confirmation__ref b {
+  letter-spacing: 0.12em;
+}
+.site-pm .moteur-confirmation__demo {
+  margin-top: 18px;
+  font-size: 13px;
+  font-style: italic;
+  color: color-mix(in srgb, var(--texte) 62%, transparent);
+}
+.site-pm .moteur-confirmation .moteur-recap {
+  position: static;
+  width: min(100%, 460px);
+  text-align: start;
+}
+
+@media (max-width: 900px) {
+  .site-pm .moteur-liste {
+    margin-top: 28px;
+    gap: 28px;
+  }
+  .site-pm .moteur-sejour {
+    grid-template-columns: 1fr 1fr;
+  }
+  .site-pm .moteur-sejour label:nth-child(3) {
+    grid-column: span 2;
+  }
+  .site-pm .moteur-sejour .bouton {
+    grid-column: span 2;
+  }
+  .site-pm .moteur-carte {
+    grid-template-columns: 1fr;
+  }
+  /* Mobile : les photos défilent côte à côte, la première se voit en grand. */
+  .site-pm .moteur-carte__photos {
+    display: flex;
+    min-height: 0;
+    height: 260px;
+    gap: 4px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .site-pm .moteur-carte__photos::-webkit-scrollbar {
+    display: none;
+  }
+  .site-pm .moteur-carte__photos img {
+    flex: none;
+    width: 86%;
+    scroll-snap-align: start;
+  }
+  .site-pm .moteur-carte__photos[data-nombre='1'] img {
+    width: 100%;
+  }
+  .site-pm .moteur-carte__photos img:nth-child(n + 4) {
+    display: block;
+  }
+  .site-pm .moteur-etape__grille {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .site-pm .moteur-recap {
+    position: static;
+    order: -1;
+  }
+  .site-pm .moteur-champs {
+    grid-template-columns: 1fr;
+  }
+  .site-pm .moteur-champs__large {
+    grid-column: auto;
+  }
+}

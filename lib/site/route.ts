@@ -27,5 +27,5 @@ export function estUnCheminDuSite(chemin: string, pages: string[], langues: { de
   const segments = chemin.split('/').filter(Boolean)
   const { chemin: c } = lireCible(segments, langues)
   // La réservation du site (dates → logements du PM) et la fiche d'une villa : des pages du site, pas de la plateforme.
-  return pages.includes(c) || c === 'reserver' || /^reserver\/[A-Za-z0-9:_-]+$/.test(c)
+  return pages.includes(c) || c === 'reserver' || /^reserver\/[A-Za-z0-9:_-]+(\/(paiement|confirmation))?$/.test(c)
 }

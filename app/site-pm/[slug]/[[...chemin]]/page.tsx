@@ -2,14 +2,12 @@ import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { CadreSite, CHEMIN_RESERVER } from '@/components/site/Chrome'
-import { Reservation } from '@/components/site/Reservation'
+import { Parcours } from '@/components/site/moteur/Parcours'
 import { metaMarqueBlanche } from '@/lib/site/meta'
-import { Villa } from '@/components/site/Villa'
-import { lireVilla } from '@/lib/site/logement'
 import { SitePm } from '@/components/site/SitePm'
 import { lireSitePm } from '@/lib/site/api'
 import { lien, lireCible } from '@/lib/site/route'
-import { t } from '@/lib/site/texte'
+import { mot, t } from '@/lib/site/texte'
 
 /**
  * Le site publié d'un PM, sur SON domaine : middleware.ts réécrit ici les chemins de ses pages
@@ -37,8 +35,17 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   if (!c) return {}
   const { site, cible, page } = c
   const { defaut, actives } = site.spec.langues
-  if (!page) return { ...metaMarqueBlanche(site, site.spec.identite.nom), robots: { index: false, follow: true } }
   const hote = ((await headers()).get('host') || '').split(':')[0]
+  if (!page) {
+    // Le parcours de réservation : à la marque du client, adresse canonique sur SON domaine (jamais celle de la
+    // plateforme du layout racine) ; seules la liste de réservation est indexable, pas la fiche, le paiement ni la confirmation.
+    return {
+      ...metaMarqueBlanche(site, `${mot('reserver', cible.langue)} · ${site.spec.identite.nom}`),
+      ...(hote ? { metadataBase: new URL(`https://${hote}`) } : {}),
+      alternates: { canonical: lien('', cible.langue, defaut, cible.chemin) },
+      robots: { index: cible.chemin === CHEMIN_RESERVER, follow: true },
+    }
+  }
   const titre = t(page.seo?.titre, cible.langue, defaut) || t(page.titre, cible.langue, defaut)
   const titreComplet = page.chemin === '' || !titre ? site.spec.identite.nom : `${titre} · ${site.spec.identite.nom}`
   const description = t(page.seo?.description, cible.langue, defaut) || undefined
@@ -55,21 +62,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function SitePublie(props: Props) {
   const c = await charger(props)
   if (!c) notFound()
-  if (!c.page && c.cible.chemin.startsWith(`${CHEMIN_RESERVER}/`)) {
-    // `/reserver/<id>` : la fiche d'une villa DE CE PM, dans son cadre (404 pour tout autre logement).
-    const villa = await lireVilla(c.slug, c.cible.chemin.slice(CHEMIN_RESERVER.length + 1))
-    if (!villa) notFound()
-    return (
-      <CadreSite site={c.site} base="" langue={c.cible.langue} chemin={c.cible.chemin}>
-        <Villa site={c.site} base="" langue={c.cible.langue} villa={villa} />
-      </CadreSite>
-    )
-  }
   if (!c.page) {
+    // `/reserver…` : le parcours de réservation du site (liste, fiche, paiement, confirmation) dans son cadre,
+    // limité aux logements de CE PM (404 pour tout autre logement).
     const valeurs = await props.searchParams
     return (
-      <CadreSite site={c.site} base="" langue={c.cible.langue} chemin={CHEMIN_RESERVER}>
-        <Reservation site={c.site} slug={c.slug} base="" langue={c.cible.langue} valeurs={valeurs} />
+      <CadreSite site={c.site} base="" langue={c.cible.langue} chemin={c.cible.chemin}>
+        <Parcours site={c.site} slug={c.slug} base="" langue={c.cible.langue} sousChemin={c.cible.chemin.slice(CHEMIN_RESERVER.length + 1)} valeurs={valeurs} />
       </CadreSite>
     )
   }
