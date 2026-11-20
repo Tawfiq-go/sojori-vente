@@ -1,17 +1,12 @@
 /**
- * Le site d'un PM composé par l'agent Site web : en-tête (pages, langues), sections de la page,
- * pied de page avec les mentions légales. Rendu serveur, enfermé dans `.site-pm` : les couleurs
- * et polices du thème ne débordent pas sur le reste de sojori-vente (pages logement, réservation).
+ * Le site d'un PM composé par l'agent Site web : le cadre (en-tête, pied, WhatsApp — `CadreSite`) et les
+ * sections de la page. Rendu serveur, enfermé dans `.site-pm` : les couleurs et polices du thème ne
+ * débordent pas sur le reste de sojori-vente (pages logement, réservation).
  */
-import { lien } from '@/lib/site/route'
-import { mot, t } from '@/lib/site/texte'
-import { lienPolices, variablesDuTheme } from '@/lib/site/theme'
 import type { Langue, Page, SitePublic } from '@/lib/site/types'
 import { AssistantSite } from './AssistantSite'
-import { Reseaux, WhatsappFlottant } from './Reseaux'
+import { CadreSite } from './Chrome'
 import { Sections } from './Sections'
-import '@/app/site-pm.css'
-import '@/app/site-styles.css'
 
 /** Le jeton de l'aperçu, lu dans le préfixe de ses liens (`/site-apercu/<jeton>/<slug>`). */
 const jetonDe = (base: string) => decodeURIComponent(base.split('/')[2] ?? '')
@@ -29,81 +24,27 @@ export function SitePm({
   langue: Langue
   page: Page
 }) {
-  const { defaut, actives } = site.spec.langues
-  const legal = site.spec.pages.find((p) => p.sections.some((s) => s.niveau === 'sojori' && s.type === 'legal'))
-  const logo = site.spec.identite.logo ? site.medias[site.spec.identite.logo] : undefined
-  // L'en-tête : logo seul (défaut quand il y en a un), logo et nom, ou nom seul (28/10/2026).
-  const affichage = site.spec.identite.affichage ?? 'logo'
-  const whatsapp = site.spec.identite.whatsappFlottant ? site.contact?.whatsapp : null
-  const l = (lg: Langue, chemin: string) => lien(base, lg, defaut, chemin)
+  const { defaut } = site.spec.langues
   const ctx = { site, slug, base, langue, defaut }
   return (
-    <div
-      className="site-pm"
-      data-style={site.spec.theme.style ?? 'classique'}
-      data-anim={site.spec.theme.animations ?? 'douces'}
-      dir={langue === 'ar' ? 'rtl' : 'ltr'}
-      lang={langue}
-      style={variablesDuTheme(site.spec.theme)}
+    <CadreSite
+      site={site}
+      base={base}
+      langue={langue}
+      chemin={page.chemin}
+      pageId={page.id}
+      apres={
+        site.spec.identite.assistant ? (
+          <AssistantSite
+            cible={site.apercu ? { jeton: jetonDe(base) } : { slug }}
+            langue={langue}
+            whatsapp={site.contact?.whatsapp}
+            suffixe={base ? `?pm=${encodeURIComponent(slug)}` : ''}
+          />
+        ) : undefined
+      }
     >
-      <link rel="stylesheet" href={lienPolices(site.spec.theme)} />
-      {/* Style minimal : le mot en écriture manuscrite du premier écran sobre (Nommos Beach Resort, 20/11/2026). */}
-      {site.spec.theme.style === 'minimal' && (
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" />
-      )}
-      {/* Pas de bandeau « Aperçu — non publié » (Tawfiq, 16/11/2026) : l'écran Site web du dashboard dit déjà
-          « Brouillon — pas encore en ligne » au-dessus du cadre, et le bandeau masquait l'en-tête du site. */}
-      <header className="entete" data-bloc="entete">
-        <a className="entete__nom" href={l(langue, '')} data-affichage={affichage}>
-          {affichage !== 'nom' && logo && (
-            <img src={logo.url} alt={affichage === 'logo' ? site.spec.identite.nom : ''} />
-          )}
-          {(affichage !== 'logo' || !logo) && <span>{site.spec.identite.nom}</span>}
-        </a>
-        <nav className="entete__menu" aria-label="Menu">
-          {site.spec.pages
-            .filter((p) => p !== legal)
-            .map((p) => (
-              <a key={p.id} href={l(langue, p.chemin)} aria-current={p.id === page.id ? 'page' : undefined}>
-                {t(p.titre, langue, defaut)}
-              </a>
-            ))}
-        </nav>
-        {site.spec.identite.reserver && (
-          // « Réserver » : la recherche de réservation du PM (le moteur), limitée à ses logements (`?pm=` dans l'aperçu).
-          <a className="bouton entete__reserver" href={`/search${base ? `?pm=${encodeURIComponent(slug)}` : ''}`}>
-            {mot('reserver', langue)}
-          </a>
-        )}
-        {actives.length > 1 && (
-          <nav className="entete__langues" aria-label="Langue">
-            {actives.map((lg) => (
-              <a key={lg} href={l(lg, page.chemin)} hrefLang={lg} aria-current={lg === langue ? 'true' : undefined}>
-                {lg.toUpperCase()}
-              </a>
-            ))}
-          </nav>
-        )}
-      </header>
-      <main data-page={page.id}>
-        <Sections sections={page.sections} ctx={ctx} />
-      </main>
-      <footer className="pied" data-bloc="pied">
-        {t(site.spec.piedDePage.texte, langue, defaut) && <p>{t(site.spec.piedDePage.texte, langue, defaut)}</p>}
-        <div className="pied__liens">
-          <Reseaux reseaux={site.spec.piedDePage.reseaux ?? []} />
-          {legal && <a href={l(langue, legal.chemin)}>{mot('mentions', langue)}</a>}
-        </div>
-      </footer>
-      {whatsapp && <WhatsappFlottant numero={whatsapp} langue={langue} />}
-      {site.spec.identite.assistant && (
-        <AssistantSite
-          cible={site.apercu ? { jeton: jetonDe(base) } : { slug }}
-          langue={langue}
-          whatsapp={site.contact?.whatsapp}
-          suffixe={base ? `?pm=${encodeURIComponent(slug)}` : ''}
-        />
-      )}
-    </div>
+      <Sections sections={page.sections} ctx={ctx} />
+    </CadreSite>
   )
 }

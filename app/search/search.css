@@ -1342,3 +1342,13 @@
   align-items: center;
   justify-content: center;
 }
+
+/* `?pm=<slug>` : la liste seule, sans colonne de filtres ni carte — la page de réservation d'un propriétaire. */
+.search-layout.search-layout--pm {
+  grid-template-columns: 1fr;
+}
+.search-layout--pm .main {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+}

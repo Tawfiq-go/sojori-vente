@@ -1066,3 +1066,69 @@
     transition: none !important;
   }
 }
+
+/* La page de réservation du site (`/reserver`) : la barre de dates dans le design du site, puis la liste. */
+.site-pm .recherche--page h1 {
+  margin-bottom: 24px;
+}
+.site-pm .recherche--page .recherche__barre {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+.site-pm .recherche--page .recherche__barre label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+.site-pm .recherche--page .recherche__barre input {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--texte) 18%, transparent);
+  border-radius: var(--arrondi);
+  background: var(--fond);
+  color: var(--texte);
+  font: inherit;
+}
+
+/* Dans le site du client, la liste n'a plus rien du marché Sojori : ni badge « DIRECT » ni PM, ni cœur, ni tri ;
+   les polices, couleurs et angles sont ceux du site. */
+.site-pm .search-layout--pm .source-badge,
+.site-pm .search-layout--pm .pm-badge,
+.site-pm .search-layout--pm .wish,
+.site-pm .search-layout--pm .sort,
+.site-pm .search-layout--pm .grain {
+  display: none;
+}
+.site-pm .search-layout--pm .main-toolbar {
+  padding: 0 0 20px;
+}
+.site-pm .search-layout--pm .main-toolbar h1 {
+  font-family: var(--police-texte);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--texte) 70%, transparent);
+}
+.site-pm .search-layout--pm .main-toolbar h1 b {
+  font-style: normal;
+  color: var(--texte);
+}
+.site-pm .search-layout--pm .lc {
+  color: var(--texte);
+}
+.site-pm .search-layout--pm .lc-photo,
+.site-pm .search-layout--pm .lc-photo img {
+  border-radius: var(--arrondi);
+}
+.site-pm .search-layout--pm .lc .nm {
+  font-family: var(--police-titres);
+  font-size: 19px;
+  color: var(--texte);
+}
+.site-pm .search-layout--pm .lc .price b {
+  font-family: var(--police-titres);
+  font-size: 20px;
+  color: var(--texte);
+}
