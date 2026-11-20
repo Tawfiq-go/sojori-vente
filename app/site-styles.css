@@ -454,6 +454,47 @@
   color: var(--texte);
 }
 
+/* Premier écran « sobre » du style minimal : un titre, un mot en italique dessous, UN bouton contour, centrés sur la vidéo ou la photo
+   (Nommos Beach Resort, 20/11/2026). Réservé aux premiers écrans sans sous-titre ni bande d'infos : les autres gardent leur rendu. */
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .bandeau__texte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1080px;
+  padding-bottom: 0;
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) h1 {
+  margin-bottom: 8px;
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .sur-titre {
+  order: 2;
+  margin: 0 0 12px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: clamp(30px, 4.4vw, 62px);
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 1;
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .actions {
+  order: 3;
+  justify-content: center;
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .bouton:not(.bouton--second) {
+  background: transparent;
+  border-color: #fff;
+  color: #fff;
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .bouton:not(.bouton--second):hover {
+  background: #fff;
+  color: #141617;
+}
+
 /* ───────────────────────── luxe ───────────────────────── */
 .site-pm[data-style='luxe'] h1,
 .site-pm[data-style='luxe'] h2 {
