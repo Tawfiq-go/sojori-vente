@@ -14,6 +14,13 @@ const COMING_SOON = process.env.COMING_SOON === 'true';
 export default clerkMiddleware(async (auth, req) => {
   const path = req.nextUrl.pathname;
 
+  // Pages du site d'un PM (aperçu) : le layout racine n'y pose ni Clerk, ni JSON-LD « Sojori », ni police de la plateforme.
+  const enteteSite = new Headers(req.headers);
+  enteteSite.set('x-site-pm', '1');
+  if (path.startsWith('/site-apercu/')) {
+    return NextResponse.next({ request: { headers: enteteSite } });
+  }
+
   // Proxy API dev local : pas de résolution tenant / Clerk inutile
   if (path.startsWith('/api/sojori')) {
     return NextResponse.next();
@@ -76,7 +83,7 @@ export default clerkMiddleware(async (auth, req) => {
     if (site && estUnCheminDuSite(path, site.pages, site.langues)) {
       const url = req.nextUrl.clone();
       url.pathname = `/site-pm/${tenant}${path === '/' ? '' : path}`;
-      const rw = NextResponse.rewrite(url);
+      const rw = NextResponse.rewrite(url, { request: { headers: enteteSite } });
       rw.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
       rw.headers.set('x-pm-resolve', lastResolveDebug || 'static');
       rw.headers.set('x-pm-site', 'fiche');

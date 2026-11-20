@@ -1,25 +1,13 @@
 import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/config/site';
-import { Instrument_Serif } from 'next/font/google';
-import { ClerkProvider } from '@clerk/nextjs';
-import ThemePreview from '@/components/ThemePreview';
-import { frFR } from '@clerk/localizations';
 import { CurrencyProvider } from '@/context/CurrencyContext';
-import { clerkAppearance } from '@/lib/clerk/appearance';
+import { headers } from 'next/headers';
 import './globals.css';
 import './themes.css';
 import './homepage.css';
 
 /** Vercel prod : évite prerender statique (useSearchParams / Clerk sur plusieurs pages). */
 export const dynamic = 'force-dynamic';
-
-const instrumentSerif = Instrument_Serif({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-serif',
-  display: 'swap',
-  style: ['normal', 'italic'],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -89,75 +77,22 @@ export const metadata: Metadata = {
 // sojori.com (logiciel B2B). book.sojori.com n'est qu'un produit rattaché
 // (marketplace grand public), référencé ici via sameAs plutôt que dupliqué en detail
 // (adresse/contactPoint complets restent uniquement sur sojori.com).
-const organizationJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: 'Sojori',
-  url: 'https://sojori.com',
-  sameAs: [
-    SITE_URL,
-    'https://www.linkedin.com/company/108488739',
-    'https://instagram.com/sojoriapp',
-  ],
-  description:
-    "Sojori est une entreprise de technologie hôtelière. sojori.com est sa plateforme de gestion locative pour property managers professionnels ; book.sojori.com est sa marketplace de location courte durée au Maroc (riads, villas, appartements).",
-};
-
-const websiteJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: 'Sojori',
-  url: SITE_URL,
-  publisher: {
-    '@type': 'Organization',
-    name: 'Sojori',
-    url: 'https://sojori.com',
-  },
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-  return (
-    <ClerkProvider
-      publishableKey={publishableKey}
-      localization={frFR as Parameters<typeof ClerkProvider>[0]['localization']}
-      appearance={clerkAppearance}
-      signInUrl="/login"
-      signUpUrl="/signup"
-      signInForceRedirectUrl="/"
-      signUpForceRedirectUrl="/"
-      signInFallbackRedirectUrl="/"
-      signUpFallbackRedirectUrl="/"
-    >
-      <html lang="fr" className={instrumentSerif.variable}>
-        <head>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap"
-            rel="stylesheet"
-          />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
-          />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
-          />
-        </head>
+  // Site d'un PM (domaine du client ou aperçu) : aucune trace de la plateforme — ni Clerk, ni JSON-LD « Sojori »,
+  // ni police de la plateforme. Posé par le middleware (`x-site-pm`).
+  if ((await headers()).get('x-site-pm') === '1') {
+    return (
+      <html lang="fr">
         <body>
-          <ThemePreview />
-          <CurrencyProvider>
-            {children}
-          </CurrencyProvider>
+          <CurrencyProvider>{children}</CurrencyProvider>
         </body>
       </html>
-    </ClerkProvider>
-  );
+    );
+  }
+  const { LayoutPlateforme } = await import('@/components/LayoutPlateforme');
+  return <LayoutPlateforme>{children}</LayoutPlateforme>;
 }
