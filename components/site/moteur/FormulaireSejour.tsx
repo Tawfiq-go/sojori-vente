@@ -12,12 +12,15 @@ export function FormulaireSejour({
   valeurs,
   maxVoyageurs = 12,
   libelle,
+  secondaire = false,
 }: {
   action: string
   langue: Langue
   valeurs: { checkIn?: string; checkOut?: string; adults?: string }
   maxVoyageurs?: number
   libelle?: string
+  /** Bouton discret (panneau de la fiche), le bouton plein étant « Continuer ». */
+  secondaire?: boolean
 }) {
   const min = aujourdhui()
   const adultes = Math.min(Math.max(Number(valeurs.adults) || 2, 1), maxVoyageurs)
@@ -41,7 +44,7 @@ export function FormulaireSejour({
           ))}
         </select>
       </label>
-      <button className="bouton" type="submit">
+      <button className={secondaire ? 'bouton bouton--second' : 'bouton'} type="submit">
         {libelle ?? mm('voirDispo', langue)}
       </button>
     </form>

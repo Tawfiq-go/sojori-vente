@@ -55,7 +55,7 @@ export function FicheType({
         <span aria-hidden="true">›</span>
         <span aria-current="page">{type.nom}</span>
       </nav>
-      {type.etablissement && <p className="moteur-carte__etab">{type.etablissement}</p>}
+      <p className="recherche__script">{nomSite}</p>
       <h1>{type.nom}</h1>
       <p className="villa__specs">{specs.join(' · ')}</p>
       {photos.length > 0 && (
@@ -116,6 +116,7 @@ export function FicheType({
             valeurs={valeurs}
             maxVoyageurs={Math.max(villa.voyageurs ?? 12, 1)}
             libelle={sejour ? mm('modifier', langue) : mm('recalculer', langue)}
+            secondaire
           />
           {sejour && type.etat === 'libre' && devis ? (
             <div className="moteur-devis__prix">

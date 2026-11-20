@@ -6,21 +6,12 @@
   text-align: center;
   max-width: 980px;
 }
-.site-pm .moteur-entete__accent {
-  margin: 0 0 4px;
-  font-family: var(--police-titres);
-  font-style: italic;
-  font-size: clamp(18px, 2.2vw, 24px);
-  color: var(--accent);
-}
-.site-pm[data-style='minimal'] .moteur-entete__accent {
-  font-family: 'Great Vibes', Georgia, 'Times New Roman', serif;
-  font-style: normal;
-  font-size: clamp(36px, 5vw, 64px);
-  line-height: 1.1;
-}
 .site-pm .moteur-entete h1 {
   margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: clamp(26px, 3.4vw, 46px);
+  font-weight: 500;
 }
 .site-pm .moteur-entete__sous {
   margin: 0 auto 32px;
@@ -88,7 +79,7 @@
 .site-pm .moteur-liste {
   display: grid;
   gap: 40px;
-  margin-top: calc(var(--espace) * 0.6);
+  margin-top: 32px;
   max-width: 1240px;
 }
 .site-pm .moteur-carte {
@@ -114,11 +105,18 @@
 .site-pm .moteur-carte__photos--vide {
   display: block;
 }
+.site-pm .moteur-carte__photos {
+  overflow: hidden;
+}
 .site-pm .moteur-carte__photos img {
   width: 100%;
   height: 100%;
   min-height: 0;
   object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.site-pm .moteur-carte:hover .moteur-carte__photos img {
+  transform: scale(1.03);
 }
 .site-pm .moteur-carte__photos img:first-child {
   grid-row: span 2;
@@ -154,7 +152,10 @@
 }
 .site-pm .moteur-carte__nom {
   margin: 0 0 6px;
-  font-size: clamp(26px, 2.8vw, 36px);
+  font-size: clamp(22px, 2.4vw, 30px);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
 }
 .site-pm .moteur-carte__nom a {
   color: inherit;
@@ -194,7 +195,7 @@
   display: grid;
   gap: 4px;
   padding-top: 20px;
-  border-top: 1px solid color-mix(in srgb, var(--texte) 12%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
 }
 .site-pm .moteur-carte__prix p {
   margin: 0;
@@ -251,13 +252,7 @@
 }
 .site-pm .moteur-devis .moteur-sejour label:nth-child(3),
 .site-pm .moteur-devis .moteur-sejour .bouton {
-  grid-column: span 2;
-}
-.site-pm .moteur-devis .moteur-sejour .bouton {
   width: 100%;
-  background: transparent;
-  color: var(--texte);
-  border: 1px solid color-mix(in srgb, var(--texte) 30%, transparent);
 }
 .site-pm .moteur-devis__prix {
   display: grid;
@@ -304,6 +299,36 @@
 .site-pm .moteur-devis__ecrire {
   font-size: 13.5px;
   text-align: center;
+}
+
+/* Boutons pleins : le vert sauge du thème (comme le panneau de la fiche) */
+.site-pm[data-style] .moteur-carte__prix .bouton,
+.site-pm[data-style] .moteur-paiement .bouton,
+.site-pm[data-style] .moteur-sejour .bouton:not(.bouton--second),
+.site-pm[data-style] .moteur-confirmation .bouton {
+  background: color-mix(in srgb, var(--accent) 80%, #000);
+  border-color: color-mix(in srgb, var(--accent) 80%, #000);
+  color: #fff;
+}
+.site-pm[data-style] .moteur-carte__prix .bouton:hover,
+.site-pm[data-style] .moteur-paiement .bouton:hover,
+.site-pm[data-style] .moteur-sejour .bouton:not(.bouton--second):hover,
+.site-pm[data-style] .moteur-confirmation .bouton:hover {
+  background: transparent;
+  color: color-mix(in srgb, var(--accent) 80%, #000);
+}
+.site-pm .moteur-etape h1,
+.site-pm .moteur-confirmation h1 {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+.site-pm .moteur-paiement h2 {
+  font-size: 13px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--accent);
 }
 
 /* Paiement et confirmation */

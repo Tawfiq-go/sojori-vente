@@ -61,8 +61,8 @@ export async function Parcours({
     return (
       <>
         <section className="section moteur-entete">
-          <p className="moteur-entete__accent">{site.spec.identite.nom}</p>
-          <h1>{mm('titre', langue)}</h1>
+          <p className="recherche__script">{mot('reserverSur', langue)}</p>
+          <h1>{mot('reserverTitre', langue)}</h1>
           <p className="moteur-entete__sous">{mm('sousTitre', langue)}</p>
           <FormulaireSejour action={l(CHEMIN_RESERVER)} langue={langue} valeurs={valeurs} maxVoyageurs={maxVoy} />
           {aDesDates && !sejour && <p className="moteur-alerte">{mm('datesInvalides', langue)}</p>}
