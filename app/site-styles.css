@@ -495,6 +495,19 @@
   color: #141617;
 }
 
+/* Même premier écran sobre : la vidéo ou la photo reste nette et lumineuse (plus de voile noir ni de fond sombre),
+   le texte blanc garde une ombre légère pour rester lisible (Nommos Beach Resort, 20/11/2026). */
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) {
+  background: transparent;
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos))::after {
+  background: none;
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) h1,
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .sur-titre {
+  text-shadow: 0 1px 14px rgb(0 0 0 / 0.28);
+}
+
 /* ───────────────────────── luxe ───────────────────────── */
 .site-pm[data-style='luxe'] h1,
 .site-pm[data-style='luxe'] h2 {
