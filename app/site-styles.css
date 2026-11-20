@@ -1132,3 +1132,125 @@
   font-size: 20px;
   color: var(--texte);
 }
+
+/* La fiche d'une villa dans le site du PM (`/reserver/<id>`) : mosaïque de photos, texte, demande à droite. */
+.site-pm .villa {
+  max-width: 1240px;
+}
+.site-pm .villa__ariane {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--texte) 65%, transparent);
+}
+.site-pm .villa__ariane a {
+  color: inherit;
+  text-decoration: none;
+}
+.site-pm .villa h1 {
+  font-size: clamp(30px, 4vw, 52px);
+  margin-bottom: 8px;
+}
+.site-pm .villa__specs {
+  margin: 0 0 24px;
+  color: color-mix(in srgb, var(--texte) 70%, transparent);
+}
+.site-pm .villa__photos {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-auto-rows: clamp(150px, 18vw, 260px);
+  gap: 10px;
+  margin-bottom: 40px;
+}
+.site-pm .villa__photos img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--arrondi);
+}
+.site-pm .villa__photos img:first-child {
+  grid-row: span 2;
+}
+.site-pm .villa__photos img:nth-child(n + 6) {
+  display: none;
+}
+.site-pm .villa__corps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 48px;
+  align-items: start;
+}
+.site-pm .villa__texte section {
+  margin-bottom: 36px;
+}
+.site-pm .villa__texte h2 {
+  font-size: clamp(22px, 2.4vw, 30px);
+  margin-bottom: 14px;
+}
+.site-pm .villa__equipements {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px 24px;
+  padding: 0;
+  list-style: none;
+}
+.site-pm .villa__demande {
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid color-mix(in srgb, var(--texte) 14%, transparent);
+  border-radius: var(--arrondi);
+  background: var(--fond);
+}
+.site-pm .villa__demande label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+.site-pm .villa__demande input {
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--texte) 18%, transparent);
+  border-radius: var(--arrondi);
+  background: var(--fond);
+  color: var(--texte);
+  font: inherit;
+}
+.site-pm .villa__prix {
+  margin: 0;
+}
+.site-pm .villa__prix b {
+  font-size: 24px;
+}
+.site-pm .villa__note,
+.site-pm .villa__horaires {
+  margin: 0;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--texte) 65%, transparent);
+}
+.site-pm .villa__plan {
+  width: 100%;
+  min-height: 360px;
+  border-radius: var(--arrondi);
+  background: color-mix(in srgb, var(--texte) 6%, transparent);
+}
+@media (max-width: 900px) {
+  .site-pm .villa__corps {
+    grid-template-columns: 1fr;
+  }
+  .site-pm .villa__demande {
+    position: static;
+  }
+  .site-pm .villa__photos {
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 150px;
+  }
+  .site-pm .villa__photos img:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}

@@ -58,6 +58,21 @@ export default clerkMiddleware(async (auth, req) => {
     // Site composé par l'agent Site web : ses pages viennent de sa fiche publiée (srv-site) ;
     // logements, réservation et compte restent les pages de sojori-vente.
     const site = await pagesDuSite(tenant);
+    // Isolation : sur le domaine d'un client qui a son site, ni la recherche ni les fiches du marché Sojori ne
+    // s'ouvrent (logements d'autres PM, design Sojori) — la réservation et la fiche d'une villa sont des pages du site.
+    if (site) {
+      const vers = (chemin: string) => {
+        const url = req.nextUrl.clone();
+        url.pathname = chemin;
+        url.search = '';
+        const redirect = NextResponse.redirect(url);
+        redirect.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
+        return redirect;
+      };
+      if (path === '/search') return vers('/reserver');
+      const villa = path.match(/^\/listings\/([A-Za-z0-9:_-]+)\/?$/);
+      if (villa) return vers(`/reserver/${villa[1]}`);
+    }
     if (site && estUnCheminDuSite(path, site.pages, site.langues)) {
       const url = req.nextUrl.clone();
       url.pathname = `/site-pm/${tenant}${path === '/' ? '' : path}`;

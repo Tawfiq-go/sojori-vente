@@ -3,6 +3,8 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { CadreSite, CHEMIN_RESERVER } from '@/components/site/Chrome'
 import { Reservation } from '@/components/site/Reservation'
+import { Villa } from '@/components/site/Villa'
+import { lireVilla } from '@/lib/site/logement'
 import { SitePm } from '@/components/site/SitePm'
 import { lireSitePm } from '@/lib/site/api'
 import { lien, lireCible } from '@/lib/site/route'
@@ -24,7 +26,7 @@ async function charger(props: Props) {
   if (!site) return null
   const cible = lireCible(chemin, site.spec.langues)
   // `/reserver` : la page de réservation du site (dates → logements de ce PM), dans son cadre.
-  if (cible.chemin === CHEMIN_RESERVER) return { slug, site, cible, page: null }
+  if (cible.chemin === CHEMIN_RESERVER || cible.chemin.startsWith(`${CHEMIN_RESERVER}/`)) return { slug, site, cible, page: null }
   const page = site.spec.pages.find((p) => p.chemin === cible.chemin)
   return page ? { slug, site, cible, page } : null
 }
@@ -51,6 +53,16 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function SitePublie(props: Props) {
   const c = await charger(props)
   if (!c) notFound()
+  if (!c.page && c.cible.chemin.startsWith(`${CHEMIN_RESERVER}/`)) {
+    // `/reserver/<id>` : la fiche d'une villa DE CE PM, dans son cadre (404 pour tout autre logement).
+    const villa = await lireVilla(c.slug, c.cible.chemin.slice(CHEMIN_RESERVER.length + 1))
+    if (!villa) notFound()
+    return (
+      <CadreSite site={c.site} base="" langue={c.cible.langue} chemin={c.cible.chemin}>
+        <Villa site={c.site} base="" langue={c.cible.langue} villa={villa} />
+      </CadreSite>
+    )
+  }
   if (!c.page) {
     const valeurs = await props.searchParams
     return (
