@@ -21,6 +21,7 @@ export function metaNeutre(titre = 'Page introuvable'): Metadata {
     icons: { icon: ICONE_VIDE, shortcut: ICONE_VIDE, apple: ICONE_VIDE },
     openGraph: { type: 'website', title: titre, description: titre, siteName: '', images: [] },
     twitter: { card: 'summary', title: titre, images: [] },
+    alternates: { canonical: null },
     robots: { index: false, follow: false },
   }
 }
@@ -33,6 +34,7 @@ export function metaMarqueBlanche(site: SitePublic, titre: string, descriptionPa
   return {
     title: titre,
     description,
+    alternates: { canonical: null },
     applicationName: nom,
     authors: [{ name: nom }],
     creator: nom,
