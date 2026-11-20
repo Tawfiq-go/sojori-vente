@@ -50,6 +50,12 @@ export type TypeChambre = {
   motif?: string
 }
 
+/** Plafonds contre l'amplification : un visiteur anonyme choisit les dates, chaque type évalué coûte 2 appels à srv-listing. */
+const MAX_TYPES_EVALUES = 12
+const HORIZON_JOURS = 540
+const EVALUATIONS_PAR_MINUTE = 60
+const FENETRE_DISPO_JOURS = 92
+
 const ID = /^[A-Za-z0-9:_-]{8,80}$/
 const AAAA_MM_JJ = /^\d{4}-\d{2}-\d{2}$/
 const JOUR = 86_400_000
@@ -69,6 +75,7 @@ export function lireSejour(q: { checkIn?: string; checkOut?: string; adults?: st
   if (!Number.isFinite(a) || !Number.isFinite(d)) return null
   const nuits = Math.round((d - a) / JOUR)
   if (nuits < 1 || nuits > 60 || checkIn < aujourdhui()) return null
+  if (a - Date.now() > HORIZON_JOURS * JOUR) return null
   const voyageurs = Math.round(Number(q.adults ?? 2))
   if (!Number.isFinite(voyageurs) || voyageurs < 1 || voyageurs > 20) return null
   return { arrivee: checkIn, depart: checkOut, voyageurs, nuits }
@@ -100,6 +107,30 @@ async function lire(chemin: string, slug: string, requete: Record<string, string
   }
 }
 
+function fenetreDispo(arrivee: string): { from: string; to: string } {
+  const from = `${arrivee.slice(0, 8)}01`
+  const to = new Date(Date.parse(`${from}T00:00:00Z`) + FENETRE_DISPO_JOURS * JOUR).toISOString().slice(0, 10)
+  return { from, to }
+}
+
+/** Débit par visiteur (adresse IP), en mémoire du processus : un excès n'évalue plus rien, la liste reste lisible. */
+const debits = new Map<string, { debut: number; n: number }>()
+export function autoriserEvaluations(cle: string, n: number, maintenant = Date.now()): boolean {
+  const d = debits.get(cle)
+  if (!d || maintenant - d.debut >= 60_000) {
+    debits.delete(cle)
+    debits.set(cle, { debut: maintenant, n })
+    while (debits.size > 2000) {
+      const plusAncien = debits.keys().next().value
+      if (plusAncien === undefined) break
+      debits.delete(plusAncien)
+    }
+    return n <= EVALUATIONS_PAR_MINUTE
+  }
+  d.n += n
+  return d.n <= EVALUATIONS_PAR_MINUTE
+}
+
 /** `<listingId>:<roomTypeId>` (multi-unités) ou un listingId seul. */
 export function decomposerId(id: string): { listingId: string; roomTypeId?: string } | null {
   if (!ID.test(id)) return null
@@ -120,7 +151,9 @@ export async function evaluerType(slug: string, id: string, sejour: Sejour, maxV
   if (maxVoyageurs !== undefined && maxVoyageurs > 0 && sejour.voyageurs > maxVoyageurs) return { etat: 'capacite' }
   const unite = ids.roomTypeId ? { roomTypeId: ids.roomTypeId } : {}
   const [dispo, prix] = await Promise.all([
-    lire(`${encodeURIComponent(ids.listingId)}/availability`, slug, { from: sejour.arrivee, to: sejour.depart, ...unite }),
+    // Fenêtre alignée sur le mois de l'arrivée : tous les visiteurs de ce mois partagent la même lecture (cache), quelles que
+    // soient leurs dates exactes ; `nuitBloquee` ne regarde ensuite que les nuits du séjour.
+    lire(`${encodeURIComponent(ids.listingId)}/availability`, slug, { ...fenetreDispo(sejour.arrivee), ...unite }),
     lire(`${encodeURIComponent(ids.listingId)}/pricing`, slug, {
       checkIn: sejour.arrivee,
       checkOut: sejour.depart,
@@ -176,24 +209,31 @@ function enType(l: Logement): TypeChambre {
  * Les types de chambre de CE PM pour un séjour. Sans séjour valide : la liste seule (« à partir de »).
  * Les types disponibles passent d'abord, puis les autres ; l'ordre de la fiche est gardé à l'intérieur.
  */
-export const lireTypes = cache(async (slug: string, sejour: Sejour | null): Promise<TypeChambre[]> => {
+export const lireTypes = cache(async (slug: string, sejour: Sejour | null, visiteur = ''): Promise<TypeChambre[]> => {
   const logements = await lireLogements(slug)
   const types = logements.map(enType)
   if (!sejour) return types
+  const aEvaluer = types.slice(0, MAX_TYPES_EVALUES)
+  // Trop de lectures de ce visiteur : on ne lit rien de plus (la liste reste affichée, « momentanément illisible »).
+  const permis = autoriserEvaluations(visiteur || 'anonyme', aEvaluer.length)
   const evalues = await Promise.all(
-    types.map(async (tp) => ({ ...tp, ...(await evaluerType(slug, tp.id, sejour, tp.voyageurs)) })),
+    types.map(async (tp, i) =>
+      i < MAX_TYPES_EVALUES && permis ? { ...tp, ...(await evaluerType(slug, tp.id, sejour, tp.voyageurs)) } : { ...tp, etat: 'erreur' as const },
+    ),
   )
   const rang = (t: TypeChambre) => (t.etat === 'libre' ? 0 : t.etat === 'erreur' ? 2 : 1)
   return evalues.map((t, i) => ({ t, i })).sort((a, b) => rang(a.t) - rang(b.t) || a.i - b.i).map(({ t }) => t)
 })
 
 /** Un type précis de CE PM (404 propre sinon) avec le devis du séjour demandé. */
-export async function lireType(slug: string, id: string, sejour: Sejour | null): Promise<TypeChambre | null> {
+export async function lireType(slug: string, id: string, sejour: Sejour | null, visiteur = ''): Promise<TypeChambre | null> {
   const logements = await lireLogements(slug)
   const l = logements.find((x) => x.id === id)
   if (!l) return null
   const base = enType(l)
-  return sejour ? { ...base, ...(await evaluerType(slug, id, sejour, base.voyageurs)) } : base
+  if (!sejour) return base
+  if (!autoriserEvaluations(visiteur || 'anonyme', 1)) return { ...base, etat: 'erreur' }
+  return { ...base, ...(await evaluerType(slug, id, sejour, base.voyageurs)) }
 }
 
 export function formaterPrix(montant: number, devise: string, langue: string): string {

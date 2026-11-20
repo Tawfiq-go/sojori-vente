@@ -5,7 +5,7 @@ import { CadreSite, CHEMIN_RESERVER } from '@/components/site/Chrome'
 import { Parcours } from '@/components/site/moteur/Parcours'
 import { metaMarqueBlanche, metaNeutre } from '@/lib/site/meta'
 import { SitePm } from '@/components/site/SitePm'
-import { lireApercu } from '@/lib/site/api'
+import { lireApercu, lireLogements, lireProprietaireApercu } from '@/lib/site/api'
 import { lireCible } from '@/lib/site/route'
 
 /**
@@ -35,6 +35,10 @@ export default async function ApercuDuSite(props: Props) {
   const base = `/site-apercu/${encodeURIComponent(jeton)}/${encodeURIComponent(slug)}`
   // `/reserver…` : le parcours de réservation du site (liste, fiche, paiement, confirmation), dans son cadre.
   if (cible.chemin === CHEMIN_RESERVER || cible.chemin.startsWith(`${CHEMIN_RESERVER}/`)) {
+    // Le slug de l'adresse n'est qu'une indication : il doit désigner le propriétaire que le JETON autorise, sinon un
+    // jeton valide ouvrirait les types, prix et disponibilités de n'importe quel autre PM (revue du 20/11/2026).
+    const [proprietaire, logements] = await Promise.all([lireProprietaireApercu(jeton), lireLogements(slug)])
+    if (!proprietaire || logements.some((l) => l.pmId !== proprietaire)) notFound()
     const valeurs = await props.searchParams
     return (
       <CadreSite site={site} base={base} langue={cible.langue} chemin={cible.chemin}>
