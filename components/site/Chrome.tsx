@@ -93,11 +93,57 @@ export function CadreSite({
       </header>
       <main data-page={pageId ?? CHEMIN_RESERVER}>{children}</main>
       <footer className="pied" data-bloc="pied">
-        {t(site.spec.piedDePage.texte, langue, defaut) && <p>{t(site.spec.piedDePage.texte, langue, defaut)}</p>}
-        <div className="pied__liens">
-          <Reseaux reseaux={site.spec.piedDePage.reseaux ?? []} />
-          {legal && <a href={l(langue, legal.chemin)}>{mot('mentions', langue)}</a>}
+        <div className="pied__colonnes">
+          <div className="pied__col pied__col--marque">
+            {logo && <img className="pied__logo" src={logo.url} alt={site.spec.identite.nom} loading="lazy" decoding="async" />}
+            {t(site.spec.piedDePage.texte, langue, defaut) && (
+              <p className="multiligne">{t(site.spec.piedDePage.texte, langue, defaut)}</p>
+            )}
+          </div>
+          <nav className="pied__col pied__col--menu" aria-label={mot('pied_navigation', langue)}>
+            <h3>{mot('pied_navigation', langue)}</h3>
+            <ul>
+              {site.spec.pages
+                .filter((p) => p !== legal)
+                .map((p) => (
+                  <li key={p.id}>
+                    <a href={l(langue, p.chemin)}>{t(p.titre, langue, defaut)}</a>
+                  </li>
+                ))}
+            </ul>
+          </nav>
+          {((site.spec.piedDePage.infos ?? []).length > 0 || (site.spec.piedDePage.reseaux ?? []).length > 0) && (
+            <div className="pied__col pied__col--infos">
+              {(site.spec.piedDePage.infos ?? []).length > 0 && (
+                <>
+                  <h3>{mot('pied_infos', langue)}</h3>
+                  <ul>
+                    {(site.spec.piedDePage.infos ?? []).map((ligne, i) => (
+                      <li key={i}>{t(ligne, langue, defaut)}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {(site.spec.piedDePage.reseaux ?? []).length > 0 && (
+                <>
+                  <h3>{mot('pied_suivez', langue)}</h3>
+                  <div className="pied__liens">
+                    <Reseaux reseaux={site.spec.piedDePage.reseaux ?? []} />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
+        <p className="pied__droits">
+          © {new Date().getFullYear()} {site.spec.identite.nom} · {mot('pied_droits', langue)}
+          {legal && (
+            <>
+              {' · '}
+              <a href={l(langue, legal.chemin)}>{mot('mentions', langue)}</a>
+            </>
+          )}
+        </p>
       </footer>
       {whatsapp && <WhatsappFlottant numero={whatsapp} langue={langue} />}
       {apres}

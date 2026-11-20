@@ -47,7 +47,7 @@ export type SiteSpec = {
   }
   langues: { defaut: Langue; actives: Langue[] }
   pages: Page[]
-  piedDePage: { texte?: Texte; reseaux?: Array<{ type: string; url: string }> }
+  piedDePage: { texte?: Texte; infos?: Texte[]; reseaux?: Array<{ type: string; url: string }> }
 }
 
 export type Media = { url: string; type: 'image' | 'video'; alt?: string }

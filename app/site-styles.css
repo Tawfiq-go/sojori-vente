@@ -1356,3 +1356,278 @@
   gap: 12px;
   align-items: end;
 }
+
+/* ═══ Design fidèle à l'ORIGINAL de Nommos Beach Resort (relevé du 21/11/2026 sur nommosbeachresort.com) ═══
+   Montserrat partout ; texte #141617 16 px ; titres 700 en capitales ; vert sauge #92AA91 (bandes, titres), bouton
+   vert #7D947C, bandes pâles #DDE3DD, pied #ACBBAC avec texte blanc. Réservé au style minimal. */
+.site-pm[data-style='minimal'] {
+  --sauge: var(--accent);
+  --sauge-fonce: color-mix(in srgb, var(--accent) 85%, #000);
+  --sauge-pied: color-mix(in srgb, var(--accent) 80%, #fff);
+  font-size: 16px;
+  line-height: 1.72;
+  letter-spacing: 0.015em;
+}
+.site-pm[data-style='minimal'] h1,
+.site-pm[data-style='minimal'] h2,
+.site-pm[data-style='minimal'] h3 {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.site-pm[data-style='minimal'] .section h2 {
+  text-transform: uppercase;
+  font-size: clamp(24px, 2.4vw, 34px);
+  line-height: 1.2;
+}
+/* Navigation : capitales moyennes, noir, actif en vert */
+.site-pm[data-style='minimal'] .entete__menu {
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+/* Boutons : vert #7D947C, texte blanc 16 px moyen, sans capitales espacées */
+.site-pm[data-style='minimal'] .bouton:not(.bouton--second),
+.site-pm[data-style='minimal'] .bouton:not(.bouton--second):hover {
+  background: var(--sauge-fonce);
+  border-color: var(--sauge-fonce);
+  color: #fff;
+  text-transform: none;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.site-pm[data-style='minimal'] .bouton:not(.bouton--second):hover {
+  filter: brightness(1.08);
+}
+/* Bandes vertes : la couleur d'accent telle quelle (#92AA91), texte blanc, titre en capitales gras */
+.site-pm:not([data-style='classique']) .texteImage--bande {
+  background: var(--accent);
+}
+.site-pm[data-style='minimal'] .texteImage--bande h2,
+.site-pm[data-style='minimal'] .texteImage--centre h2 {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-size: clamp(24px, 2.4vw, 34px);
+}
+.site-pm[data-style='minimal'] .texteImage--bande .bouton {
+  background: transparent;
+  border: 2px solid #fff;
+  color: #fff;
+}
+/* Barre de dates : bande pâle #DDE3DD, bouton noir « Réserver » comme l'original */
+.site-pm[data-style='minimal'] .bandeau--plein_ecran + .section.recherche .bouton {
+  background: #000;
+  border-color: #000;
+  color: #fff;
+  text-transform: none;
+  font-weight: 500;
+}
+/* Premier écran : titre 700, bouton « Book now » 25 px, bord blanc 2 px */
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) h1 {
+  font-weight: 700;
+  font-size: clamp(40px, 5.4vw, 78px);
+  letter-spacing: -0.015em;
+  text-transform: none;
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .bouton:not(.bouton--second),
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .bouton:not(.bouton--second):hover {
+  background: transparent;
+  border: 2px solid #fff;
+  color: #fff;
+  min-height: 63px;
+  padding: 0 38px;
+  font-size: clamp(18px, 1.7vw, 25px);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .bouton:not(.bouton--second):hover {
+  background: #fff;
+  color: #141617;
+}
+/* Pied de page : vert pâle #ACBBAC, texte blanc */
+.site-pm[data-style='minimal'] .pied {
+  background: var(--sauge-pied);
+  color: #fff;
+  border-top: 0;
+  margin-top: 0;
+}
+.site-pm[data-style='minimal'] .pied a {
+  color: #fff;
+}
+.site-pm[data-style='minimal'] .pied__liens a svg {
+  fill: #fff;
+}
+
+/* Bande claire (#DDE3DD) : « Piscine & Vibes » de l'original — texte sombre centré sur le fond doux, pleine largeur. */
+.site-pm:not([data-style='classique']) .texteImage--bande_claire {
+  display: block;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding: clamp(48px, 6vw, 90px) clamp(20px, 6vw, 80px);
+  background: var(--accent-doux);
+  color: var(--texte);
+  text-align: center;
+}
+.site-pm:not([data-style='classique']) .texteImage--bande_claire .texteImage__texte {
+  max-width: 1020px;
+  margin: 0 auto;
+}
+.site-pm:not([data-style='classique']) .texteImage--bande_claire h2 {
+  max-width: none;
+  margin-left: auto;
+  margin-right: auto;
+}
+.site-pm:not([data-style='classique']) .texteImage--bande_claire .actions {
+  justify-content: center;
+}
+/* « centre » : le logo (ou l'image) AU-DESSUS du titre, sans recadrage, comme le bloc d'introduction de l'original ;
+   le titre en vert sauge, gras. */
+.site-pm[data-style='minimal'] .texteImage--centre .texteImage__media {
+  order: -1;
+  max-width: min(520px, 80%);
+  aspect-ratio: auto;
+  object-fit: contain;
+  margin: 0 auto 28px;
+}
+.site-pm[data-style='minimal'] .texteImage--centre h2 {
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.site-pm[data-style='minimal'] .texteImage--centre .sur-titre {
+  color: color-mix(in srgb, var(--accent) 85%, #000);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-size: 14px;
+}
+
+/* Pied de page à trois colonnes comme l'original : marque et mentions / navigation / informations et réseaux ; bandeau des droits. */
+.site-pm .pied__colonnes {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 40px clamp(24px, 5vw, 72px);
+  max-width: 1240px;
+  margin: 0 auto;
+}
+.site-pm .pied__logo {
+  display: block;
+  max-width: 260px;
+  height: auto;
+  margin-bottom: 18px;
+}
+.site-pm .pied h3 {
+  margin: 0 0 14px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.site-pm .pied ul {
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+}
+.site-pm .pied li {
+  padding: 7px 0;
+  font-size: 14px;
+}
+.site-pm .pied__col--menu li {
+  border-bottom: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+}
+.site-pm .pied__col--menu li a::before {
+  content: '› ';
+}
+.site-pm .pied a {
+  color: inherit;
+  text-decoration: none;
+}
+.site-pm .pied__col--marque p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.site-pm .pied__droits {
+  max-width: 1240px;
+  margin: 40px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  font-size: 12px;
+  text-align: center;
+}
+@media (max-width: 800px) {
+  .site-pm .pied__colonnes {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Rythme de l'original : les bandes se touchent (pas de blanc entre elles), le reste respire modérément. */
+.site-pm[data-style='minimal'] .section:not(.bandeau--plein_ecran):not(.mesure) {
+  margin-top: clamp(36px, 4.5vw, 64px);
+}
+.site-pm[data-style='minimal'] .texteImage--bande,
+.site-pm[data-style='minimal'] .texteImage--bande_claire,
+.site-pm[data-style='minimal'] .section.recherche.recherche--bande,
+.site-pm[data-style='minimal'] .galerie--grille:has(.galerie__grille > :nth-child(5):last-child) {
+  margin-top: 0;
+}
+.site-pm[data-style='minimal'] .texteImage--centre {
+  margin-top: 0;
+  padding-top: clamp(36px, 4vw, 56px);
+  padding-bottom: clamp(24px, 3vw, 40px);
+}
+.site-pm[data-style='minimal'] .texteImage--bande p,
+.site-pm[data-style='minimal'] .texteImage--bande_claire p,
+.site-pm[data-style='minimal'] .texteImage--centre p {
+  font-size: 15px;
+  line-height: 1.75;
+}
+/* Bande de 5 photos bord à bord (entre l'introduction et les villas, comme l'original) */
+.site-pm[data-style='minimal'] .galerie--grille:has(.galerie__grille > :nth-child(5):last-child) {
+  max-width: none;
+  padding: 0;
+}
+.site-pm[data-style='minimal'] .galerie--grille .galerie__grille:has(> :nth-child(5):last-child) {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+}
+.site-pm[data-style='minimal'] .galerie--grille .galerie__grille:has(> :nth-child(5):last-child) .galerie__media {
+  aspect-ratio: 3 / 4;
+  border-radius: 0;
+}
+/* Grille de 6 photos (3 × 2) sous le texte de LA LA LA */
+.site-pm[data-style='minimal'] .galerie--grille .galerie__grille:has(> :nth-child(6):last-child) {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.site-pm[data-style='minimal'] .galerie--grille .galerie__grille:has(> :nth-child(6):last-child) .galerie__media {
+  aspect-ratio: 4 / 5;
+  border-radius: 0;
+}
+@media (max-width: 700px) {
+  .site-pm[data-style='minimal'] .galerie--grille .galerie__grille:has(> :nth-child(5):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .site-pm[data-style='minimal'] .galerie--grille .galerie__grille:has(> :nth-child(6):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Bandes moins hautes (celles de l'original font ~150 px) ; titre vert seulement sous le logo d'introduction. */
+.site-pm:not([data-style='classique']) .texteImage--bande,
+.site-pm:not([data-style='classique']) .texteImage--bande_claire {
+  padding-top: clamp(28px, 3.4vw, 52px);
+  padding-bottom: clamp(28px, 3.4vw, 52px);
+}
+.site-pm[data-style='minimal'] .texteImage--bande h2,
+.site-pm[data-style='minimal'] .texteImage--bande_claire h2 {
+  margin-bottom: 16px;
+}
+.site-pm[data-style='minimal'] .texteImage--centre:not(:has(.texteImage__media)) h2 {
+  color: var(--texte);
+}
+.site-pm .pied li,
+.site-pm .pied p {
+  overflow-wrap: anywhere;
+}
+.site-pm .pied__colonnes > * {
+  min-width: 0;
+}
