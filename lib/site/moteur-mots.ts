@@ -45,6 +45,10 @@ const M = {
   recalculer: { fr: 'Calculer le prix', en: 'Calculate price', ar: 'احسب السعر' },
   deMoinsDe: { fr: 'Choisissez vos dates pour voir le prix exact.', en: 'Choose your dates to see the exact price.', ar: 'اختر تواريخك لرؤية السعر الدقيق.' },
   prixConfirme: { fr: 'Le prix affiché est celui du séjour, taxes et frais compris.', en: 'The price shown is for your whole stay, taxes and fees included.', ar: 'السعر المعروض هو سعر الإقامة كاملة شاملًا الضرائب والرسوم.' },
+  annulationTitre: { fr: 'Conditions d’annulation', en: 'Cancellation policy', ar: 'شروط الإلغاء' },
+  annulationGratuite: { fr: 'Annulation gratuite jusqu’à {n} jour(s) avant l’arrivée.', en: 'Free cancellation up to {n} day(s) before arrival.', ar: 'إلغاء مجاني حتى {n} يوم قبل الوصول.' },
+  annulationApres: { fr: 'Ensuite, {v} % du séjour est retenu.', en: 'After that, {v}% of the stay is charged.', ar: 'بعد ذلك، يُحتجز {v}٪ من قيمة الإقامة.' },
+  nonRemboursable: { fr: 'Ce séjour n’est pas remboursable.', en: 'This stay is non-refundable.', ar: 'هذه الإقامة غير قابلة للاسترداد.' },
   // Paiement
   paiementTitre: { fr: 'Vos coordonnées et le paiement', en: 'Your details and payment', ar: 'بياناتك والدفع' },
   coordonnees: { fr: 'Vos coordonnées', en: 'Your details', ar: 'بياناتك' },
@@ -101,4 +105,15 @@ export function mm(cle: CleMot, langue: Langue, vars: Record<string, string | nu
   let s = mot[langue] ?? mot.fr
   for (const [k, v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, String(v))
   return s
+}
+
+/** La politique d'annulation en phrases, à partir des paliers de la fiche (jamais inventée : sans palier, aucune phrase). */
+export function phrasesAnnulation(paliers: Array<{ from: number; to: number; value: number }> | undefined, langue: Langue): string[] {
+  if (!paliers?.length) return []
+  const gratuit = paliers.filter((p) => p.value === 0).sort((a, b) => b.from - a.from)[0]
+  const retenu = paliers.filter((p) => p.value > 0).sort((a, b) => b.from - a.from)[0]
+  if (!gratuit) return retenu && retenu.value >= 100 ? [mm('nonRemboursable', langue)] : []
+  const phrases = [mm('annulationGratuite', langue, { n: gratuit.from })]
+  if (retenu) phrases.push(mm('annulationApres', langue, { v: retenu.value }))
+  return phrases
 }

@@ -6,7 +6,7 @@
 import { CarteVilla } from '@/components/site/CarteVilla'
 import { CHEMIN_RESERVER } from '@/components/site/Chrome'
 import { formaterPrix, type Sejour, type TypeChambre } from '@/lib/site/moteur'
-import { mm } from '@/lib/site/moteur-mots'
+import { mm, phrasesAnnulation } from '@/lib/site/moteur-mots'
 import { lien } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
 import type { Langue, SitePublic } from '@/lib/site/types'
@@ -82,6 +82,14 @@ export function FicheType({
                   <li key={e}>{e.charAt(0).toUpperCase() + e.slice(1)}</li>
                 ))}
               </ul>
+            </section>
+          )}
+          {phrasesAnnulation(villa.annulation, langue).length > 0 && (
+            <section>
+              <h2>{mm('annulationTitre', langue)}</h2>
+              {phrasesAnnulation(villa.annulation, langue).map((p) => (
+                <p key={p}>{p}</p>
+              ))}
             </section>
           )}
           {villa.arrivee && villa.depart && (
