@@ -47,6 +47,10 @@ export function SitePm({
       style={variablesDuTheme(site.spec.theme)}
     >
       <link rel="stylesheet" href={lienPolices(site.spec.theme)} />
+      {/* Style minimal : le mot en écriture manuscrite du premier écran sobre (Nommos Beach Resort, 20/11/2026). */}
+      {site.spec.theme.style === 'minimal' && (
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" />
+      )}
       {/* Pas de bandeau « Aperçu — non publié » (Tawfiq, 16/11/2026) : l'écran Site web du dashboard dit déjà
           « Brouillon — pas encore en ligne » au-dessus du cadre, et le bandeau masquait l'en-tête du site. */}
       <header className="entete" data-bloc="entete">

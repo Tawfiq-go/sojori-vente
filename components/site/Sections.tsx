@@ -52,7 +52,7 @@ function MediaVue({
         aria-label={alt || m.alt || ''}
       />
     )
-  return <img className={className} src={m.url} alt={alt || m.alt || ''} loading="lazy" />
+  return <img className={className} src={m.url} alt={alt || m.alt || ''} loading="lazy" decoding="async" />
 }
 
 /** Un lien de la fiche : interne (/chemin), ancre (#…), ou externe (https, mailto, tel). */

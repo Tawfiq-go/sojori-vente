@@ -474,9 +474,9 @@
 .site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .sur-titre {
   order: 2;
   margin: 0 0 12px;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-style: italic;
-  font-size: clamp(30px, 4.4vw, 62px);
+  font-family: 'Great Vibes', Georgia, 'Times New Roman', serif;
+  font-style: normal;
+  font-size: clamp(40px, 6vw, 84px);
   letter-spacing: 0;
   text-transform: none;
   opacity: 1;
@@ -506,6 +506,152 @@
 .site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) h1,
 .site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .sur-titre {
   text-shadow: 0 1px 14px rgb(0 0 0 / 0.28);
+}
+
+/* Finition du style minimal (Nommos Beach Resort, 20/11/2026) : en-tête discret, bandes pleine largeur, pied soigné, mobile. */
+.site-pm[data-style='minimal'] .entete {
+  padding: 14px clamp(20px, 5vw, 64px);
+  background: color-mix(in srgb, var(--fond) 94%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--texte) 8%, transparent);
+}
+.site-pm[data-style='minimal'] .entete__menu {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+}
+.site-pm[data-style='minimal'] .entete__menu a {
+  transition: color 0.25s;
+}
+.site-pm[data-style='minimal'] .entete__menu a:hover {
+  color: var(--accent);
+}
+.site-pm[data-style='minimal'] .pied {
+  margin-top: calc(var(--espace) * 2);
+  padding: 48px clamp(20px, 5vw, 64px) 56px;
+  border-top: 1px solid color-mix(in srgb, var(--texte) 10%, transparent);
+  font-size: 13px;
+  line-height: 1.8;
+  color: color-mix(in srgb, var(--texte) 72%, transparent);
+}
+@media (max-width: 900px) {
+  /* Téléphone : le logo et la langue sur une ligne, le menu sur UNE ligne qui défile (au lieu de 4 lignes). */
+  .site-pm[data-style='minimal'] .entete {
+    gap: 6px 16px;
+    padding: 10px 16px;
+  }
+  .site-pm[data-style='minimal'] .entete__nom img {
+    height: 30px;
+  }
+  .site-pm[data-style='minimal'] .entete__langues {
+    order: 2;
+  }
+  .site-pm[data-style='minimal'] .entete__menu {
+    order: 3;
+    flex-basis: 100%;
+    flex-wrap: nowrap;
+    gap: 22px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+    font-size: 11px;
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+  .site-pm[data-style='minimal'] .entete__menu::-webkit-scrollbar {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) {
+    min-height: min(78svh, 620px);
+  }
+}
+
+/* Accessibilité de base et mouvement : un contour visible au clavier, pas d'animation pour qui la refuse ; boutons centrés dans les cartes d'appel. */
+.site-pm[data-style='minimal'] a:focus-visible,
+.site-pm[data-style='minimal'] button:focus-visible,
+.site-pm[data-style='minimal'] summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.site-pm[data-style='minimal'] .appel__boite .actions {
+  justify-content: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-pm[data-style='minimal'] .bandeau--plein_ecran .bandeau__media {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* Rythme : moins de blanc avant le premier bloc d'une page intérieure, et sur téléphone. */
+.site-pm[data-style='minimal'] main > .section:first-child:not(.bandeau--plein_ecran):not(.mesure) {
+  margin-top: calc(var(--espace) * 1.1);
+}
+@media (max-width: 700px) {
+  .site-pm[data-style='minimal'] .section:not(.bandeau--plein_ecran):not(.mesure) {
+    margin-top: calc(var(--espace) * 1.3);
+  }
+  .site-pm[data-style='minimal'] main > .section:first-child:not(.bandeau--plein_ecran):not(.mesure) {
+    margin-top: calc(var(--espace) * 0.6);
+  }
+}
+
+/* texteImage « bande » : bande pleine largeur à la couleur d'accent, texte centré ; « centre » : texte centré, image dessous. */
+.site-pm:not([data-style='classique']) .texteImage--bande,
+.site-pm:not([data-style='classique']) .texteImage--centre {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: center;
+}
+.site-pm:not([data-style='classique']) .texteImage--bande {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding: clamp(56px, 8vw, 112px) clamp(20px, 6vw, 80px);
+  background: color-mix(in srgb, var(--accent) 80%, #000);
+  color: #fff;
+}
+.site-pm:not([data-style='classique']) .texteImage--bande .texteImage__texte,
+.site-pm:not([data-style='classique']) .texteImage--centre .texteImage__texte {
+  max-width: 860px;
+  margin: 0 auto;
+}
+.site-pm:not([data-style='classique']) .texteImage--bande h2,
+.site-pm:not([data-style='classique']) .texteImage--centre h2 {
+  max-width: none;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: clamp(26px, 3.4vw, 44px);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.site-pm:not([data-style='classique']) .texteImage--bande .sur-titre,
+.site-pm:not([data-style='classique']) .texteImage--bande p {
+  color: #fff;
+  opacity: 0.95;
+}
+.site-pm:not([data-style='classique']) .texteImage--bande .actions,
+.site-pm:not([data-style='classique']) .texteImage--centre .actions {
+  justify-content: center;
+}
+.site-pm:not([data-style='classique']) .texteImage--bande .bouton {
+  background: transparent;
+  border-color: #fff;
+  color: #fff;
+}
+.site-pm:not([data-style='classique']) .texteImage--bande .bouton:hover {
+  background: #fff;
+  color: #141617;
+}
+.site-pm:not([data-style='classique']) .texteImage--bande .texteImage__media,
+.site-pm:not([data-style='classique']) .texteImage--centre .texteImage__media {
+  display: block;
+  max-width: 1100px;
+  width: 100%;
+  margin: 48px auto 0;
+  aspect-ratio: 16 / 9;
+  order: 2;
 }
 
 /* ───────────────────────── luxe ───────────────────────── */
