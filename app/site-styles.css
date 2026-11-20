@@ -566,6 +566,23 @@
   }
 }
 
+/* Accessibilité de base et mouvement : un contour visible au clavier, pas d'animation pour qui la refuse ; boutons centrés dans les cartes d'appel. */
+.site-pm[data-style='minimal'] a:focus-visible,
+.site-pm[data-style='minimal'] button:focus-visible,
+.site-pm[data-style='minimal'] summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.site-pm[data-style='minimal'] .appel__boite .actions {
+  justify-content: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-pm[data-style='minimal'] .bandeau--plein_ecran .bandeau__media {
+    animation: none;
+    transform: none;
+  }
+}
+
 /* texteImage « bande » : bande pleine largeur à la couleur d'accent, texte centré ; « centre » : texte centré, image dessous. */
 .site-pm:not([data-style='classique']) .texteImage--bande,
 .site-pm:not([data-style='classique']) .texteImage--centre {
