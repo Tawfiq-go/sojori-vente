@@ -58,6 +58,9 @@ function MediaVue({
 /** Un lien de la fiche : interne (/chemin), ancre (#…), ou externe (https, mailto, tel). */
 function href(cible: unknown, ctx: Contexte): string | undefined {
   if (typeof cible !== 'string' || !cible) return undefined
+  // `/reserver` : la recherche de réservation du PM (notre moteur), comme le bouton « Réserver » de l'en-tête —
+  // jamais un moteur tiers (Nommos Beach Resort, 20/11/2026 : « Book now doit naviguer dans notre moteur »).
+  if (cible === '/reserver') return `/search${ctx.base ? `?pm=${encodeURIComponent(ctx.slug)}` : ''}`
   if (cible.startsWith('/')) return lien(ctx.base, ctx.langue, ctx.defaut, cible.slice(1))
   return cible
 }
