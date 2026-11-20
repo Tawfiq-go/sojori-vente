@@ -227,6 +227,9 @@ function SearchContent({
   // Push filter state to URL
   useEffect(() => {
     if (!urlSyncReady.current) return;
+    // Intégrée au site d'un PM : jamais de router.replace('/search…') (sortie du site du client vers le marché, et boucle
+    // « /search → /reserver → /search » avec la redirection du domaine : le bouton clignotait, 20/11/2026).
+    if (integre) return;
     skipNextUrlParse.current = true;
     const params = buildSearchParamsWithFilters(searchParams, {
       selectedPMs,
@@ -249,6 +252,7 @@ function SearchContent({
     priceBounds,
     router,
     searchParams,
+    integre,
   ]);
 
   // Check availability when dates are provided
