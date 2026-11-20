@@ -24,6 +24,8 @@ export type Villa = {
   depart?: string
   lat?: number
   lng?: number
+  /** Paliers d'annulation lus tels quels sur la fiche (jours avant l'arrivée, % du séjour retenu). Absent = rien d'affiché. */
+  annulation?: Array<{ from: number; to: number; value: number }>
 }
 
 const texte = (v: unknown) => (typeof v === 'string' ? v : undefined)
@@ -45,6 +47,9 @@ export const lireVilla = cache(async (slug: string, id: string): Promise<Villa |
     // 2) la fiche porte le même propriétaire (jamais d'un autre PM, même avec un identifiant valide)
     const pm = (l.propertyManager ?? {}) as Record<string, unknown>
     if (texte(pm.slug) !== slug) return null
+    const annulation = (Array.isArray(l.cancellationPolicies) ? (l.cancellationPolicies as Array<Record<string, unknown>>) : [])
+      .map((r) => ({ from: Number(r?.from), to: Number(r?.to), value: Number(r?.value) }))
+      .filter((r) => [r.from, r.to, r.value].every(Number.isFinite))
     const lat = nombre(l.lat)
     const lng = nombre(l.lng)
     return {
@@ -57,6 +62,7 @@ export const lireVilla = cache(async (slug: string, id: string): Promise<Villa |
       voyageurs: nombre(l.maxGuests),
       chambres: nombre(l.bedrooms),
       sallesDeBain: nombre(l.bathrooms),
+      ...(annulation.length ? { annulation } : {}),
       images: Array.isArray(l.images) ? l.images.filter((x): x is string => typeof x === 'string' && x.startsWith('https://')) : [],
       equipements: Array.isArray(l.amenities) ? l.amenities.filter((x): x is string => typeof x === 'string') : [],
       arrivee: texte(l.checkInTime),
