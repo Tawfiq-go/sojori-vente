@@ -46,7 +46,9 @@ export const lireVilla = cache(async (slug: string, id: string): Promise<Villa |
     if (!l) return null
     // 2) la fiche porte le même propriétaire (jamais d'un autre PM, même avec un identifiant valide)
     const pm = (l.propertyManager ?? {}) as Record<string, unknown>
-    if (texte(pm.slug) !== slug) return null
+    // `slug` est un slug de PM, ou (aperçu d'un brouillon lu chez un autre propriétaire) son identifiant de 24 hex.
+    const memeProprietaire = /^[0-9a-f]{24}$/i.test(slug) ? texte(l.pmId)?.toLowerCase() === slug.toLowerCase() : texte(pm.slug) === slug
+    if (!memeProprietaire) return null
     const annulation = (Array.isArray(l.cancellationPolicies) ? (l.cancellationPolicies as Array<Record<string, unknown>>) : [])
       .map((r) => ({ from: Number(r?.from), to: Number(r?.to), value: Number(r?.value) }))
       .filter((r) => [r.from, r.to, r.value].every(Number.isFinite))
