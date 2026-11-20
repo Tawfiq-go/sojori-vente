@@ -6,6 +6,25 @@
 import type { Metadata } from 'next'
 import type { SitePublic } from './types'
 
+/** Une icône vide (1 pixel transparent) : à défaut de logo, jamais le favicon de la plateforme. */
+const ICONE_VIDE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+
+/** Métadonnées neutres (page introuvable, site sans fiche) : rien de la plateforme n'est hérité du layout racine. */
+export function metaNeutre(titre = 'Page introuvable'): Metadata {
+  return {
+    title: titre,
+    description: titre,
+    authors: [],
+    creator: '',
+    publisher: '',
+    keywords: [],
+    icons: { icon: ICONE_VIDE, shortcut: ICONE_VIDE, apple: ICONE_VIDE },
+    openGraph: { type: 'website', title: titre, description: titre, siteName: '', images: [] },
+    twitter: { card: 'summary', title: titre, images: [] },
+    robots: { index: false, follow: false },
+  }
+}
+
 export function metaMarqueBlanche(site: SitePublic, titre: string, descriptionPage?: string): Metadata {
   const nom = site.spec.identite.nom
   // Jamais la description de la plateforme (celle du layout racine) : à défaut, le nom du site.
@@ -19,7 +38,7 @@ export function metaMarqueBlanche(site: SitePublic, titre: string, descriptionPa
     creator: nom,
     publisher: nom,
     keywords: [],
-    ...(logo ? { icons: { icon: logo, shortcut: logo, apple: logo } } : {}),
+    icons: { icon: logo ?? ICONE_VIDE, shortcut: logo ?? ICONE_VIDE, apple: logo ?? ICONE_VIDE },
     openGraph: { type: 'website', siteName: nom, title: titre, description, images: [] },
     twitter: { card: 'summary', title: titre, description, images: [] },
   }

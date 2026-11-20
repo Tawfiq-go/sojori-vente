@@ -14,9 +14,21 @@ const COMING_SOON = process.env.COMING_SOON === 'true';
 export default clerkMiddleware(async (auth, req) => {
   const path = req.nextUrl.pathname;
 
+  // `x-site-pm` n'est JAMAIS repris d'un client : seul ce middleware le pose (sinon un visiteur pourrait faire rendre
+  // le marché sans sa coque). Les requêtes passent toutes par `propre` ; les pages d'un site ajoutent l'en-tête.
+  const propre = new Headers(req.headers);
+  propre.delete('x-site-pm');
+  const suite = () => NextResponse.next({ request: { headers: propre } });
+  // Pages du site d'un PM (aperçu) : le layout racine n'y pose ni Clerk, ni JSON-LD « Sojori », ni police de la plateforme.
+  const enteteSite = new Headers(propre);
+  enteteSite.set('x-site-pm', '1');
+  if (path.startsWith('/site-apercu/')) {
+    return NextResponse.next({ request: { headers: enteteSite } });
+  }
+
   // Proxy API dev local : pas de résolution tenant / Clerk inutile
   if (path.startsWith('/api/sojori')) {
-    return NextResponse.next();
+    return suite();
   }
 
   // Le site d'un PM ne s'ouvre que sur SON domaine (réécriture plus bas), jamais en direct.
@@ -76,18 +88,18 @@ export default clerkMiddleware(async (auth, req) => {
     if (site && estUnCheminDuSite(path, site.pages, site.langues)) {
       const url = req.nextUrl.clone();
       url.pathname = `/site-pm/${tenant}${path === '/' ? '' : path}`;
-      const rw = NextResponse.rewrite(url);
+      const rw = NextResponse.rewrite(url, { request: { headers: enteteSite } });
       rw.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
       rw.headers.set('x-pm-resolve', lastResolveDebug || 'static');
       rw.headers.set('x-pm-site', 'fiche');
       return rw;
     }
-    const res = NextResponse.next();
+    const res = suite();
     res.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
     res.headers.set('x-pm-resolve', lastResolveDebug || 'static');
     return res;
   }
-  const res = NextResponse.next();
+  const res = suite();
   res.headers.set('x-pm-resolve', lastResolveDebug || 'none');
   if (req.cookies.has(TENANT_COOKIE)) {
     res.cookies.delete(TENANT_COOKIE);

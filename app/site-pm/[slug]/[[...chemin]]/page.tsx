@@ -3,7 +3,7 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { CadreSite, CHEMIN_RESERVER } from '@/components/site/Chrome'
 import { Parcours } from '@/components/site/moteur/Parcours'
-import { metaMarqueBlanche } from '@/lib/site/meta'
+import { metaMarqueBlanche, metaNeutre } from '@/lib/site/meta'
 import { SitePm } from '@/components/site/SitePm'
 import { lireSitePm } from '@/lib/site/api'
 import { lien, lireCible } from '@/lib/site/route'
@@ -32,7 +32,7 @@ async function charger(props: Props) {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const c = await charger(props)
-  if (!c) return {}
+  if (!c) return metaNeutre()
   const { site, cible, page } = c
   const { defaut, actives } = site.spec.langues
   const hote = ((await headers()).get('host') || '').split(':')[0]
