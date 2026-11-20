@@ -1,55 +1,67 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useWishlistStore } from '@/lib/store/useBookingStore';
-import { useListings } from '@/lib/hooks/useListings';
-import { useAvailableCities } from '@/lib/hooks/useCities';
-import { listingDisplayPrice } from '@/lib/pricing/listingPrice';
-import { formatMadAmount } from '@/lib/utils/formatMad';
-import { listingRatingLabel } from '@/lib/utils/listingDisplay';
-import SearchNavBar, { formatGuestSummary } from '@/components/search/SearchNavBar';
-import SearchFiltersPanel from '@/components/search/SearchFiltersPanel';
-import SearchMapPanel from '@/components/search/SearchMapPanel';
-import SearchMapSplitView from '@/components/search/SearchMapSplitView';
-import MobileFiltersDrawer from '@/components/search/MobileFiltersDrawer';
-import type { GuestCounts } from '@/components/search/GuestPicker';
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Suspense,
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
+import { useWishlistStore } from "@/lib/store/useBookingStore";
+import { useListings } from "@/lib/hooks/useListings";
+import { useAvailableCities } from "@/lib/hooks/useCities";
+import { listingDisplayPrice } from "@/lib/pricing/listingPrice";
+import { formatMadAmount } from "@/lib/utils/formatMad";
+import { listingRatingLabel } from "@/lib/utils/listingDisplay";
+import SearchNavBar, {
+  formatGuestSummary,
+} from "@/components/search/SearchNavBar";
+import SearchFiltersPanel from "@/components/search/SearchFiltersPanel";
+import SearchMapPanel from "@/components/search/SearchMapPanel";
+import SearchMapSplitView from "@/components/search/SearchMapSplitView";
+import MobileFiltersDrawer from "@/components/search/MobileFiltersDrawer";
+import type { GuestCounts } from "@/components/search/GuestPicker";
 import {
   SEARCH_AMENITY_FILTERS,
   listingMatchesAmenityFilter,
   mergeAmenityCatalog,
   buildAmenityFilterOptions,
-} from '@/lib/search/amenityFilters';
-import { normalizePropertyType } from '@/lib/search/propertyTypes';
+} from "@/lib/search/amenityFilters";
+import { normalizePropertyType } from "@/lib/search/propertyTypes";
 import {
   buildSearchParamsWithFilters,
   countActiveUrlFilters,
   parseFiltersFromSearchParams,
-} from '@/lib/search/urlFilters';
+} from "@/lib/search/urlFilters";
 import {
   buildPriceHistogram,
   clampPriceRange,
   computePriceBounds,
   isSearchPropertyType,
-} from '@/lib/search/priceUtils';
-import type { PropertyManager } from '@/lib/api/client';
-import { logger } from '@/lib/utils/logger';
-import './search.css';
+} from "@/lib/search/priceUtils";
+import type { PropertyManager } from "@/lib/api/client";
+import { logger } from "@/lib/utils/logger";
+import "./search.css";
 
 function SearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const city = searchParams.get('city');
-  const query = searchParams.get('q');
-  const guests = searchParams.get('guests');
-  const adults = searchParams.get('adults');
-  const children = searchParams.get('children');
-  const infants = searchParams.get('infants');
-  const pets = searchParams.get('pets');
-  const aiMode = searchParams.get('ai');
-  const checkIn = searchParams.get('checkIn');
-  const checkOut = searchParams.get('checkOut');
+  const city = searchParams.get("city");
+  const query = searchParams.get("q");
+  const guests = searchParams.get("guests");
+  const adults = searchParams.get("adults");
+  const children = searchParams.get("children");
+  const infants = searchParams.get("infants");
+  const pets = searchParams.get("pets");
+  const aiMode = searchParams.get("ai");
+  const checkIn = searchParams.get("checkIn");
+  const checkOut = searchParams.get("checkOut");
+  // `?pm=<slug>` : la recherche se limite aux logements de CE propriétaire (le bouton « Réserver » de son site),
+  // jamais ceux des autres ; ni filtres ni carte, comme la page de réservation d'un hôtel (Tawfiq, 20/11/2026).
+  const pmSlug = searchParams.get("pm");
 
   // Total travelers requested (adults + children) — filter = minimum capacity, not exact match
   const totalGuestsRequested = useMemo(() => {
@@ -65,15 +77,23 @@ function SearchContent() {
     limit: 100,
   });
   const { cities: apiCities } = useAvailableCities();
-  const [propertyManagers, setPropertyManagers] = useState<PropertyManager[]>([]);
-  const [intervalMinPrices, setIntervalMinPrices] = useState<Record<string, number>>({});
+  const [propertyManagers, setPropertyManagers] = useState<PropertyManager[]>(
+    [],
+  );
+  const [pmsCharges, setPmsCharges] = useState(false);
+  const [intervalMinPrices, setIntervalMinPrices] = useState<
+    Record<string, number>
+  >({});
   const [loadingIntervalPrices, setLoadingIntervalPrices] = useState(false);
 
   useEffect(() => {
-    import('@/lib/api/client').then(({ apiClient }) => {
-      apiClient.getPropertyManagers().then((res) => {
-        if (res.success && res.data) setPropertyManagers(res.data);
-      });
+    import("@/lib/api/client").then(({ apiClient }) => {
+      apiClient
+        .getPropertyManagers()
+        .then((res) => {
+          if (res.success && res.data) setPropertyManagers(res.data);
+        })
+        .finally(() => setPmsCharges(true));
     });
   }, []);
 
@@ -97,12 +117,16 @@ function SearchContent() {
       }
       setLoadingIntervalPrices(true);
       try {
-        const { apiClient } = await import('@/lib/api/client');
+        const { apiClient } = await import("@/lib/api/client");
         const listingIds = listings.map((l) => (l as any)._id || (l as any).id);
-        const mins = await apiClient.getMinNightlyPrices(listingIds, checkIn, checkOut);
+        const mins = await apiClient.getMinNightlyPrices(
+          listingIds,
+          checkIn,
+          checkOut,
+        );
         setIntervalMinPrices(mins);
       } catch (error) {
-        logger.warn('Interval min price fetch failed:', error);
+        logger.warn("Interval min price fetch failed:", error);
         setIntervalMinPrices({});
       } finally {
         setLoadingIntervalPrices(false);
@@ -111,7 +135,9 @@ function SearchContent() {
     void loadIntervalPrices();
   }, [checkIn, checkOut, listings]);
   const [availableListingIds, setAvailableListingIds] = useState<string[]>([]);
-  const [unavailableListingIds, setUnavailableListingIds] = useState<string[]>([]);
+  const [unavailableListingIds, setUnavailableListingIds] = useState<string[]>(
+    [],
+  );
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [availabilityChecked, setAvailabilityChecked] = useState(false);
 
@@ -125,7 +151,7 @@ function SearchContent() {
   const [amenityCatalog, setAmenityCatalog] = useState(SEARCH_AMENITY_FILTERS);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [hoveredListingId, setHoveredListingId] = useState<string | null>(null);
-  const [mapViewMode, setMapViewMode] = useState<'list' | 'split'>('list');
+  const [mapViewMode, setMapViewMode] = useState<"list" | "split">("list");
   const urlSyncReady = useRef(false);
   const skipNextUrlParse = useRef(false);
   const hoverClearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -162,7 +188,7 @@ function SearchContent() {
   );
 
   useEffect(() => {
-    import('@/lib/api/client').then(({ apiClient }) => {
+    import("@/lib/api/client").then(({ apiClient }) => {
       apiClient.getAmenities(city || undefined).then((res) => {
         if (res.success && res.data?.length) {
           setAmenityCatalog(mergeAmenityCatalog(res.data));
@@ -183,7 +209,9 @@ function SearchContent() {
     setSelectedAmenities(parsed.amenities);
     setMinRating(parsed.minRating);
     if (parsed.minPrice != null && parsed.maxPrice != null) {
-      setPriceRange(clampPriceRange([parsed.minPrice, parsed.maxPrice], priceBounds));
+      setPriceRange(
+        clampPriceRange([parsed.minPrice, parsed.maxPrice], priceBounds),
+      );
     }
     urlSyncReady.current = true;
   }, [searchParams]);
@@ -229,13 +257,13 @@ function SearchContent() {
       setLoadingAvailability(true);
       setAvailabilityChecked(false);
       try {
-        const { apiClient } = await import('@/lib/api/client');
+        const { apiClient } = await import("@/lib/api/client");
         const listingIds = listings.map((l) => (l as any)._id || (l as any).id);
 
         const result = await apiClient.checkListingsAvailability(
           listingIds,
           checkIn,
-          checkOut
+          checkOut,
         );
 
         if (result.success && result.data) {
@@ -244,7 +272,7 @@ function SearchContent() {
         }
         setAvailabilityChecked(true);
       } catch (error) {
-        logger.warn('Availability check failed:', error);
+        logger.warn("Availability check failed:", error);
         setAvailabilityChecked(true);
       } finally {
         setLoadingAvailability(false);
@@ -256,13 +284,23 @@ function SearchContent() {
 
   const contextListings = useMemo(() => {
     let pool = listings;
+    if (pmSlug) {
+      const pm = propertyManagers.find((p) => p.slug === pmSlug);
+      pool = pm
+        ? pool.filter(
+            (listing) => String((listing as any).pmId) === String(pm.id),
+          )
+        : [];
+    }
     if (city && apiListings.length === 0) {
-      pool = pool.filter((listing) => listing.city.toLowerCase() === city.toLowerCase());
+      pool = pool.filter(
+        (listing) => listing.city.toLowerCase() === city.toLowerCase(),
+      );
     }
     if (query) {
       const searchTerm = query.toLowerCase();
       pool = pool.filter((listing) => {
-        const neighborhood = (listing as any).neighborhood || '';
+        const neighborhood = (listing as any).neighborhood || "";
         return (
           listing.title.toLowerCase().includes(searchTerm) ||
           listing.city.toLowerCase().includes(searchTerm) ||
@@ -271,9 +309,13 @@ function SearchContent() {
       });
     }
     return pool;
-  }, [listings, city, query, apiListings.length]);
+  }, [listings, city, query, apiListings.length, pmSlug, propertyManagers]);
+  const pmCourant = pmSlug
+    ? (propertyManagers.find((p) => p.slug === pmSlug) ?? null)
+    : null;
 
-  const totalGuests = totalGuestsRequested || guestCounts.adults + guestCounts.children;
+  const totalGuests =
+    totalGuestsRequested || guestCounts.adults + guestCounts.children;
 
   const facetPool = useMemo(() => {
     if (checkIn && checkOut && availabilityChecked && !loadingAvailability) {
@@ -285,7 +327,9 @@ function SearchContent() {
       });
     }
     if (totalGuests > 0) {
-      return contextListings.filter((listing) => listing.maxGuests >= totalGuests);
+      return contextListings.filter(
+        (listing) => listing.maxGuests >= totalGuests,
+      );
     }
     return contextListings;
   }, [
@@ -299,7 +343,8 @@ function SearchContent() {
   ]);
 
   const amenityOptions = useMemo(
-    () => buildAmenityFilterOptions(amenityCatalog, facetPool, selectedAmenities),
+    () =>
+      buildAmenityFilterOptions(amenityCatalog, facetPool, selectedAmenities),
     [amenityCatalog, facetPool, selectedAmenities],
   );
 
@@ -308,7 +353,10 @@ function SearchContent() {
     [facetPool, intervalMinPrices],
   );
 
-  const priceHistogram = useMemo(() => buildPriceHistogram(facetPrices), [facetPrices]);
+  const priceHistogram = useMemo(
+    () => buildPriceHistogram(facetPrices),
+    [facetPrices],
+  );
 
   useEffect(() => {
     if (!facetPrices.length) return;
@@ -317,7 +365,9 @@ function SearchContent() {
     const parsed = parseFiltersFromSearchParams(searchParams);
     // Without explicit URL price filter, follow facet bounds (includes dynamic 10 MAD nights)
     if (parsed.minPrice != null && parsed.maxPrice != null) {
-      setPriceRange(clampPriceRange([parsed.minPrice, parsed.maxPrice], bounds));
+      setPriceRange(
+        clampPriceRange([parsed.minPrice, parsed.maxPrice], bounds),
+      );
     } else {
       setPriceRange(bounds);
     }
@@ -347,7 +397,9 @@ function SearchContent() {
   }
 
   if (minRating > 0) {
-    filteredListings = filteredListings.filter((listing) => (listing.rating || 0) >= minRating);
+    filteredListings = filteredListings.filter(
+      (listing) => (listing.rating || 0) >= minRating,
+    );
   }
 
   filteredListings = filteredListings.filter((listing) => {
@@ -363,9 +415,7 @@ function SearchContent() {
     }
 
     const p =
-      intervalP != null && intervalP > 0
-        ? intervalP
-        : cardPrice(listing);
+      intervalP != null && intervalP > 0 ? intervalP : cardPrice(listing);
 
     if (p <= 0) return true;
 
@@ -412,33 +462,35 @@ function SearchContent() {
 
   // Final listings to display (available first)
   const displayListings = availableListings;
-  const hasUnavailableListings = unavailableByDate.length > 0 || unavailableByGuests.length > 0;
+  const hasUnavailableListings =
+    unavailableByDate.length > 0 || unavailableByGuests.length > 0;
 
   // Build search display text
   const searchLocation = city
     ? city
         .split(/[\s-]+/)
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-        .join(' ')
-    : 'Maroc';
-  const searchDates = checkIn && checkOut
-    ? `${new Date(checkIn).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} - ${new Date(checkOut).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`
-    : 'Dates flexibles';
+        .join(" ")
+    : "Maroc";
+  const searchDates =
+    checkIn && checkOut
+      ? `${new Date(checkIn).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} - ${new Date(checkOut).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`
+      : "Dates flexibles";
 
   const searchGuests = formatGuestSummary(guestCounts);
 
   const buildListingUrl = useCallback(
     (listingId: string) => {
       const params = new URLSearchParams();
-      if (checkIn) params.append('checkIn', checkIn);
-      if (checkOut) params.append('checkOut', checkOut);
-      if (guests) params.append('guests', guests);
-      if (adults) params.append('adults', adults);
-      if (children) params.append('children', children);
-      if (infants) params.append('infants', infants);
-      if (pets) params.append('pets', pets);
+      if (checkIn) params.append("checkIn", checkIn);
+      if (checkOut) params.append("checkOut", checkOut);
+      if (guests) params.append("guests", guests);
+      if (adults) params.append("adults", adults);
+      if (children) params.append("children", children);
+      if (infants) params.append("infants", infants);
+      if (pets) params.append("pets", pets);
       const qs = params.toString();
-      return `/listings/${listingId}${qs ? `?${qs}` : ''}`;
+      return `/listings/${listingId}${qs ? `?${qs}` : ""}`;
     },
     [checkIn, checkOut, guests, adults, children, infants, pets],
   );
@@ -453,7 +505,7 @@ function SearchContent() {
           city: listing.city,
           neighborhood: listing.neighborhood,
           price: cardPrice(listing),
-          currency: listing.currency || 'MAD',
+          currency: listing.currency || "MAD",
           lat: (listing as any).lat,
           lng: (listing as any).lng,
           image: listing.images?.[0],
@@ -472,10 +524,16 @@ function SearchContent() {
   }, [priceBounds]);
 
   const handleFilterChange = useCallback(
-    (patch: Partial<import('@/components/search/SearchFiltersPanel').SearchFiltersState>) => {
+    (
+      patch: Partial<
+        import("@/components/search/SearchFiltersPanel").SearchFiltersState
+      >,
+    ) => {
       if (patch.selectedPMs !== undefined) setSelectedPMs(patch.selectedPMs);
-      if (patch.selectedTypes !== undefined) setSelectedTypes(patch.selectedTypes);
-      if (patch.selectedAmenities !== undefined) setSelectedAmenities(patch.selectedAmenities);
+      if (patch.selectedTypes !== undefined)
+        setSelectedTypes(patch.selectedTypes);
+      if (patch.selectedAmenities !== undefined)
+        setSelectedAmenities(patch.selectedAmenities);
       if (patch.minRating !== undefined) setMinRating(patch.minRating);
       if (patch.priceRange !== undefined) setPriceRange(patch.priceRange);
     },
@@ -515,7 +573,7 @@ function SearchContent() {
     />
   );
 
-  const colors = ['', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  const colors = ["", "b", "c", "d", "e", "f", "g", "h"];
 
   return (
     <>
@@ -534,17 +592,19 @@ function SearchContent() {
           <div className="ai-bar-inner">
             <div className="ic">✨</div>
             <div className="copy">
-              <div className="pretitle">Sojori AI · votre prompt traduit en filtres</div>
+              <div className="pretitle">
+                Sojori AI · votre prompt traduit en filtres
+              </div>
               <div className="prompt">
-                « <span className="quoted">{query || 'Recherche AI'}</span> à{' '}
+                « <span className="quoted">{query || "Recherche AI"}</span> à{" "}
                 <span className="quoted">{searchLocation}</span>
                 {guests && (
                   <>
-                    {' '}
+                    {" "}
                     pour <span className="quoted">{guests} voyageurs</span>
                   </>
                 )}
-                 »
+                »
               </div>
               <div className="applied">
                 <span>Filtres appliqués :</span>
@@ -564,7 +624,10 @@ function SearchContent() {
               </div>
             </div>
             <button className="edit-prompt">✎ Affiner</button>
-            <button className="new-search" onClick={() => (window.location.href = '/')}>
+            <button
+              className="new-search"
+              onClick={() => (window.location.href = "/")}
+            >
               + Nouvelle
             </button>
           </div>
@@ -572,441 +635,572 @@ function SearchContent() {
       )}
 
       {/* LAYOUT — filtres toujours visibles ; liste ou split carte */}
-      <div className={`search-layout ${mapViewMode === 'split' ? 'search-layout--map-split' : ''}`}>
-        <div className="filters-desktop-wrap">{filtersPanel}</div>
+      <div
+        className={`search-layout ${mapViewMode === "split" && !pmSlug ? "search-layout--map-split" : ""} ${pmSlug ? "search-layout--pm" : ""}`}
+      >
+        {!pmSlug && <div className="filters-desktop-wrap">{filtersPanel}</div>}
 
-        <MobileFiltersDrawer
-          open={mobileFiltersOpen}
-          onClose={() => setMobileFiltersOpen(false)}
-          activeCount={activeFilterCount}
-          resultCount={displayListings.length}
-        >
-          <SearchFiltersPanel
-            propertyManagers={propertyManagers}
-            facetPool={facetPool}
-            amenityOptions={amenityOptions}
+        {!pmSlug && (
+          <MobileFiltersDrawer
+            open={mobileFiltersOpen}
+            onClose={() => setMobileFiltersOpen(false)}
+            activeCount={activeFilterCount}
             resultCount={displayListings.length}
-            priceBounds={priceBounds}
-            priceHistogram={priceHistogram}
-            variant="drawer"
-            hideLiveCount
-            filters={{
-              selectedPMs,
-              selectedTypes: selectedTypes.filter(isSearchPropertyType),
-              selectedAmenities,
-              minRating,
-              priceRange,
-            }}
-            onChange={handleFilterChange}
-            onReset={resetFilters}
-          />
-        </MobileFiltersDrawer>
+          >
+            <SearchFiltersPanel
+              propertyManagers={propertyManagers}
+              facetPool={facetPool}
+              amenityOptions={amenityOptions}
+              resultCount={displayListings.length}
+              priceBounds={priceBounds}
+              priceHistogram={priceHistogram}
+              variant="drawer"
+              hideLiveCount
+              filters={{
+                selectedPMs,
+                selectedTypes: selectedTypes.filter(isSearchPropertyType),
+                selectedAmenities,
+                minRating,
+                priceRange,
+              }}
+              onChange={handleFilterChange}
+              onReset={resetFilters}
+            />
+          </MobileFiltersDrawer>
+        )}
 
-        <button
-          type="button"
-          className="mobile-filter-fab"
-          onClick={() => setMobileFiltersOpen(true)}
-        >
-          ⚙ Filtres
-          {activeFilterCount > 0 && <span className="fab-badge">{activeFilterCount}</span>}
-        </button>
+        {!pmSlug && (
+          <button
+            type="button"
+            className="mobile-filter-fab"
+            onClick={() => setMobileFiltersOpen(true)}
+          >
+            ⚙ Filtres
+            {activeFilterCount > 0 && (
+              <span className="fab-badge">{activeFilterCount}</span>
+            )}
+          </button>
+        )}
 
-        {mapViewMode === 'list' && displayListings.length > 0 && (
+        {!pmSlug && mapViewMode === "list" && displayListings.length > 0 && (
           <button
             type="button"
             className="mobile-map-fab"
-            onClick={() => setMapViewMode('split')}
+            onClick={() => setMapViewMode("split")}
           >
             🗺 Carte
           </button>
         )}
 
-        {mapViewMode === 'split' ? (
+        {mapViewMode === "split" && !pmSlug ? (
           <SearchMapSplitView
             city={city}
             listings={mapListings}
             activeListingId={hoveredListingId}
             onListingHover={setMapHover}
-            onClose={() => setMapViewMode('list')}
+            onClose={() => setMapViewMode("list")}
             buildListingUrl={buildListingUrl}
           />
         ) : (
           <>
-        {/* MAIN RESULTS */}
-        <main className="main">
-          <div className="main-toolbar">
-            <h1>
-              <b>{displayListings.length}</b> bien{displayListings.length > 1 ? 's' : ''} disponible{displayListings.length > 1 ? 's' : ''}
-              {city && ` à ${city}`}
-              {checkIn && checkOut && (
-                <span style={{ fontSize: '16px', fontWeight: '400', color: 'var(--ink3)', marginLeft: '8px' }}>
-                  · {new Date(checkIn).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                  {' → '}
-                  {new Date(checkOut).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                </span>
-              )}
-            </h1>
-            <div className="toolbar-actions">
-              <div className="view-toggle">
-                <button
-                  type="button"
-                  className={`view-toggle-btn ${mapViewMode === 'list' ? 'on' : ''}`}
-                  onClick={() => setMapViewMode('list')}
-                >
-                  ☰ Liste
-                </button>
-                <button
-                  type="button"
-                  className={`view-toggle-btn ${mapViewMode === 'split' ? 'on' : ''}`}
-                  onClick={() => setMapViewMode('split')}
-                  disabled={displayListings.length === 0}
-                >
-                  🗺 Carte
-                </button>
-              </div>
-              <div className="sort">
-                Trier par :
-                <select>
-                  <option>Pertinence</option>
-                  <option>Prix croissant</option>
-                  <option>Prix décroissant</option>
-                  <option>Note</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {loadingListings || loadingAvailability ? (
-            <div style={{ textAlign: 'center', padding: '80px 32px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
-              <h3 style={{ fontSize: '24px', color: 'var(--ink3)' }}>
-                {loadingAvailability ? 'Vérification des disponibilités...' : 'Chargement des biens...'}
-              </h3>
-            </div>
-          ) : displayListings.length === 0 && !hasUnavailableListings ? (
-            <div style={{ textAlign: 'center', padding: '80px 32px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
-              <h3 style={{ fontSize: '24px', marginBottom: '12px' }}>Aucun bien trouvé</h3>
-              <p style={{ color: 'var(--ink3)', marginBottom: '24px' }}>
-                Essayez de modifier vos critères de recherche
-              </p>
-              <Link
-                href="/"
-                style={{
-                  padding: '12px 24px',
-                  background: 'var(--gold)',
-                  color: 'var(--ink)',
-                  borderRadius: '99px',
-                  fontWeight: '600',
-                  display: 'inline-block',
-                }}
-              >
-                Retour à l'accueil
-              </Link>
-            </div>
-          ) : (
-            <>
-              {/* Available listings */}
-              {displayListings.length > 0 && (
-                <div className="results-grid">
-                  {displayListings.map((listing, i) => {
-                  // Handle both API (_id) and mock (id) data structures
-                  const listingId = (listing as any)._id || (listing as any).id;
-                  const listingPmId = (listing as any).pmId;
-                  const pm = propertyManagers.find((p) => p.id === listingPmId);
-                  const colorClass = colors[i % colors.length];
-                  const neighborhood = (listing as any).neighborhood || listing.city;
-
-                  const listingUrl = buildListingUrl(listingId);
-
-                  const coverImage = listing.images?.find(Boolean) || '';
-
-                  return (
-                    <Link
-                      key={listingId}
-                      href={listingUrl}
-                      className="lc"
-                      onMouseEnter={() => setMapHover(listingId)}
-                      onMouseLeave={() => setMapHover(null)}
+            {/* MAIN RESULTS */}
+            <main className="main">
+              <div className="main-toolbar">
+                <h1>
+                  <b>{displayListings.length}</b> bien
+                  {displayListings.length > 1 ? "s" : ""} disponible
+                  {displayListings.length > 1 ? "s" : ""}
+                  {city && ` à ${city}`}
+                  {pmCourant && ` chez ${pmCourant.name}`}
+                  {checkIn && checkOut && (
+                    <span
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "400",
+                        color: "var(--ink3)",
+                        marginLeft: "8px",
+                      }}
                     >
-                      <div
-                        className={`lc-photo ${coverImage ? 'has-img' : colorClass}`}
-                        style={
-                          coverImage
-                            ? {
-                                backgroundImage: `url(${coverImage})`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                              }
-                            : undefined
-                        }
+                      ·{" "}
+                      {new Date(checkIn).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                      {" → "}
+                      {new Date(checkOut).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </span>
+                  )}
+                </h1>
+                <div className="toolbar-actions">
+                  {!pmSlug && (
+                    <div className="view-toggle">
+                      <button
+                        type="button"
+                        className={`view-toggle-btn ${mapViewMode === "list" ? "on" : ""}`}
+                        onClick={() => setMapViewMode("list")}
                       >
-                        <div className="grain"></div>
-                        <button
-                          className={`wish ${wishlistItems.includes(listingId) ? 'on' : ''}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            toggleWishlist(listingId);
-                          }}
-                        >
-                          {wishlistItems.includes(listingId) ? '♥' : '♡'}
-                        </button>
-                        <div className="source-badge">DIRECT</div>
-                        {pm && (
-                          <div className="pm-badge">
-                            <div className="pml">{pm.slug.substring(0, 2).toUpperCase()}</div>
-                            {pm.name}
-                          </div>
-                        )}
-                      </div>
-                      <div className="lc-info">
-                        <div className="top">
-                          <div className="nm">{listing.title}</div>
-                          {listingRatingLabel(listing.rating) && (
-                          <div className="rating">
-                            <span className="star">★</span>
-                            {listingRatingLabel(listing.rating)}
-                          </div>
-                          )}
-                        </div>
-                        <div className="loc">
-                          {neighborhood}, {listing.city}
-                        </div>
-                        <div className="meta-row">
-                          <span>{listing.bedrooms} chambres</span>
-                          <span className="d"></span>
-                          <span>{listing.maxGuests} voyageurs</span>
-                        </div>
-                        <div className="price">
-                          <b>{formatMadAmount(cardPrice(listing))} {listing.currency || 'MAD'}</b>
-                          <span className="per">/nuit</span>
-                        </div>
-                      </div>
+                        ☰ Liste
+                      </button>
+                      <button
+                        type="button"
+                        className={`view-toggle-btn ${mapViewMode === "split" ? "on" : ""}`}
+                        onClick={() => setMapViewMode("split")}
+                        disabled={displayListings.length === 0}
+                      >
+                        🗺 Carte
+                      </button>
+                    </div>
+                  )}
+                  <div className="sort">
+                    Trier par :
+                    <select>
+                      <option>Pertinence</option>
+                      <option>Prix croissant</option>
+                      <option>Prix décroissant</option>
+                      <option>Note</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {loadingListings ||
+              loadingAvailability ||
+              (pmSlug && !pmsCharges) ? (
+                <div style={{ textAlign: "center", padding: "80px 32px" }}>
+                  <div style={{ fontSize: "48px", marginBottom: "16px" }}>
+                    ⏳
+                  </div>
+                  <h3 style={{ fontSize: "24px", color: "var(--ink3)" }}>
+                    {loadingAvailability
+                      ? "Vérification des disponibilités..."
+                      : "Chargement des biens..."}
+                  </h3>
+                </div>
+              ) : displayListings.length === 0 && !hasUnavailableListings ? (
+                <div style={{ textAlign: "center", padding: "80px 32px" }}>
+                  <div style={{ fontSize: "48px", marginBottom: "16px" }}>
+                    🔍
+                  </div>
+                  <h3 style={{ fontSize: "24px", marginBottom: "12px" }}>
+                    {pmSlug
+                      ? "Aucun logement disponible pour le moment"
+                      : "Aucun bien trouvé"}
+                  </h3>
+                  <p style={{ color: "var(--ink3)", marginBottom: "24px" }}>
+                    {pmSlug
+                      ? "Ce propriétaire n’a pas encore de logement réservable en ligne."
+                      : "Essayez de modifier vos critères de recherche"}
+                  </p>
+                  {!pmSlug && (
+                    <Link
+                      href="/"
+                      style={{
+                        padding: "12px 24px",
+                        background: "var(--gold)",
+                        color: "var(--ink)",
+                        borderRadius: "99px",
+                        fontWeight: "600",
+                        display: "inline-block",
+                      }}
+                    >
+                      Retour à l'accueil
                     </Link>
-                  );
-                })}
+                  )}
                 </div>
-              )}
+              ) : (
+                <>
+                  {/* Available listings */}
+                  {displayListings.length > 0 && (
+                    <div className="results-grid">
+                      {displayListings.map((listing, i) => {
+                        // Handle both API (_id) and mock (id) data structures
+                        const listingId =
+                          (listing as any)._id || (listing as any).id;
+                        const listingPmId = (listing as any).pmId;
+                        const pm = propertyManagers.find(
+                          (p) => p.id === listingPmId,
+                        );
+                        const colorClass = colors[i % colors.length];
+                        const neighborhood =
+                          (listing as any).neighborhood || listing.city;
 
-              {/* Unavailable by date - shown below with message */}
-              {unavailableByDate.length > 0 && (
-                <div style={{ marginTop: '64px' }}>
-                  <div style={{
-                    padding: '16px 24px',
-                    background: '#FFF9E6',
-                    border: '1px solid #FFE066',
-                    borderRadius: '12px',
-                    marginBottom: '24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                  }}>
-                    <span style={{ fontSize: '24px' }}>📅</span>
-                    <div>
-                      <div style={{ fontWeight: '600', fontSize: '15px', marginBottom: '4px' }}>
-                        {unavailableByDate.length} bien{unavailableByDate.length > 1 ? 's' : ''} non disponible{unavailableByDate.length > 1 ? 's' : ''} pour ces dates
-                      </div>
-                      <div style={{ fontSize: '14px', color: 'var(--ink3)' }}>
-                        Ces logements sont déjà réservés du {new Date(checkIn!).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} au {new Date(checkOut!).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}. Essayez d'autres dates ou contactez-nous.
-                      </div>
-                    </div>
-                  </div>
+                        const listingUrl = buildListingUrl(listingId);
 
-                  <div className="results-grid" style={{ opacity: 0.6 }}>
-                    {unavailableByDate.map((listing, i) => {
-                      const listingId = (listing as any)._id || (listing as any).id;
-                      const listingPmId = (listing as any).pmId;
-                      const pm = propertyManagers.find((p) => p.id === listingPmId);
-                      const colorClass = colors[i % colors.length];
-                      const neighborhood = (listing as any).neighborhood || listing.city;
+                        const coverImage = listing.images?.find(Boolean) || "";
 
-                      const coverImage = listing.images?.find(Boolean) || '';
-
-                      return (
-                        <div key={listingId} className="lc" style={{ position: 'relative', pointerEvents: 'none' }}>
-                          <div
-                            className={`lc-photo ${coverImage ? 'has-img' : colorClass}`}
-                            style={
-                              coverImage
-                                ? {
-                                    backgroundImage: `url(${coverImage})`,
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center',
-                                  }
-                                : undefined
-                            }
+                        return (
+                          <Link
+                            key={listingId}
+                            href={listingUrl}
+                            className="lc"
+                            onMouseEnter={() => setMapHover(listingId)}
+                            onMouseLeave={() => setMapHover(null)}
                           >
-                            <div className="grain"></div>
-                            <div style={{
-                              position: 'absolute',
-                              inset: 0,
-                              background: 'rgba(255,255,255,0.7)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '14px',
-                              fontWeight: '600',
-                              color: 'var(--ink)',
-                              borderRadius: '12px'
-                            }}>
-                              ✕ Non disponible
-                            </div>
-                            {pm && (
-                              <div className="pm-badge">
-                                <div className="pml">{pm.slug.substring(0, 2).toUpperCase()}</div>
-                                {pm.name}
-                              </div>
-                            )}
-                          </div>
-                          <div className="lc-info">
-                            <div className="top">
-                              <div className="nm">{listing.title}</div>
-                              {listingRatingLabel(listing.rating) && (
-                              <div className="rating">
-                                <span className="star">★</span>
-                                {listingRatingLabel(listing.rating)}
-                              </div>
+                            <div
+                              className={`lc-photo ${coverImage ? "has-img" : colorClass}`}
+                              style={
+                                coverImage
+                                  ? {
+                                      backgroundImage: `url(${coverImage})`,
+                                      backgroundSize: "cover",
+                                      backgroundPosition: "center",
+                                    }
+                                  : undefined
+                              }
+                            >
+                              <div className="grain"></div>
+                              <button
+                                className={`wish ${wishlistItems.includes(listingId) ? "on" : ""}`}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  toggleWishlist(listingId);
+                                }}
+                              >
+                                {wishlistItems.includes(listingId) ? "♥" : "♡"}
+                              </button>
+                              <div className="source-badge">DIRECT</div>
+                              {pm && (
+                                <div className="pm-badge">
+                                  <div className="pml">
+                                    {pm.slug.substring(0, 2).toUpperCase()}
+                                  </div>
+                                  {pm.name}
+                                </div>
                               )}
                             </div>
-                            <div className="loc">
-                              {neighborhood}, {listing.city}
+                            <div className="lc-info">
+                              <div className="top">
+                                <div className="nm">{listing.title}</div>
+                                {listingRatingLabel(listing.rating) && (
+                                  <div className="rating">
+                                    <span className="star">★</span>
+                                    {listingRatingLabel(listing.rating)}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="loc">
+                                {neighborhood}, {listing.city}
+                              </div>
+                              <div className="meta-row">
+                                <span>{listing.bedrooms} chambres</span>
+                                <span className="d"></span>
+                                <span>{listing.maxGuests} voyageurs</span>
+                              </div>
+                              <div className="price">
+                                <b>
+                                  {formatMadAmount(cardPrice(listing))}{" "}
+                                  {listing.currency || "MAD"}
+                                </b>
+                                <span className="per">/nuit</span>
+                              </div>
                             </div>
-                            <div className="meta-row">
-                              <span>{listing.bedrooms} chambres</span>
-                              <span className="d"></span>
-                              <span>{listing.maxGuests} voyageurs</span>
-                            </div>
-                            <div className="price">
-                              <b>{formatMadAmount(cardPrice(listing))} {listing.currency || 'MAD'}</b>
-                              <span className="per">/nuit</span>
-                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Unavailable by date - shown below with message */}
+                  {unavailableByDate.length > 0 && (
+                    <div style={{ marginTop: "64px" }}>
+                      <div
+                        style={{
+                          padding: "16px 24px",
+                          background: "#FFF9E6",
+                          border: "1px solid #FFE066",
+                          borderRadius: "12px",
+                          marginBottom: "24px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                        }}
+                      >
+                        <span style={{ fontSize: "24px" }}>📅</span>
+                        <div>
+                          <div
+                            style={{
+                              fontWeight: "600",
+                              fontSize: "15px",
+                              marginBottom: "4px",
+                            }}
+                          >
+                            {unavailableByDate.length} bien
+                            {unavailableByDate.length > 1 ? "s" : ""} non
+                            disponible{unavailableByDate.length > 1 ? "s" : ""}{" "}
+                            pour ces dates
+                          </div>
+                          <div
+                            style={{ fontSize: "14px", color: "var(--ink3)" }}
+                          >
+                            Ces logements sont déjà réservés du{" "}
+                            {new Date(checkIn!).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "short",
+                            })}{" "}
+                            au{" "}
+                            {new Date(checkOut!).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "short",
+                            })}
+                            . Essayez d'autres dates ou contactez-nous.
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Unavailable by guests capacity */}
-              {unavailableByGuests.length > 0 && (
-                <div style={{ marginTop: '64px' }}>
-                  <div style={{
-                    padding: '16px 24px',
-                    background: '#F0F8FF',
-                    border: '1px solid #B0D4F1',
-                    borderRadius: '12px',
-                    marginBottom: '24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                  }}>
-                    <span style={{ fontSize: '24px' }}>👥</span>
-                    <div>
-                      <div style={{ fontWeight: '600', fontSize: '15px', marginBottom: '4px' }}>
-                        {unavailableByGuests.length} bien{unavailableByGuests.length > 1 ? 's' : ''} avec capacité insuffisante
                       </div>
-                      <div style={{ fontSize: '14px', color: 'var(--ink3)' }}>
-                        Ces logements ne peuvent pas accueillir {totalGuests} voyageur{totalGuests > 1 ? 's' : ''}. Réduisez le nombre de voyageurs ou choisissez un bien plus grand.
+
+                      <div className="results-grid" style={{ opacity: 0.6 }}>
+                        {unavailableByDate.map((listing, i) => {
+                          const listingId =
+                            (listing as any)._id || (listing as any).id;
+                          const listingPmId = (listing as any).pmId;
+                          const pm = propertyManagers.find(
+                            (p) => p.id === listingPmId,
+                          );
+                          const colorClass = colors[i % colors.length];
+                          const neighborhood =
+                            (listing as any).neighborhood || listing.city;
+
+                          const coverImage =
+                            listing.images?.find(Boolean) || "";
+
+                          return (
+                            <div
+                              key={listingId}
+                              className="lc"
+                              style={{
+                                position: "relative",
+                                pointerEvents: "none",
+                              }}
+                            >
+                              <div
+                                className={`lc-photo ${coverImage ? "has-img" : colorClass}`}
+                                style={
+                                  coverImage
+                                    ? {
+                                        backgroundImage: `url(${coverImage})`,
+                                        backgroundSize: "cover",
+                                        backgroundPosition: "center",
+                                      }
+                                    : undefined
+                                }
+                              >
+                                <div className="grain"></div>
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    inset: 0,
+                                    background: "rgba(255,255,255,0.7)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "14px",
+                                    fontWeight: "600",
+                                    color: "var(--ink)",
+                                    borderRadius: "12px",
+                                  }}
+                                >
+                                  ✕ Non disponible
+                                </div>
+                                {pm && (
+                                  <div className="pm-badge">
+                                    <div className="pml">
+                                      {pm.slug.substring(0, 2).toUpperCase()}
+                                    </div>
+                                    {pm.name}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="lc-info">
+                                <div className="top">
+                                  <div className="nm">{listing.title}</div>
+                                  {listingRatingLabel(listing.rating) && (
+                                    <div className="rating">
+                                      <span className="star">★</span>
+                                      {listingRatingLabel(listing.rating)}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="loc">
+                                  {neighborhood}, {listing.city}
+                                </div>
+                                <div className="meta-row">
+                                  <span>{listing.bedrooms} chambres</span>
+                                  <span className="d"></span>
+                                  <span>{listing.maxGuests} voyageurs</span>
+                                </div>
+                                <div className="price">
+                                  <b>
+                                    {formatMadAmount(cardPrice(listing))}{" "}
+                                    {listing.currency || "MAD"}
+                                  </b>
+                                  <span className="per">/nuit</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="results-grid" style={{ opacity: 0.6 }}>
-                    {unavailableByGuests.map((listing, i) => {
-                      const listingId = (listing as any)._id || (listing as any).id;
-                      const listingPmId = (listing as any).pmId;
-                      const pm = propertyManagers.find((p) => p.id === listingPmId);
-                      const colorClass = colors[i % colors.length];
-                      const neighborhood = (listing as any).neighborhood || listing.city;
-
-                      const coverImage = listing.images?.find(Boolean) || '';
-
-                      return (
-                        <div key={listingId} className="lc" style={{ position: 'relative', pointerEvents: 'none' }}>
+                  {/* Unavailable by guests capacity */}
+                  {unavailableByGuests.length > 0 && (
+                    <div style={{ marginTop: "64px" }}>
+                      <div
+                        style={{
+                          padding: "16px 24px",
+                          background: "#F0F8FF",
+                          border: "1px solid #B0D4F1",
+                          borderRadius: "12px",
+                          marginBottom: "24px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                        }}
+                      >
+                        <span style={{ fontSize: "24px" }}>👥</span>
+                        <div>
                           <div
-                            className={`lc-photo ${coverImage ? 'has-img' : colorClass}`}
-                            style={
-                              coverImage
-                                ? {
-                                    backgroundImage: `url(${coverImage})`,
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center',
-                                  }
-                                : undefined
-                            }
+                            style={{
+                              fontWeight: "600",
+                              fontSize: "15px",
+                              marginBottom: "4px",
+                            }}
                           >
-                            <div className="grain"></div>
-                            <div style={{
-                              position: 'absolute',
-                              inset: 0,
-                              background: 'rgba(255,255,255,0.7)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '14px',
-                              fontWeight: '600',
-                              color: 'var(--ink)',
-                              borderRadius: '12px'
-                            }}>
-                              Max {listing.maxGuests} voyageurs
-                            </div>
-                            {pm && (
-                              <div className="pm-badge">
-                                <div className="pml">{pm.slug.substring(0, 2).toUpperCase()}</div>
-                                {pm.name}
-                              </div>
-                            )}
+                            {unavailableByGuests.length} bien
+                            {unavailableByGuests.length > 1 ? "s" : ""} avec
+                            capacité insuffisante
                           </div>
-                          <div className="lc-info">
-                            <div className="top">
-                              <div className="nm">{listing.title}</div>
-                              {listingRatingLabel(listing.rating) && (
-                              <div className="rating">
-                                <span className="star">★</span>
-                                {listingRatingLabel(listing.rating)}
-                              </div>
-                              )}
-                            </div>
-                            <div className="loc">
-                              {neighborhood}, {listing.city}
-                            </div>
-                            <div className="meta-row">
-                              <span>{listing.bedrooms} chambres</span>
-                              <span className="d"></span>
-                              <span>{listing.maxGuests} voyageurs</span>
-                            </div>
-                            <div className="price">
-                              <b>{formatMadAmount(cardPrice(listing))} {listing.currency || 'MAD'}</b>
-                              <span className="per">/nuit</span>
-                            </div>
+                          <div
+                            style={{ fontSize: "14px", color: "var(--ink3)" }}
+                          >
+                            Ces logements ne peuvent pas accueillir{" "}
+                            {totalGuests} voyageur{totalGuests > 1 ? "s" : ""}.
+                            Réduisez le nombre de voyageurs ou choisissez un
+                            bien plus grand.
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+                      </div>
 
-              {displayListings.length > 12 && (
-                <div className="load-more">
-                  <div className="info">
-                    Affichage de <b>12</b> sur <b>{displayListings.length}</b> résultats
-                  </div>
-                  <button>Charger plus</button>
-                </div>
-              )}
-            </>
-          )}
-        </main>
+                      <div className="results-grid" style={{ opacity: 0.6 }}>
+                        {unavailableByGuests.map((listing, i) => {
+                          const listingId =
+                            (listing as any)._id || (listing as any).id;
+                          const listingPmId = (listing as any).pmId;
+                          const pm = propertyManagers.find(
+                            (p) => p.id === listingPmId,
+                          );
+                          const colorClass = colors[i % colors.length];
+                          const neighborhood =
+                            (listing as any).neighborhood || listing.city;
 
-        <SearchMapPanel
-          city={city}
-          listings={mapListings}
-          activeListingId={hoveredListingId}
-          onListingHover={setMapHover}
-          onOpenSplitView={() => setMapViewMode('split')}
-        />
+                          const coverImage =
+                            listing.images?.find(Boolean) || "";
+
+                          return (
+                            <div
+                              key={listingId}
+                              className="lc"
+                              style={{
+                                position: "relative",
+                                pointerEvents: "none",
+                              }}
+                            >
+                              <div
+                                className={`lc-photo ${coverImage ? "has-img" : colorClass}`}
+                                style={
+                                  coverImage
+                                    ? {
+                                        backgroundImage: `url(${coverImage})`,
+                                        backgroundSize: "cover",
+                                        backgroundPosition: "center",
+                                      }
+                                    : undefined
+                                }
+                              >
+                                <div className="grain"></div>
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    inset: 0,
+                                    background: "rgba(255,255,255,0.7)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "14px",
+                                    fontWeight: "600",
+                                    color: "var(--ink)",
+                                    borderRadius: "12px",
+                                  }}
+                                >
+                                  Max {listing.maxGuests} voyageurs
+                                </div>
+                                {pm && (
+                                  <div className="pm-badge">
+                                    <div className="pml">
+                                      {pm.slug.substring(0, 2).toUpperCase()}
+                                    </div>
+                                    {pm.name}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="lc-info">
+                                <div className="top">
+                                  <div className="nm">{listing.title}</div>
+                                  {listingRatingLabel(listing.rating) && (
+                                    <div className="rating">
+                                      <span className="star">★</span>
+                                      {listingRatingLabel(listing.rating)}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="loc">
+                                  {neighborhood}, {listing.city}
+                                </div>
+                                <div className="meta-row">
+                                  <span>{listing.bedrooms} chambres</span>
+                                  <span className="d"></span>
+                                  <span>{listing.maxGuests} voyageurs</span>
+                                </div>
+                                <div className="price">
+                                  <b>
+                                    {formatMadAmount(cardPrice(listing))}{" "}
+                                    {listing.currency || "MAD"}
+                                  </b>
+                                  <span className="per">/nuit</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {displayListings.length > 12 && (
+                    <div className="load-more">
+                      <div className="info">
+                        Affichage de <b>12</b> sur{" "}
+                        <b>{displayListings.length}</b> résultats
+                      </div>
+                      <button>Charger plus</button>
+                    </div>
+                  )}
+                </>
+              )}
+            </main>
+
+            {!pmSlug && (
+              <SearchMapPanel
+                city={city}
+                listings={mapListings}
+                activeListingId={hoveredListingId}
+                onListingHover={setMapHover}
+                onOpenSplitView={() => setMapViewMode("split")}
+              />
+            )}
           </>
         )}
       </div>
@@ -1020,11 +1214,11 @@ export default function SearchPage() {
       fallback={
         <div
           style={{
-            paddingTop: '88px',
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            paddingTop: "88px",
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <div>Chargement...</div>
