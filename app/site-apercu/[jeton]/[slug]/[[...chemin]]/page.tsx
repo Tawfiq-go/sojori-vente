@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { AnnotationApercu } from '@/components/site/AnnotationApercu'
 import { CadreSite, CHEMIN_RESERVER } from '@/components/site/Chrome'
 import { Reservation } from '@/components/site/Reservation'
+import { metaMarqueBlanche } from '@/lib/site/meta'
 import { Villa } from '@/components/site/Villa'
 import { lireVilla } from '@/lib/site/logement'
 import { SitePm } from '@/components/site/SitePm'
@@ -22,6 +23,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const { jeton } = await props.params
   const site = await lireApercu(jeton)
   return {
+    ...(site ? metaMarqueBlanche(site, `Aperçu · ${site.spec.identite.nom}`) : {}),
     title: site ? `Aperçu · ${site.spec.identite.nom}` : 'Aperçu',
     robots: { index: false, follow: false },
   }

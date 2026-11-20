@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { CadreSite, CHEMIN_RESERVER } from '@/components/site/Chrome'
 import { Reservation } from '@/components/site/Reservation'
+import { metaMarqueBlanche } from '@/lib/site/meta'
 import { Villa } from '@/components/site/Villa'
 import { lireVilla } from '@/lib/site/logement'
 import { SitePm } from '@/components/site/SitePm'
@@ -36,12 +37,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   if (!c) return {}
   const { site, cible, page } = c
   const { defaut, actives } = site.spec.langues
-  if (!page) return { title: site.spec.identite.nom, robots: { index: false, follow: true } }
+  if (!page) return { ...metaMarqueBlanche(site, site.spec.identite.nom), robots: { index: false, follow: true } }
   const hote = ((await headers()).get('host') || '').split(':')[0]
   const titre = t(page.seo?.titre, cible.langue, defaut) || t(page.titre, cible.langue, defaut)
+  const titreComplet = page.chemin === '' || !titre ? site.spec.identite.nom : `${titre} · ${site.spec.identite.nom}`
+  const description = t(page.seo?.description, cible.langue, defaut) || undefined
   return {
-    title: page.chemin === '' || !titre ? site.spec.identite.nom : `${titre} · ${site.spec.identite.nom}`,
-    description: t(page.seo?.description, cible.langue, defaut) || undefined,
+    ...metaMarqueBlanche(site, titreComplet, description),
     ...(hote ? { metadataBase: new URL(`https://${hote}`) } : {}),
     alternates: {
       canonical: lien('', cible.langue, defaut, page.chemin),
