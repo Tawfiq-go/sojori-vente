@@ -8,6 +8,7 @@
 import { lien } from '@/lib/site/route'
 import { t } from '@/lib/site/texte'
 import type { Langue, Media, Section, SitePublic } from '@/lib/site/types'
+import { CarteRestaurant } from './CarteRestaurant'
 import { BarreRecherche, BlocSojori, FondLogement } from './Sojori'
 
 export type Contexte = {
@@ -221,6 +222,8 @@ function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque'
           </div>
         </section>
       )
+    case 'carteRestaurant':
+      return <CarteRestaurant id={s.id} variante={s.variante} contenu={c} ctx={ctx} />
     case 'equipe':
       return (
         <section className={classe} data-section={s.id} id={s.id}>

@@ -1023,3 +1023,346 @@
     order: 2;
   }
 }
+
+/* ───────────────────────── carte du restaurant (carteRestaurant) ───────────────────────── */
+.site-pm .carteRestaurant {
+  max-width: 1040px;
+  margin-inline: auto;
+}
+.site-pm .carte-resto__entete {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.site-pm .carte-resto__categorie {
+  margin-bottom: 36px;
+}
+.site-pm .carte-resto__titre {
+  font-size: clamp(20px, 2.6vw, 26px);
+  margin: 0 0 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--accent-doux);
+  color: var(--accent);
+}
+.site-pm .carte-resto__note {
+  margin: 8px 0 4px;
+  font-style: italic;
+  opacity: 0.8;
+}
+.site-pm .carte-resto__plats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.site-pm .carte-resto__plat,
+.site-pm .carte-resto__entetes {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 20px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px dotted var(--accent-doux);
+}
+.site-pm .carte-resto__plat--2,
+.site-pm .carte-resto__entetes {
+  grid-template-columns: 1fr 96px 96px;
+}
+.site-pm .carte-resto__entetes {
+  border-bottom: 0;
+  padding-bottom: 0;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.site-pm .carte-resto__nom {
+  font-weight: 600;
+}
+.site-pm .carte-resto__description {
+  display: block;
+  margin-top: 2px;
+  font-weight: 400;
+  font-size: 14px;
+  opacity: 0.75;
+}
+.site-pm .carte-resto__prix {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  font-weight: 600;
+}
+.site-pm .carte-resto__mention {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.7;
+}
+.site-pm .carte-resto--colonnes {
+  columns: 2 420px;
+  column-gap: 56px;
+}
+.site-pm .carte-resto--colonnes .carte-resto__categorie {
+  break-inside: avoid;
+}
+
+/* Onglets sans JavaScript : la case cochée montre sa catégorie. */
+.site-pm .carte-resto__radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.site-pm .carte-resto__onglets {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 14px;
+  margin-bottom: 18px;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+.site-pm .carte-resto__onglets label {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  padding: 9px 16px;
+  min-height: 40px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+}
+.site-pm .carte-resto__onglets label:hover {
+  background: var(--accent-doux);
+}
+.site-pm .carte-resto__panneau {
+  display: none;
+}
+.site-pm .carte-resto__radio:focus-visible ~ .carte-resto__onglets {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.site-pm .carte-resto__radio:nth-of-type(1):checked ~ .carte-resto__onglets label:nth-child(1) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(1):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(1) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(2):checked ~ .carte-resto__onglets label:nth-child(2) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(2):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(2) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(3):checked ~ .carte-resto__onglets label:nth-child(3) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(3):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(3) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(4):checked ~ .carte-resto__onglets label:nth-child(4) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(4):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(4) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(5):checked ~ .carte-resto__onglets label:nth-child(5) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(5):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(5) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(6):checked ~ .carte-resto__onglets label:nth-child(6) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(6):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(6) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(7):checked ~ .carte-resto__onglets label:nth-child(7) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(7):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(7) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(8):checked ~ .carte-resto__onglets label:nth-child(8) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(8):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(8) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(9):checked ~ .carte-resto__onglets label:nth-child(9) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(9):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(9) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(10):checked ~ .carte-resto__onglets label:nth-child(10) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(10):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(10) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(11):checked ~ .carte-resto__onglets label:nth-child(11) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(11):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(11) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(12):checked ~ .carte-resto__onglets label:nth-child(12) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(12):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(12) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(13):checked ~ .carte-resto__onglets label:nth-child(13) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(13):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(13) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(14):checked ~ .carte-resto__onglets label:nth-child(14) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(14):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(14) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(15):checked ~ .carte-resto__onglets label:nth-child(15) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(15):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(15) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(16):checked ~ .carte-resto__onglets label:nth-child(16) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(16):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(16) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(17):checked ~ .carte-resto__onglets label:nth-child(17) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(17):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(17) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(18):checked ~ .carte-resto__onglets label:nth-child(18) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(18):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(18) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(19):checked ~ .carte-resto__onglets label:nth-child(19) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(19):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(19) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(20):checked ~ .carte-resto__onglets label:nth-child(20) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(20):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(20) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(21):checked ~ .carte-resto__onglets label:nth-child(21) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(21):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(21) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(22):checked ~ .carte-resto__onglets label:nth-child(22) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(22):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(22) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(23):checked ~ .carte-resto__onglets label:nth-child(23) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(23):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(23) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(24):checked ~ .carte-resto__onglets label:nth-child(24) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(24):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(24) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(25):checked ~ .carte-resto__onglets label:nth-child(25) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(25):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(25) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(26):checked ~ .carte-resto__onglets label:nth-child(26) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(26):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(26) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(27):checked ~ .carte-resto__onglets label:nth-child(27) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(27):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(27) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(28):checked ~ .carte-resto__onglets label:nth-child(28) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(28):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(28) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(29):checked ~ .carte-resto__onglets label:nth-child(29) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(29):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(29) {
+  display: block;
+}
+.site-pm .carte-resto__radio:nth-of-type(30):checked ~ .carte-resto__onglets label:nth-child(30) {
+  background: var(--accent);
+  color: var(--fond);
+}
+.site-pm .carte-resto__radio:nth-of-type(30):checked ~ .carte-resto__panneaux .carte-resto__panneau:nth-child(30) {
+  display: block;
+}
+
+/* Sans CSS :checked (très vieux navigateurs) tout reste lisible : chaque panneau s'affiche. */
+@supports not selector(:checked) {
+  .site-pm .carte-resto__panneau {
+    display: block;
+  }
+}
+.site-pm[data-style='immersif'] .carte-resto__titre,
+.site-pm[data-style='moderne'] .carte-resto__titre {
+  border-bottom-width: 2px;
+}
+.site-pm[dir='rtl'] .carte-resto__prix {
+  text-align: left;
+}
