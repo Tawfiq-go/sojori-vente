@@ -1332,3 +1332,27 @@
     order: -1;
   }
 }
+
+/* Accueil fidèle à l'original (Nommos, 21/11/2026) : « Luxurious » en vert sauge, plus grand, qui mord sur le titre ;
+   la barre de dates sous le premier écran, dans un cadre vert pâle pleine largeur. */
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .sur-titre {
+  color: color-mix(in srgb, var(--accent) 88%, #fff);
+  font-size: clamp(54px, 8.4vw, 124px);
+  margin: -0.42em 0 6px;
+  text-shadow: 0 2px 22px rgb(0 0 0 / 0.35);
+  transform: rotate(-3deg);
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran + .section.recherche {
+  max-width: none;
+  margin: 0;
+  padding: 26px clamp(20px, 5vw, 64px);
+  background: var(--accent-doux);
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran + .section.recherche .recherche__barre {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  align-items: end;
+}

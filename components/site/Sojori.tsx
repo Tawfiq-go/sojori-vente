@@ -6,6 +6,7 @@
  */
 import { lireAvis, lireLogements } from '@/lib/site/api'
 import { plusBeauLogement } from '@/lib/site/logements'
+import { lien } from '@/lib/site/route'
 import { mot, prix } from '@/lib/site/texte'
 import type { Logement, Section } from '@/lib/site/types'
 import { CarteSite } from './CarteSite'
@@ -228,8 +229,8 @@ async function CarteDesLogements({ s, ctx }: { s: Extract<Section, { niveau: 'so
  */
 export function BarreRecherche({ ctx }: { ctx: Contexte }) {
   return (
-      <form className="recherche__barre" action="/search" method="get">
-        {ctx.base && <input type="hidden" name="pm" value={ctx.slug} />}
+      // La page de réservation DU site (dates → logements de ce PM, dans son cadre), jamais la recherche du marché.
+      <form className="recherche__barre" action={lien(ctx.base, ctx.langue, ctx.defaut, 'reserver')} method="get">
         <label>
           <span>{mot('arrivee', ctx.langue)}</span>
           <input type="date" name="checkIn" required />
