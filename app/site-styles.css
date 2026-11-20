@@ -506,6 +506,8 @@
 .site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) h1,
 .site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__sous, .bandeau__infos)) .sur-titre {
   text-shadow: 0 1px 14px rgb(0 0 0 / 0.28);
+}
+
 /* Finition du style minimal (Nommos Beach Resort, 20/11/2026) : en-tête discret, bandes pleine largeur, pied soigné, mobile. */
 .site-pm[data-style='minimal'] .entete {
   padding: 14px clamp(20px, 5vw, 64px);
