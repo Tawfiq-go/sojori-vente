@@ -956,8 +956,8 @@ export default function ListingPage() {
               <MoroccoMap
                 city={listing.city}
                 neighborhood={listing.neighborhood}
-                lat={listing.location?.lat}
-                lng={listing.location?.lng}
+                lat={(listing as any).lat ?? (listing as any).location?.lat}
+                lng={(listing as any).lng ?? (listing as any).location?.lng}
               />
               <div className={styles.poiGrid}>
                 {apiPOIs.length > 0 ? (
@@ -968,41 +968,7 @@ export default function ListingPage() {
                       <span className={styles.d}>{poi.distance}</span>
                     </div>
                   ))
-                ) : (
-                  // Fallback mockup data if no real POIs available
-                  <>
-                    <div className={styles.poi}>
-                      <span className={styles.ic}>🚊</span>
-                      <span className={styles.nm}>Tramway CFC</span>
-                      <span className={styles.d}>2 MIN À PIED</span>
-                    </div>
-                    <div className={styles.poi}>
-                      <span className={styles.ic}>🍽</span>
-                      <span className={styles.nm}>Restaurants & cafés</span>
-                      <span className={styles.d}>3 MIN À PIED</span>
-                    </div>
-                    <div className={styles.poi}>
-                      <span className={styles.ic}>🏖</span>
-                      <span className={styles.nm}>Corniche Aïn Diab</span>
-                      <span className={styles.d}>12 MIN EN VOITURE</span>
-                    </div>
-                    <div className={styles.poi}>
-                      <span className={styles.ic}>🕌</span>
-                      <span className={styles.nm}>Mosquée Hassan II</span>
-                      <span className={styles.d}>15 MIN EN VOITURE</span>
-                    </div>
-                    <div className={styles.poi}>
-                      <span className={styles.ic}>🛍</span>
-                      <span className={styles.nm}>Morocco Mall</span>
-                      <span className={styles.d}>10 MIN EN VOITURE</span>
-                    </div>
-                    <div className={styles.poi}>
-                      <span className={styles.ic}>✈️</span>
-                      <span className={styles.nm}>Aéroport Mohammed V</span>
-                      <span className={styles.d}>30 MIN EN VOITURE</span>
-                    </div>
-                  </>
-                )}
+                ) : null}
               </div>
             </section>
 
