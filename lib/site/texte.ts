@@ -32,6 +32,8 @@ const MOTS = {
   pied_navigation: { fr: 'Navigation', en: 'Navigation', ar: 'التنقل' },
   pied_infos: { fr: 'Nos informations', en: 'Our information', ar: 'معلوماتنا' },
   pied_suivez: { fr: 'Suivez-nous', en: 'Follow us', ar: 'تابعنا' },
+  essai_titre: { fr: 'Mode essai', en: 'Trial mode', ar: 'وضع التجربة' },
+  essai_detail: { fr: 'aperçu privé : rien n’est envoyé ni débité', en: 'private preview: nothing is sent or charged', ar: 'معاينة خاصة: لا يُرسل ولا يُخصم شيء' },
   pied_droits: { fr: 'Tous droits réservés', en: 'All rights reserved', ar: 'جميع الحقوق محفوظة' },
   mentions: { fr: 'Mentions légales', en: 'Legal notice', ar: 'إشعار قانوني' },
   aucunLogement: { fr: 'Aucun logement disponible pour le moment.', en: 'No property available right now.', ar: 'لا يوجد سكن متاح حاليًا.' },

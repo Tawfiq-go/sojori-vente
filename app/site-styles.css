@@ -1912,3 +1912,9 @@
   padding-top: clamp(28px, 3vw, 44px);
   padding-bottom: clamp(36px, 4vw, 56px);
 }
+
+/* Aperçu : bandeau « Mode essai » (jamais sur le site public). */
+.bandeau-essai { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 60; display: flex; gap: 8px; align-items: baseline; max-width: calc(100vw - 24px); padding: 8px 14px; border-radius: 999px; background: #141617; color: #fff; font: 500 12px/1.3 var(--site-police-texte, system-ui); box-shadow: 0 4px 18px rgba(0,0,0,.25); }
+.bandeau-essai strong { text-transform: uppercase; letter-spacing: .08em; font-size: 11px; color: #c9d8c8; }
+.bandeau-essai span { opacity: .85 }
+@media (max-width: 520px) { .bandeau-essai { border-radius: 14px; flex-direction: column; gap: 2px; text-align: center; bottom: 8px } .bandeau-essai span { font-size: 11px } }
