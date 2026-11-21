@@ -68,7 +68,8 @@ export function CadreSite({
         </a>
         <nav className="entete__menu" aria-label="Menu">
           {site.spec.pages
-            .filter((p) => p !== legal)
+            // Une landing d'offre n'entre jamais dans le menu : on y arrive par son lien (campagne, e-mail, réseaux).
+            .filter((p) => p !== legal && !p.offre)
             .map((p) => (
               <a key={p.id} href={l(langue, p.chemin)} aria-current={p.id === pageId ? 'page' : undefined}>
                 {t(p.titre, langue, defaut)}
