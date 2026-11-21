@@ -1631,3 +1631,284 @@
 .site-pm .pied__colonnes > * {
   min-width: 0;
 }
+
+/* ═══ Pages intérieures fidèles à l'original ═══ */
+/* La carte : catégories à GAUCHE en boîtes pâles (#DDE3DD) à l'écriture manuscrite, plats à droite en vert sauge, filets pointillés. */
+@media (min-width: 900px) {
+  .site-pm[data-style='minimal'] .carte-resto--onglets {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 0 40px;
+    align-items: start;
+  }
+  .site-pm[data-style='minimal'] .carte-resto__onglets {
+    flex-direction: column;
+    gap: 8px;
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+  }
+  .site-pm[data-style='minimal'] .carte-resto__onglets label {
+    border: 1px solid color-mix(in srgb, var(--accent-doux) 70%, #000);
+    border-radius: 0;
+    background: var(--accent-doux);
+    padding: 8px 18px;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    font-family: 'Great Vibes', Georgia, serif;
+    font-size: 24px;
+    line-height: 1.1;
+    white-space: normal;
+  }
+}
+.site-pm[data-style='minimal'] .carte-resto__onglets label:hover {
+  background: color-mix(in srgb, var(--accent-doux) 70%, var(--accent));
+}
+.site-pm[data-style='minimal'] .carte-resto__titre {
+  display: none;
+}
+.site-pm[data-style='minimal'] .carte-resto__plat {
+  border-bottom: 1px dotted #141617;
+  padding: 18px 0 16px;
+}
+.site-pm[data-style='minimal'] .carte-resto__nom {
+  color: var(--accent);
+  font-weight: 500;
+}
+.site-pm[data-style='minimal'] .carte-resto__prix {
+  color: var(--accent);
+  font-weight: 500;
+}
+.site-pm[data-style='minimal'] .carteRestaurant {
+  max-width: 1240px;
+}
+/* Sous-pages : le titre du premier bloc en écriture manuscrite (« Authentic signature » chez l'original), vert sauge. */
+.site-pm[data-style='minimal'] .bandeau--moitie h1,
+.site-pm[data-style='minimal'] .bandeau--texte_seul h1 {
+  font-family: 'Great Vibes', Georgia, serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: clamp(40px, 4.4vw, 62px);
+  line-height: 1.1;
+}
+/* La carte : bande pâle centrée portant seulement « La carte » */
+.site-pm[data-style='minimal'] .bandeau--texte_seul {
+  max-width: none;
+  margin: 0;
+  padding: clamp(36px, 4vw, 60px) 20px;
+  background: var(--accent-doux);
+  text-align: center;
+}
+.site-pm[data-style='minimal'] .bandeau--texte_seul .bandeau__texte {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+/* Contact : bande verte, titre blanc en capitales (Montserrat, pas de script) */
+.site-pm[data-style='minimal'] [data-page='contact'] .bandeau--texte_seul,
+.site-pm[data-style='minimal'] main[data-page] .bandeau--texte_seul:has(+ .contact) {
+  background: var(--accent);
+  color: #fff;
+}
+.site-pm[data-style='minimal'] main[data-page] .bandeau--texte_seul:has(+ .contact) h1 {
+  font-family: var(--police-titres);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: clamp(22px, 2.3vw, 30px);
+  letter-spacing: -0.015em;
+  color: #fff;
+}
+/* Pied : textes noirs sur le vert pâle (original), bandeau des droits plus foncé et pleine largeur */
+.site-pm[data-style='minimal'] .pied,
+.site-pm[data-style='minimal'] .pied a {
+  color: #141617;
+}
+.site-pm[data-style='minimal'] .pied__col--menu li {
+  border-bottom-color: #141617;
+}
+.site-pm[data-style='minimal'] .pied__droits {
+  max-width: none;
+  margin: 40px calc(-1 * clamp(16px, 4vw, 48px)) -56px;
+  padding: 18px 20px;
+  border-top: 0;
+  background: color-mix(in srgb, var(--accent) 92%, #000);
+  color: #fff;
+}
+.site-pm[data-style='minimal'] .pied__droits a {
+  color: #fff;
+}
+.site-pm[data-style='minimal'] .pied__liens a svg {
+  fill: #141617;
+}
+/* Bandeau vidéo sans texte (la carte) : large bandeau 16:9 plafonné ; logo du pied en noir ; bandeau des droits pleine largeur */
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__texte)) {
+  min-height: min(52vw, 620px);
+}
+.site-pm[data-style='minimal'] .bandeau--plein_ecran:not(:has(.bandeau__texte))::after {
+  background: none;
+}
+.site-pm[data-style='minimal'] .pied__logo {
+  filter: brightness(0);
+}
+.site-pm[data-style='minimal'] .pied {
+  padding-left: clamp(20px, 5vw, 64px);
+  padding-right: clamp(20px, 5vw, 64px);
+}
+.site-pm[data-style='minimal'] .pied__droits {
+  margin-left: calc(-1 * clamp(20px, 5vw, 64px));
+  margin-right: calc(-1 * clamp(20px, 5vw, 64px));
+}
+
+/* Titre de page porté par un bloc texteImage (h1.titre-section) : même rendu qu'un titre de section. */
+.site-pm .texteImage h1.titre-section {
+  font-size: clamp(24px, 2.4vw, 34px);
+  line-height: 1.2;
+  margin-bottom: 28px;
+  max-width: 900px;
+}
+.site-pm[data-style='minimal'] .texteImage--centre h1.titre-section {
+  margin-left: auto;
+  margin-right: auto;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+/* Pages intérieures (hors accueil) : les titres des blocs image/texte en écriture manuscrite verte, comme l'original. */
+.site-pm[data-style='minimal'] main:not([data-chemin='accueil']) .texteImage--image_gauche h1,
+.site-pm[data-style='minimal'] main:not([data-chemin='accueil']) .texteImage--image_gauche h2,
+.site-pm[data-style='minimal'] main:not([data-chemin='accueil']) .texteImage--image_droite h1,
+.site-pm[data-style='minimal'] main:not([data-chemin='accueil']) .texteImage--image_droite h2 {
+  font-family: 'Great Vibes', Georgia, serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: clamp(34px, 3.4vw, 48px);
+  line-height: 1.3;
+  color: color-mix(in srgb, var(--accent) 85%, #000);
+}
+.site-pm[data-style='minimal'] main:not([data-chemin='accueil']) .texteImage--centre h1 {
+  font-family: 'Great Vibes', Georgia, serif;
+  font-weight: 400;
+  text-transform: none;
+  font-size: clamp(40px, 4.4vw, 62px);
+  color: color-mix(in srgb, var(--accent) 85%, #000);
+  letter-spacing: 0.02em;
+}
+/* Images des blocs : 5/3 comme l'original (et non 4/5) ; textes de 16 px alignés à gauche */
+.site-pm[data-style='minimal'] .texteImage--image_gauche .texteImage__media,
+.site-pm[data-style='minimal'] .texteImage--image_droite .texteImage__media {
+  aspect-ratio: 5 / 3;
+  border-radius: 0;
+}
+.site-pm[data-style='minimal'] .texteImage--image_gauche .texteImage__texte p,
+.site-pm[data-style='minimal'] .texteImage--image_droite .texteImage__texte p {
+  font-size: 16px;
+  line-height: 1.72;
+  color: var(--texte);
+}
+/* Carrousel de photos bord à bord (piscine, LA LA LA) : cinq vignettes visibles, défilement sans barre */
+.site-pm[data-style='minimal'] .galerie--carrousel {
+  max-width: none;
+  padding: 0;
+  margin-top: clamp(24px, 3vw, 40px);
+}
+.site-pm[data-style='minimal'] .galerie--carrousel .galerie__media {
+  border-radius: 0;
+}
+/* Carrousel : une rangée de vignettes hautes, défilement horizontal sans barre (5 visibles sur grand écran) */
+.site-pm[data-style='minimal'] .galerie--carrousel .galerie__grille {
+  display: grid;
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 20vw);
+  gap: 0;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.site-pm[data-style='minimal'] .galerie--carrousel .galerie__grille::-webkit-scrollbar {
+  display: none;
+}
+.site-pm[data-style='minimal'] .galerie--carrousel .galerie__media {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  scroll-snap-align: start;
+}
+
+/* ═══ Contact comme l'original : UNE grande bande verte — titre centré, « Nos informations » à gauche, formulaire à droite ═══ */
+.site-pm[data-style='minimal'] main[data-chemin='contact'] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 clamp(24px, 4vw, 64px);
+  align-items: start;
+  background: var(--accent);
+  color: #fff;
+  padding: 0 clamp(20px, 5vw, 64px) clamp(40px, 5vw, 72px);
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] > * {
+  max-width: none;
+  margin: 0;
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] > .bandeau--texte_seul {
+  grid-column: 1 / -1;
+  margin: 0 calc(-1 * clamp(20px, 5vw, 64px));
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] > .appel {
+  order: 1;
+  padding: 0;
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] > .contact {
+  order: 2;
+  padding: 0;
+  color: #fff;
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] .appel__boite {
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  color: #fff;
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] .appel__boite h2 {
+  color: #fff;
+  font-weight: 400;
+  text-align: left;
+  font-size: clamp(26px, 2.6vw, 36px);
+  margin: 0 0 24px;
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] .appel__boite p {
+  white-space: pre-line;
+  text-align: left;
+  font-size: 16px;
+  line-height: 2.1;
+  color: #fff;
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] .appel__boite .actions {
+  justify-content: flex-start;
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] .appel__boite .bouton,
+.site-pm[data-style='minimal'] main[data-chemin='contact'] .contact__whatsapp {
+  background: color-mix(in srgb, var(--accent) 85%, #000);
+  border-color: color-mix(in srgb, var(--accent) 85%, #000);
+  color: #fff;
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] .contact__formulaire {
+  width: 100%;
+  min-height: 520px;
+  border: 0;
+  background: transparent;
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] .a-venir {
+  color: #fff;
+  border-color: rgb(255 255 255 / 0.6);
+}
+@media (max-width: 800px) {
+  .site-pm[data-style='minimal'] main[data-chemin='contact'] {
+    grid-template-columns: 1fr;
+  }
+}
+.site-pm[data-style='minimal'] main[data-chemin='contact'] > .bandeau--texte_seul {
+  padding-top: clamp(28px, 3vw, 44px);
+  padding-bottom: clamp(36px, 4vw, 56px);
+}

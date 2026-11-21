@@ -91,7 +91,7 @@ export function CadreSite({
           </nav>
         )}
       </header>
-      <main data-page={pageId ?? CHEMIN_RESERVER}>{children}</main>
+      <main data-page={pageId ?? CHEMIN_RESERVER} data-chemin={chemin === '' ? 'accueil' : chemin}>{children}</main>
       <footer className="pied" data-bloc="pied">
         <div className="pied__colonnes">
           <div className="pied__col pied__col--marque">
