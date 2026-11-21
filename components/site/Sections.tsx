@@ -106,7 +106,7 @@ function Actions({ c, ctx }: { c: Record<string, unknown>; ctx: Contexte }) {
   )
 }
 
-function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque' }>; ctx: Contexte }) {
+function Bibliotheque({ s, ctx, premier = false }: { s: Extract<Section, { niveau: 'bibliotheque' }>; ctx: Contexte; premier?: boolean }) {
   const c = s.contenu
   const tx = (k: string) => t(c[k], ctx.langue, ctx.defaut)
   const classe = `section ${s.type} ${s.type}--${s.variante}`
@@ -156,7 +156,13 @@ function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque'
           <MediaVue ref_={c.media} site={ctx.site} className="texteImage__media" />
           <div className="texteImage__texte">
             {surTitre}
-            {tx('titre') && <h2 data-champ="titre">{tx('titre')}</h2>}
+            {tx('titre') &&
+              (premier ? (
+                // Premier bloc de la page : c'est le titre de la page (h1), pas un titre de section.
+                <h1 className="titre-section" data-champ="titre">{tx('titre')}</h1>
+              ) : (
+                <h2 data-champ="titre">{tx('titre')}</h2>
+              ))}
             {tx('texte') && (
               <p className="multiligne" data-champ="texte">
                 {tx('texte')}
@@ -259,8 +265,8 @@ function Mesure({ s, ctx }: { s: Extract<Section, { niveau: 'mesure' }>; ctx: Co
 export function Sections({ sections, ctx }: { sections: Section[]; ctx: Contexte }) {
   return (
     <>
-      {sections.map((s) => {
-        if (s.niveau === 'bibliotheque') return <Bibliotheque key={s.id} s={s} ctx={ctx} />
+      {sections.map((s, i) => {
+        if (s.niveau === 'bibliotheque') return <Bibliotheque key={s.id} s={s} ctx={ctx} premier={i === 0} />
         if (s.niveau === 'mesure') return <Mesure key={s.id} s={s} ctx={ctx} />
         return <BlocSojori key={s.id} s={s} ctx={ctx} />
       })}
