@@ -520,3 +520,9 @@
     grid-column: auto;
   }
 }
+
+/* Charte propre du moteur (onglet « Moteur de réservation ») : le texte des boutons suit la couleur de marque choisie. */
+.site-pm[data-moteur][data-style] .bouton,
+.site-pm[data-moteur][data-style] .entete__reserver {
+  color: var(--encre-bouton, inherit);
+}

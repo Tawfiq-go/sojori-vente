@@ -7,6 +7,7 @@
 import type { ReactNode } from 'react'
 import { lien } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
+import { lienPoliceMoteur, type SurchargeMoteur } from '@/lib/site/moteur-theme'
 import { lienPolices, variablesDuTheme } from '@/lib/site/theme'
 import type { Langue, SitePublic } from '@/lib/site/types'
 import { Reseaux, WhatsappFlottant } from './Reseaux'
@@ -24,6 +25,7 @@ export function CadreSite({
   pageId,
   children,
   apres,
+  moteur,
 }: {
   site: SitePublic
   /** '' sur le domaine du PM ; `/site-apercu/<jeton>/<slug>` dans l'aperçu ; `/site-pm/<slug>` sur sojori-vente. */
@@ -35,10 +37,13 @@ export function CadreSite({
   children: ReactNode
   /** Rendu après le pied de page (assistant, annotations). */
   apres?: ReactNode
+  /** La charte PROPRE du moteur (onglet « Moteur de réservation ») ; seulement la page de réservation la reçoit. */
+  moteur?: SurchargeMoteur | null
 }) {
   const { defaut, actives } = site.spec.langues
   const legal = site.spec.pages.find((p) => p.sections.some((s) => s.niveau === 'sojori' && s.type === 'legal'))
-  const logo = site.spec.identite.logo ? site.medias[site.spec.identite.logo] : undefined
+  const logoSite = site.spec.identite.logo ? site.medias[site.spec.identite.logo] : undefined
+  const logo = moteur?.logoUrl ? { url: moteur.logoUrl } : logoSite
   // L'en-tête : logo seul (défaut quand il y en a un), logo et nom, ou nom seul (28/10/2026).
   const affichage = site.spec.identite.affichage ?? 'logo'
   const whatsapp = site.spec.identite.whatsappFlottant ? site.contact?.whatsapp : null
@@ -50,9 +55,11 @@ export function CadreSite({
       data-anim={site.spec.theme.animations ?? 'douces'}
       dir={langue === 'ar' ? 'rtl' : 'ltr'}
       lang={langue}
-      style={variablesDuTheme(site.spec.theme)}
+      data-moteur={moteur ? '' : undefined}
+      style={{ ...variablesDuTheme(site.spec.theme), ...(moteur?.variables ?? {}) }}
     >
       <link rel="stylesheet" href={lienPolices(site.spec.theme)} />
+      {moteur?.police && <link rel="stylesheet" href={lienPoliceMoteur(moteur.police)} />}
       {/* Style minimal : le mot en écriture manuscrite du premier écran sobre (Nommos Beach Resort, 20/11/2026). */}
       {site.spec.theme.style === 'minimal' && (
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" />
