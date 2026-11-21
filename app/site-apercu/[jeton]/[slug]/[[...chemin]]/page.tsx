@@ -55,6 +55,8 @@ export default async function ApercuDuSite(props: Props) {
     return (
       <CadreSite site={site} base={base} langue={cible.langue} chemin={cible.chemin}>
         <Parcours site={site} slug={source} base={base} langue={cible.langue} sousChemin={cible.chemin.slice(CHEMIN_RESERVER.length + 1)} valeurs={valeurs} />
+        {/* Aperçu vivant : `sojori:rafraichir` relit le brouillon sans recharger le cadre (même route de rendu que le site). */}
+        <AnnotationApercu />
       </CadreSite>
     )
   }
