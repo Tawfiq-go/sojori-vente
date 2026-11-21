@@ -10,7 +10,7 @@
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { lireVilla } from '@/lib/site/logement'
-import { lireSejour, lireType, lireTypes, formaterPrix } from '@/lib/site/moteur'
+import { lireCalendrier, lireSejour, lireType, lireTypes, formaterPrix } from '@/lib/site/moteur'
 import { mm } from '@/lib/site/moteur-mots'
 import { lien } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
@@ -86,10 +86,10 @@ export async function Parcours({
   }
 
   // ─── /reserver/<id>… : un type de CE PM, sinon 404 ───
-  const [type, villa] = await Promise.all([lireType(slug, id, sejour, visiteur), lireVilla(slug, id)])
+  const [type, villa, jours] = await Promise.all([lireType(slug, id, sejour, visiteur), lireVilla(slug, id), etape ? Promise.resolve([]) : lireCalendrier(slug, id)])
   if (!type || !villa) notFound()
 
-  if (!etape) return <FicheType site={site} base={base} langue={langue} type={type} villa={villa} sejour={sejour} valeurs={valeurs} />
+  if (!etape) return <FicheType site={site} base={base} langue={langue} type={type} villa={villa} sejour={sejour} valeurs={valeurs} jours={jours} />
 
   const fiche = l(`${CHEMIN_RESERVER}/${type.id}${qs}`)
   const mode = modeMoteur(site)
