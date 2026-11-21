@@ -46,13 +46,17 @@ export default async function ApercuDuSite(props: Props) {
     if (!proprietaire) return <LienApercuExpire />
     // Brouillon sur un compte sans logement : la configuration peut désigner UN autre propriétaire à lire en lecture seule.
     const lu = proprietaireLuPourApercu(proprietaire)
-    const source = lu === proprietaire ? slug : lu
+    // Toujours lu par PROPRIÉTAIRE (identifiant) : l'adresse du site (`nommos-beach-resort-ali`) n'est pas le slug PM et ne
+    // trouverait aucun logement. `pm=<24 hex>` est accepté par la lecture publique, qui ne rend que ce propriétaire.
+    const source = lu
     const logements = await lireLogements(source)
     if (logements.some((l) => l.pmId !== lu)) notFound()
     const valeurs = await props.searchParams
     return (
       <CadreSite site={site} base={base} langue={cible.langue} chemin={cible.chemin}>
         <Parcours site={site} slug={source} base={base} langue={cible.langue} sousChemin={cible.chemin.slice(CHEMIN_RESERVER.length + 1)} valeurs={valeurs} />
+        {/* Aperçu vivant : `sojori:rafraichir` relit le brouillon sans recharger le cadre (même route de rendu que le site). */}
+        <AnnotationApercu />
       </CadreSite>
     )
   }
