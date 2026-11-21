@@ -18,8 +18,10 @@ const PERIMETRE_MAX = 12
 
 async function lireJours(slug: string, id: string, from: string, to: string): Promise<Jour[] | null> {
   try {
-    const qs = new URLSearchParams({ from, to, pm: slug })
-    const r = await fetch(`${getRemoteApiBaseUrl()}/api/v1/listing/public/listings/${encodeURIComponent(id)}/calendar?${qs}`, {
+    // Multi-unités : l'identifiant est `<listingId>:<roomTypeId>` ; la route veut le logement et le type à part (comme le moteur).
+    const [listingId, roomTypeId] = id.split(':')
+    const qs = new URLSearchParams({ from, to, pm: slug, ...(roomTypeId ? { roomTypeId } : {}) })
+    const r = await fetch(`${getRemoteApiBaseUrl()}/api/v1/listing/public/listings/${encodeURIComponent(listingId)}/calendar?${qs}`, {
       next: { revalidate: 20, tags: [`logements:${slug}`] },
       signal: AbortSignal.timeout(6000),
     })
