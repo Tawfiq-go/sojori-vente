@@ -56,6 +56,7 @@ export function CadreSite({
       dir={langue === 'ar' ? 'rtl' : 'ltr'}
       lang={langue}
       data-moteur={moteur ? '' : undefined}
+      data-encre={moteur?.variables['--encre-bouton'] ? '' : undefined}
       style={{ ...variablesDuTheme(site.spec.theme), ...(moteur?.variables ?? {}) }}
     >
       <link rel="stylesheet" href={lienPolices(site.spec.theme)} />

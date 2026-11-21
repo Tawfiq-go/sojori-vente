@@ -522,7 +522,7 @@
 }
 
 /* Charte propre du moteur (onglet « Moteur de réservation ») : le texte des boutons suit la couleur de marque choisie. */
-.site-pm[data-moteur][data-style] .bouton,
-.site-pm[data-moteur][data-style] .entete__reserver {
-  color: var(--encre-bouton, inherit);
+.site-pm[data-moteur][data-encre][data-style] .bouton:not(.bouton--second):not(:hover),
+.site-pm[data-moteur][data-encre][data-style] .entete__reserver:not(:hover) {
+  color: var(--encre-bouton);
 }
