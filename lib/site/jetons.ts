@@ -32,8 +32,10 @@ const libre = (j: Jour) => j.available !== false && j.stopSell !== true
 
 /** Le prix après remise, arrondi, jamais négatif ni au-dessus du prix de départ (même règle que srv-site). */
 export function prixRemise(prix: number, pourcent: number, arrondi: Remise['arrondi'] = 'unite'): number {
+  if (!Number.isFinite(prix) || !Number.isFinite(pourcent)) return prix
   const pas = arrondi === 'dix' ? 10 : arrondi === 'cinq' ? 5 : 1
-  const r = Math.round((prix * (1 - pourcent / 100)) / pas) * pas
+  // Toujours vers le bas : jamais un prix d'offre au-dessus de ce que la remise donne.
+  const r = Math.floor((prix * (1 - pourcent / 100)) / pas) * pas
   return Math.max(0, Math.min(prix, r))
 }
 
@@ -70,7 +72,13 @@ type Format = (montant: number, devise: string, langue: Langue) => string
 
 /** La valeur d'un jeton, ou `undefined` (donnée absente : la chaîne entière disparaît). */
 function valeurDe(nom: string, id: string | undefined, v: Valeurs, langue: Langue, fmt: Format): string | undefined {
-  const cibles = id ? [v.parLogement[id]].filter(Boolean) : Object.values(v.parLogement)
+  // L'identifiant d'un jeton est celui du logement ; ses types de chambre (`<logement>:<type>`) comptent avec lui.
+  // Un identifiant qui n'est pas dans le périmètre lu (logements du PM) ne désigne rien : le champ disparaît.
+  const cibles = id
+    ? Object.entries(v.parLogement)
+        .filter(([k]) => k === id || k.startsWith(`${id}:`))
+        .map(([, x]) => x)
+    : Object.values(v.parLogement)
   const avecPrix = cibles.filter((c) => c.prix !== undefined)
   const moins = avecPrix.length ? avecPrix.reduce((a, b) => ((b.prix as number) < (a.prix as number) ? b : a)) : undefined
   switch (nom) {
@@ -78,7 +86,12 @@ function valeurDe(nom: string, id: string | undefined, v: Valeurs, langue: Langu
     case 'prix_barre':
       return moins ? fmt(moins.prix as number, moins.devise, langue) : undefined
     case 'prix_offre':
-      return moins && v.remise ? fmt(prixRemise(moins.prix as number, v.remise.pourcent, v.remise.arrondi), moins.devise, langue) : undefined
+    {
+      if (!moins || !v.remise) return undefined
+      const offre = prixRemise(moins.prix as number, v.remise.pourcent, v.remise.arrondi)
+      // Une « offre » qui ne baisse pas le prix (arrondi, remise trop faible) ne s'affiche pas.
+      return offre < (moins.prix as number) ? fmt(offre, moins.devise, langue) : undefined
+    }
     case 'remise':
       return v.remise ? `-${v.remise.pourcent} %` : undefined
     case 'nuits_min': {

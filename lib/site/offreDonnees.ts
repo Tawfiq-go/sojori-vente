@@ -51,7 +51,7 @@ export async function pageAvecChampsDynamiques(slug: string, page: Page, langue:
   if (!page.offre || !contientJeton(page.sections)) return page
   const offre = page.offre
   const sien = await lireLogements(slug)
-  const voulus = offre.logements?.length ? sien.filter((l) => offre.logements?.includes(l.id)) : sien
+  const voulus = offre.logements?.length ? sien.filter((l) => offre.logements?.includes(l.id.split(':')[0])) : sien
   const perimetre = voulus.slice(0, PERIMETRE_MAX)
   const fen = fenetre(offre, maintenantMs)
   const lus: LogementLu[] = await Promise.all(

@@ -21,8 +21,11 @@ describe('valeurs réelles', () => {
     assert.equal(v.disponibles, 2)
   })
   it('remise arrondie, bornée', () => {
-    assert.equal(prixRemise(1333, 20, 'dix'), 1070)
+    assert.equal(prixRemise(1333, 20, 'dix'), 1060)
+    assert.equal(prixRemise(100, 1, 'dix'), 90)
+    assert.equal(prixRemise(NaN, 10), NaN)
     assert.equal(prixRemise(5, 90, 'dix'), 0)
+    assert.equal(prixRemise(7, 1, 'cinq'), 5)
   })
 })
 
@@ -57,6 +60,18 @@ describe('remplacement', () => {
   it('contientJeton évite tout appel inutile', () => {
     assert.equal(contientJeton({ a: 'Black Friday' }), false)
     assert.equal(contientJeton({ a: { fr: 'dès {prix_a_partir}' } }), true)
+  })
+})
+
+describe('cloisonnement', () => {
+  it('un id hors des logements lus ne désigne rien ; un id de logement couvre ses types de chambre', () => {
+    const w = calculerValeurs([{ id: `${A}:${B}`, jours: jours([800]), devise: 'MAD' }], { pourcent: 10 })
+    assert.equal(resoudreTexte(`{prix_a_partir:${A}}`, w, 'fr', fmt), '800 MAD')
+    assert.equal(resoudreTexte(`{prix_a_partir:${'c'.repeat(24)}}`, w, 'fr', fmt), '')
+  })
+  it('l'arrondi se fait vers le bas, jamais au-dessus du prix', () => {
+    const w = calculerValeurs([{ id: A, jours: jours([3]), devise: 'MAD' }], { pourcent: 1, arrondi: 'dix' })
+    assert.equal(resoudreTexte('{prix_offre}', w, 'fr', fmt), '0 MAD')
   })
 })
 
