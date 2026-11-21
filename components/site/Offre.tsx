@@ -5,7 +5,7 @@
  * la fiche du PM et de son thème. Le bouton mène au moteur de réservation du site (`/reserver`) ou à WhatsApp ;
  * l'offre ne crée ni réservation ni paiement. Rendu serveur (le décompte seul est client).
  */
-import { lienWhatsappOffre } from '@/lib/site/offre'
+import { cibleDeLOffre, lienWhatsappOffre, secondBoutonUtile } from '@/lib/site/offre'
 import { lien } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
 import type { Media, Section } from '@/lib/site/types'
@@ -26,7 +26,8 @@ function Visuel({ c, ctx }: { c: Record<string, unknown>; ctx: Contexte }) {
 }
 
 /** Un bouton de l'offre : interne (/reserver…), `#whatsapp` (numéro du compte du PM) ou externe. */
-function BoutonOffre({ texte, cible, ctx, titre, code, second }: { texte: unknown; cible: unknown; ctx: Contexte; titre: string; code?: string; second?: boolean }) {
+function BoutonOffre({ texte, cible: brut, ctx, titre, code, second }: { texte: unknown; cible: unknown; ctx: Contexte; titre: string; code?: string; second?: boolean }) {
+  const cible = cibleDeLOffre(brut, ctx.offre?.paiement)
   const libelle = t(texte, ctx.langue, ctx.defaut)
   if (!libelle || typeof cible !== 'string' || !cible) return null
   let h: string | undefined
@@ -102,7 +103,7 @@ export function SectionOffre({ s, ctx }: { s: Extract<Section, { niveau: 'biblio
             )}
             <div className="actions">
               <BoutonOffre texte={c.bouton} cible={c.lien} ctx={ctx} titre={titre} code={code} />
-              <BoutonOffre texte={c.bouton2} cible={c.lien2} ctx={ctx} titre={titre} code={code} second />
+              {secondBoutonUtile(c.lien2, offre?.paiement) && <BoutonOffre texte={c.bouton2} cible={c.lien2} ctx={ctx} titre={titre} code={code} second />}
             </div>
             {code && (
               <p className="offre__code">

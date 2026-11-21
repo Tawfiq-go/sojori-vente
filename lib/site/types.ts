@@ -29,6 +29,8 @@ export type OffreServie = {
   debutUtc?: string
   finUtc?: string
   apresFin?: 'terminee' | 'masquer'
+  /** Point d'accroche du paiement : seul `whatsapp` change l'affichage (le bouton mène à WhatsApp) ; `moteur` n'est pas branché. */
+  paiement?: 'demonstration' | 'whatsapp' | 'moteur'
   /** Le design propre à la page (listes fermées de srv-site). */
   design?: { accent?: string; accentDoux?: string; police?: string; style?: string }
 }

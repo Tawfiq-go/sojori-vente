@@ -46,3 +46,14 @@ export function lienWhatsappOffre(numero: string | null | undefined, langue: Lan
 
 /** Une landing terminée n'est jamais indexée ; en cours ou à venir (aperçu), elle l'est comme les autres pages. */
 export const offreTerminee = (offre: OffreServie | undefined, apercu: boolean): boolean => Boolean(offre) && offre?.etat === 'terminee' && !apercu
+
+/**
+ * La cible d'un bouton sur une landing : avec `paiement: whatsapp`, le lien vers la réservation du site (`/reserver`)
+ * devient `#whatsapp` (WhatsApp du compte du PM). `demonstration` et `moteur` (non branché) gardent la réservation.
+ */
+export const cibleDeLOffre = (cible: unknown, paiement: OffreServie['paiement']): unknown =>
+  paiement === 'whatsapp' && cible === '/reserver' ? '#whatsapp' : cible
+
+/** Le second bouton « WhatsApp » ferait doublon avec le premier quand le paiement est déjà WhatsApp. */
+export const secondBoutonUtile = (lien2: unknown, paiement: OffreServie['paiement']): boolean =>
+  !(paiement === 'whatsapp' && lien2 === '#whatsapp')

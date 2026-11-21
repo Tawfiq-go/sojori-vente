@@ -5,7 +5,7 @@
  * porte `data-champ` (`titre`, `elements.2.libelle`…) : on le modifie sur place dans l'aperçu
  * (Tawfiq, 28/10/2026). Rendu serveur seulement.
  */
-import { lienWhatsappOffre } from '@/lib/site/offre'
+import { cibleDeLOffre, lienWhatsappOffre, secondBoutonUtile } from '@/lib/site/offre'
 import { lien } from '@/lib/site/route'
 import { t } from '@/lib/site/texte'
 import type { Langue, Media, OffreServie, Section, SitePublic, Texte } from '@/lib/site/types'
@@ -62,7 +62,9 @@ function MediaVue({
 }
 
 /** Un lien de la fiche : interne (/chemin), ancre (#…), ou externe (https, mailto, tel). */
-function href(cible: unknown, ctx: Contexte): string | undefined {
+function href(brut: unknown, ctx: Contexte): string | undefined {
+  // Landing d'offre avec paiement WhatsApp : la réservation devient WhatsApp (lib/site/offre.ts).
+  const cible = cibleDeLOffre(brut, ctx.offre?.paiement)
   if (typeof cible !== 'string' || !cible) return undefined
   // `#whatsapp` : WhatsApp du compte du PM, avec un message qui nomme l'offre (sans numéro, pas de bouton).
   if (cible === '#whatsapp')
@@ -110,7 +112,7 @@ function Actions({ c, ctx }: { c: Record<string, unknown>; ctx: Contexte }) {
   return (
     <div className="actions">
       <Bouton texte={c.bouton} cible={c.lien} ctx={ctx} champ="bouton" />
-      <Bouton texte={c.bouton2} cible={c.lien2} ctx={ctx} second champ="bouton2" />
+      {secondBoutonUtile(c.lien2, ctx.offre?.paiement) && <Bouton texte={c.bouton2} cible={c.lien2} ctx={ctx} second champ="bouton2" />}
     </div>
   )
 }
