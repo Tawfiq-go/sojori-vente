@@ -9,6 +9,9 @@
  */
 
 /** Un jour du calendrier public de srv-listing. */
+/** fr, en, ar (copie du type du site, ce module n'importe rien). */
+type Langue = 'fr' | 'en' | 'ar'
+
 export type Jour = { date: string; available?: boolean; price?: number; minStay?: number; stopSell?: boolean }
 
 /** Ce qu'on a lu pour un logement : `jours: null` = calendrier illisible (jamais rien déduire). */
@@ -63,10 +66,10 @@ export function calculerValeurs(logements: LogementLu[], remise?: Remise): Valeu
   return { total: logements.length, ...(lus ? { disponibles } : {}), ...(remise ? { remise } : {}), parLogement }
 }
 
-type Format = (montant: number, devise: string, langue: string) => string
+type Format = (montant: number, devise: string, langue: Langue) => string
 
 /** La valeur d'un jeton, ou `undefined` (donnée absente : la chaîne entière disparaît). */
-function valeurDe(nom: string, id: string | undefined, v: Valeurs, langue: string, fmt: Format): string | undefined {
+function valeurDe(nom: string, id: string | undefined, v: Valeurs, langue: Langue, fmt: Format): string | undefined {
   const cibles = id ? [v.parLogement[id]].filter(Boolean) : Object.values(v.parLogement)
   const avecPrix = cibles.filter((c) => c.prix !== undefined)
   const moins = avecPrix.length ? avecPrix.reduce((a, b) => ((b.prix as number) < (a.prix as number) ? b : a)) : undefined
@@ -92,7 +95,7 @@ function valeurDe(nom: string, id: string | undefined, v: Valeurs, langue: strin
 }
 
 /** Une chaîne avec ses jetons remplacés ; `''` si l'un d'eux n'a pas de valeur. Sans jeton : rendue telle quelle. */
-export function resoudreTexte(texte: string, v: Valeurs, langue: string, fmt: Format): string {
+export function resoudreTexte(texte: string, v: Valeurs, langue: Langue, fmt: Format): string {
   let manque = false
   const r = texte.replace(JETON, (_m, nom: string, id?: string) => {
     const x = valeurDe(nom, id, v, langue, fmt)
@@ -109,15 +112,15 @@ const LANGUES = new Set(['fr', 'en', 'ar'])
  * (chiffres et devise suivent le système de langues du site) ; une chaîne simple (`valeur`, code) dans la langue servie.
  * Les clés non textuelles (id, type, médias, liens) ne sont jamais touchées.
  */
-export function resoudreContenu<T>(contenu: T, v: Valeurs, langue: string, fmt: Format): T {
-  const marche = (x: unknown, lg: string): unknown => {
+export function resoudreContenu<T>(contenu: T, v: Valeurs, langue: Langue, fmt: Format): T {
+  const marche = (x: unknown, lg: Langue): unknown => {
     if (typeof x === 'string') return resoudreTexte(x, v, lg, fmt)
     if (Array.isArray(x)) return x.map((e) => marche(e, lg))
     if (x && typeof x === 'object') {
       return Object.fromEntries(
         Object.entries(x).map(([k, e]) => {
           if (CLES_FIXES.has(k)) return [k, e]
-          return [k, marche(e, LANGUES.has(k) ? k : lg)]
+          return [k, marche(e, LANGUES.has(k) ? (k as Langue) : lg)]
         }),
       )
     }

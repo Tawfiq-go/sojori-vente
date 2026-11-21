@@ -19,16 +19,19 @@ export async function SitePm({
   base,
   langue,
   page: pageBrute,
+  sourceLogements,
 }: {
   site: SitePublic
   slug: string
   base: string
   langue: Langue
   page: Page
+  /** Aperçu : le propriétaire que le jeton autorise quand l'adresse n'est pas le slug du PM (lecture des tarifs). */
+  sourceLogements?: string
 }) {
   const { defaut } = site.spec.langues
   // Champs dynamiques d'une landing (prix, remise, nuits, disponibilité) : vrais tarifs lus à chaque rendu, aperçu comme public.
-  const page = await pageAvecChampsDynamiques(slug, pageBrute, langue)
+  const page = await pageAvecChampsDynamiques(sourceLogements ?? slug, pageBrute, langue)
   const ctx = { site, slug, base, langue, defaut, offre: page.offre, titrePage: page.titre }
   // Une landing a son design (accent, police, style) ; le cadre le lit dans le thème : site, en-tête et pied suivent.
   const vue: SitePublic = page.offre ? { ...site, spec: { ...site.spec, theme: themeDeLaPage(site.spec.theme, page.offre) } } : site
