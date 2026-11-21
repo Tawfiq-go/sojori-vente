@@ -3,6 +3,7 @@
  * sections de la page. Rendu serveur, enfermé dans `.site-pm` : les couleurs et polices du thème ne
  * débordent pas sur le reste de sojori-vente (pages logement, réservation).
  */
+import { pageAvecChampsDynamiques } from '@/lib/site/offreDonnees'
 import { offreTerminee, themeDeLaPage } from '@/lib/site/offre'
 import type { Langue, Page, SitePublic } from '@/lib/site/types'
 import { AssistantSite } from './AssistantSite'
@@ -12,12 +13,12 @@ import { Sections } from './Sections'
 /** Le jeton de l'aperçu, lu dans le préfixe de ses liens (`/site-apercu/<jeton>/<slug>`). */
 const jetonDe = (base: string) => decodeURIComponent(base.split('/')[2] ?? '')
 
-export function SitePm({
+export async function SitePm({
   site,
   slug,
   base,
   langue,
-  page,
+  page: pageBrute,
 }: {
   site: SitePublic
   slug: string
@@ -26,6 +27,8 @@ export function SitePm({
   page: Page
 }) {
   const { defaut } = site.spec.langues
+  // Champs dynamiques d'une landing (prix, remise, nuits, disponibilité) : vrais tarifs lus à chaque rendu, aperçu comme public.
+  const page = await pageAvecChampsDynamiques(slug, pageBrute, langue)
   const ctx = { site, slug, base, langue, defaut, offre: page.offre, titrePage: page.titre }
   // Une landing a son design (accent, police, style) ; le cadre le lit dans le thème : site, en-tête et pied suivent.
   const vue: SitePublic = page.offre ? { ...site, spec: { ...site.spec, theme: themeDeLaPage(site.spec.theme, page.offre) } } : site

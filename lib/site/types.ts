@@ -31,6 +31,10 @@ export type OffreServie = {
   apresFin?: 'terminee' | 'masquer'
   /** Point d'accroche du paiement : seul `whatsapp` change l'affichage (le bouton mène à WhatsApp) ; `moteur` n'est pas branché. */
   paiement?: 'demonstration' | 'whatsapp' | 'moteur'
+  /** Règle de remise des champs dynamiques (jetons) : pourcentage entier, appliqué aux vrais tarifs. */
+  remise?: { pourcent: number; arrondi?: 'unite' | 'cinq' | 'dix' }
+  /** Périmètre des champs dynamiques (identifiants de logements) ; absent = les logements du PM. */
+  logements?: string[]
   /** Le design propre à la page (listes fermées de srv-site). */
   design?: { accent?: string; accentDoux?: string; police?: string; style?: string }
 }
