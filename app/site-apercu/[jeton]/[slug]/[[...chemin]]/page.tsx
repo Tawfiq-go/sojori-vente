@@ -5,7 +5,8 @@ import { CadreSite, CHEMIN_RESERVER } from '@/components/site/Chrome'
 import { Parcours } from '@/components/site/moteur/Parcours'
 import { metaMarqueBlanche, metaNeutre } from '@/lib/site/meta'
 import { SitePm } from '@/components/site/SitePm'
-import { lireApercu, lireLogements, lireProprietaireApercu } from '@/lib/site/api'
+import { lireApercu, lireLogements, lireMoteurApercu, lireProprietaireApercu } from '@/lib/site/api'
+import { surchargeMoteur } from '@/lib/site/moteur-theme'
 import { proprietaireLuPourApercu } from '@/lib/site/apercu-lecture'
 import { LienApercuExpire } from '@/components/site/LienApercuExpire'
 import { lireCible } from '@/lib/site/route'
@@ -52,9 +53,11 @@ export default async function ApercuDuSite(props: Props) {
     const logements = await lireLogements(source)
     if (logements.some((l) => l.pmId !== lu)) notFound()
     const valeurs = await props.searchParams
+    // La charte propre du moteur (même API que le site publié, sur le jeton d'aperçu) ; sans thème propre : celle du site.
+    const moteur = surchargeMoteur(await lireMoteurApercu(jeton), cible.langue, site.spec.langues.defaut)
     return (
-      <CadreSite site={site} base={base} langue={cible.langue} chemin={cible.chemin}>
-        <Parcours site={site} slug={source} base={base} langue={cible.langue} sousChemin={cible.chemin.slice(CHEMIN_RESERVER.length + 1)} valeurs={valeurs} />
+      <CadreSite site={site} base={base} langue={cible.langue} chemin={cible.chemin} moteur={moteur}>
+        <Parcours site={site} slug={source} base={base} langue={cible.langue} sousChemin={cible.chemin.slice(CHEMIN_RESERVER.length + 1)} valeurs={valeurs} moteur={moteur} />
         {/* Aperçu vivant : `sojori:rafraichir` relit le brouillon sans recharger le cadre (même route de rendu que le site). */}
         <AnnotationApercu />
       </CadreSite>

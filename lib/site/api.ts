@@ -44,6 +44,32 @@ export const lireProprietaireApercu = cache(async (jeton: string): Promise<strin
   }
 })
 
+/**
+ * Le thème PROPRE du moteur, tel que srv-site le sert au moteur : sur jeton d'aperçu (brouillon, jamais mis en cache) ou
+ * pour un site publié (thème appliqué, cache 60 s). `null` : aucun thème, ou srv-site muet — la page garde le thème du site.
+ */
+export const lireMoteurApercu = cache(async (jeton: string): Promise<unknown> => {
+  try {
+    const r = await fetch(`${SITE_API}/apercu/${encodeURIComponent(jeton)}/moteur`, { cache: 'no-store', signal: AbortSignal.timeout(4000) })
+    if (!r.ok) return null
+    const corps = (await r.json()) as { success?: boolean; data?: unknown }
+    return corps.success ? (corps.data ?? null) : null
+  } catch {
+    return null
+  }
+})
+
+export const lireMoteurPublic = cache(async (slug: string): Promise<unknown> => {
+  try {
+    const r = await fetch(`${SITE_API}/pm/${encodeURIComponent(slug)}/moteur`, { next: { revalidate: 60, tags: [`site-pm:${slug}`] }, signal: AbortSignal.timeout(4000) })
+    if (!r.ok) return null
+    const corps = (await r.json()) as { success?: boolean; data?: unknown }
+    return corps.success ? (corps.data ?? null) : null
+  } catch {
+    return null
+  }
+})
+
 export const lireApercu = cache((jeton: string) => lire(`apercu/${encodeURIComponent(jeton)}`, { cache: 'no-store' }))
 
 /** srv-listing rend 0 quand il n'a pas de coordonnées : un tel logement n'a pas de place sur la carte. */
