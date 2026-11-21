@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { AnnotationApercu } from '@/components/site/AnnotationApercu'
+import { SuiviApercu } from '@/components/site/SuiviApercu'
+import { mot } from '@/lib/site/texte'
 import { CadreSite, CHEMIN_RESERVER } from '@/components/site/Chrome'
 import { Parcours } from '@/components/site/moteur/Parcours'
 import { metaMarqueBlanche, metaNeutre } from '@/lib/site/meta'
@@ -53,6 +55,7 @@ export default async function ApercuDuSite(props: Props) {
     return (
       <CadreSite site={site} base={base} langue={cible.langue} chemin={cible.chemin}>
         <Parcours site={site} slug={source} base={base} langue={cible.langue} sousChemin={cible.chemin.slice(CHEMIN_RESERVER.length + 1)} valeurs={valeurs} />
+        <SuiviApercu mots={{ essai: mot('essai_titre', cible.langue), detail: mot('essai_detail', cible.langue) }} />
       </CadreSite>
     )
   }
@@ -62,6 +65,7 @@ export default async function ApercuDuSite(props: Props) {
     <>
       <SitePm site={site} slug={slug} base={base} langue={cible.langue} page={page} />
       <AnnotationApercu />
+      <SuiviApercu mots={{ essai: mot('essai_titre', cible.langue), detail: mot('essai_detail', cible.langue) }} />
     </>
   )
 }
