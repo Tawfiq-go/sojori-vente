@@ -5,7 +5,8 @@
  * la fiche du PM et de son thème. Le bouton mène au moteur de réservation du site (`/reserver`) ou à WhatsApp ;
  * l'offre ne crée ni réservation ni paiement. Rendu serveur (le décompte seul est client).
  */
-import { cibleDeLOffre, lienWhatsappOffre, secondBoutonUtile } from '@/lib/site/offre'
+import type { CSSProperties } from 'react'
+import { cibleDeLOffre, couleurValeurSurVoile, lienWhatsappOffre, secondBoutonUtile } from '@/lib/site/offre'
 import { lien } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
 import type { Media, Section } from '@/lib/site/types'
@@ -54,7 +55,13 @@ export function SectionOffre({ s, ctx }: { s: Extract<Section, { niveau: 'biblio
   const decompte = !terminee && offre?.finUtc && tx('decompteLibelle')
   const variante = s.variante === 'moitie' || s.variante === 'carte' ? s.variante : 'plein_ecran'
   return (
-    <section className={`section offre offre--${variante}${terminee ? ' offre--terminee' : ''}`} data-section={s.id} id={s.id}>
+    <section
+      className={`section offre offre--${variante}${terminee ? ' offre--terminee' : ''}`}
+      data-section={s.id}
+      id={s.id}
+      // Plein écran : la valeur se lit sur le voile sombre, quel que soit l'accent (voir couleurValeurSurVoile).
+      style={variante === 'plein_ecran' ? ({ '--valeur-voile': couleurValeurSurVoile(offre?.design?.accent ?? ctx.site.spec.theme.couleurs.accent) } as CSSProperties) : undefined}
+    >
       {variante !== 'carte' && <Visuel c={c} ctx={ctx} />}
       <div className="offre__texte">
         {tx('surTitre') && (

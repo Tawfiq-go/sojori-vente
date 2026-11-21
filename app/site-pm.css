@@ -1469,8 +1469,19 @@
   display: flex;
   align-items: flex-end;
   overflow: hidden;
-  background: var(--texte);
+  /* Toujours sombre : var(--texte) est CLAIR en style immersif (texte blanc illisible sans média). */
+  background: #14130f;
   color: #fff;
+}
+.site-pm .offre--plein_ecran .offre__valeur strong {
+  color: var(--valeur-voile, #fff);
+  /* L'accent de la page reste visible, en filet, même quand il est trop sombre pour porter le texte. */
+  border-bottom: 4px solid var(--accent);
+  padding-bottom: 2px;
+}
+/* Le sur-titre porte l'accent par défaut : sur le voile sombre, même règle que la valeur. */
+.site-pm .offre--plein_ecran .sur-titre {
+  color: var(--valeur-voile, #fff);
 }
 .site-pm .offre--plein_ecran .offre__media {
   position: absolute;
