@@ -18,7 +18,19 @@ export type Page = {
   chemin: string
   titre: Texte
   seo?: { titre?: Texte; description?: Texte }
+  /** Présent : landing d'offre (fenêtre de validité évaluée par srv-site à chaque lecture). Jamais dans le menu. */
+  offre?: OffreServie
   sections: Section[]
+}
+
+/** La fenêtre d'une landing telle que srv-site la sert : l'état à l'instant de la lecture et les instants en UTC. */
+export type OffreServie = {
+  etat: 'a_venir' | 'en_cours' | 'terminee'
+  debutUtc?: string
+  finUtc?: string
+  apresFin?: 'terminee' | 'masquer'
+  /** Le design propre à la page (listes fermées de srv-site). */
+  design?: { accent?: string; accentDoux?: string; police?: string; style?: string }
 }
 
 export type SiteSpec = {

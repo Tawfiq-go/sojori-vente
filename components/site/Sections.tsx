@@ -5,10 +5,12 @@
  * porte `data-champ` (`titre`, `elements.2.libelle`…) : on le modifie sur place dans l'aperçu
  * (Tawfiq, 28/10/2026). Rendu serveur seulement.
  */
+import { lienWhatsappOffre } from '@/lib/site/offre'
 import { lien } from '@/lib/site/route'
 import { t } from '@/lib/site/texte'
-import type { Langue, Media, Section, SitePublic } from '@/lib/site/types'
+import type { Langue, Media, OffreServie, Section, SitePublic, Texte } from '@/lib/site/types'
 import { CarteRestaurant } from './CarteRestaurant'
+import { SectionOffre } from './Offre'
 import { BarreRecherche, BlocSojori, FondLogement } from './Sojori'
 
 export type Contexte = {
@@ -19,6 +21,10 @@ export type Contexte = {
   base: string
   langue: Langue
   defaut: Langue
+  /** La fenêtre de la landing d'offre dont la page fait partie (`page.offre`), avec son état à la lecture. */
+  offre?: OffreServie
+  /** Le titre de la page : celui de l'offre quand la section n'en a pas. */
+  titrePage?: Texte
 }
 
 function MediaVue({
@@ -58,6 +64,9 @@ function MediaVue({
 /** Un lien de la fiche : interne (/chemin), ancre (#…), ou externe (https, mailto, tel). */
 function href(cible: unknown, ctx: Contexte): string | undefined {
   if (typeof cible !== 'string' || !cible) return undefined
+  // `#whatsapp` : WhatsApp du compte du PM, avec un message qui nomme l'offre (sans numéro, pas de bouton).
+  if (cible === '#whatsapp')
+    return lienWhatsappOffre(ctx.site.contact?.whatsapp, ctx.langue, t(ctx.titrePage, ctx.langue, ctx.defaut) || ctx.site.spec.identite.nom)
   if (cible.startsWith('/')) return lien(ctx.base, ctx.langue, ctx.defaut, cible.slice(1))
   return cible
 }
@@ -222,6 +231,8 @@ function Bibliotheque({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque'
           </div>
         </section>
       )
+    case 'offre':
+      return <SectionOffre s={s} ctx={ctx} />
     case 'carteRestaurant':
       return <CarteRestaurant id={s.id} variante={s.variante} contenu={c} ctx={ctx} />
     case 'equipe':

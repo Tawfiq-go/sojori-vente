@@ -3,6 +3,7 @@
  * sections de la page. Rendu serveur, enfermé dans `.site-pm` : les couleurs et polices du thème ne
  * débordent pas sur le reste de sojori-vente (pages logement, réservation).
  */
+import { offreTerminee, themeDeLaPage } from '@/lib/site/offre'
 import type { Langue, Page, SitePublic } from '@/lib/site/types'
 import { AssistantSite } from './AssistantSite'
 import { CadreSite } from './Chrome'
@@ -25,10 +26,14 @@ export function SitePm({
   page: Page
 }) {
   const { defaut } = site.spec.langues
-  const ctx = { site, slug, base, langue, defaut }
+  const ctx = { site, slug, base, langue, defaut, offre: page.offre, titrePage: page.titre }
+  // Une landing a son design (accent, police, style) ; le cadre le lit dans le thème : site, en-tête et pied suivent.
+  const vue: SitePublic = page.offre ? { ...site, spec: { ...site.spec, theme: themeDeLaPage(site.spec.theme, page.offre) } } : site
+  // Une offre terminée n'a plus d'appel vers l'offre : on garde son message de fin et le reste de la page.
+  const sections = offreTerminee(page.offre, site.apercu) ? page.sections.filter((s) => !(s.niveau === 'bibliotheque' && s.type === 'appel')) : page.sections
   return (
     <CadreSite
-      site={site}
+      site={vue}
       base={base}
       langue={langue}
       chemin={page.chemin}
@@ -44,7 +49,7 @@ export function SitePm({
         ) : undefined
       }
     >
-      <Sections sections={page.sections} ctx={ctx} />
+      <Sections sections={sections} ctx={ctx} />
     </CadreSite>
   )
 }

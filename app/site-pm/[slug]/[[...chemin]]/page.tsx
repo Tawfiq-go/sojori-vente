@@ -6,6 +6,7 @@ import { Parcours } from '@/components/site/moteur/Parcours'
 import { metaMarqueBlanche, metaNeutre } from '@/lib/site/meta'
 import { SitePm } from '@/components/site/SitePm'
 import { lireSitePm } from '@/lib/site/api'
+import { offreTerminee } from '@/lib/site/offre'
 import { lien, lireCible } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
 
@@ -51,6 +52,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const description = t(page.seo?.description, cible.langue, defaut) || undefined
   return {
     ...metaMarqueBlanche(site, titreComplet, description),
+    // Une offre terminée n'est plus indexée (la page reste pour le lien déjà partagé).
+    ...(offreTerminee(page.offre, site.apercu) ? { robots: { index: false, follow: true } } : {}),
     ...(hote ? { metadataBase: new URL(`https://${hote}`) } : {}),
     alternates: {
       canonical: lien('', cible.langue, defaut, page.chemin),

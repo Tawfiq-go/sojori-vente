@@ -52,6 +52,19 @@ const MOTS = {
   rechercher: { fr: 'Voir les disponibilités', en: 'Check availability', ar: 'تحقق من التوفر' },
   questionsFrequentes: { fr: 'Questions fréquentes', en: 'Frequently asked questions', ar: 'أسئلة شائعة' },
   nosExperiences: { fr: 'Expériences et services', en: 'Experiences and services', ar: 'تجارب وخدمات' },
+  // Landing d'offre (21/11/2026)
+  offreTerminee: { fr: 'Offre terminée', en: 'Offer ended', ar: 'انتهى العرض' },
+  offreTermineeTexte: {
+    fr: 'Cette offre est terminée. Nos logements restent réservables en direct.',
+    en: 'This offer has ended. Our homes can still be booked direct.',
+    ar: 'انتهى هذا العرض. لا يزال بإمكانك حجز مساكننا مباشرة.',
+  },
+  offreCode: { fr: 'Code à mentionner', en: 'Code to mention', ar: 'الرمز المطلوب ذكره' },
+  offreConditions: { fr: 'Conditions de l’offre', en: 'Offer terms', ar: 'شروط العرض' },
+  decompteJours: { fr: 'jours', en: 'days', ar: 'أيام' },
+  decompteHeures: { fr: 'heures', en: 'hours', ar: 'ساعات' },
+  decompteMinutes: { fr: 'min', en: 'min', ar: 'دقائق' },
+  decompteSecondes: { fr: 'sec', en: 'sec', ar: 'ثوانٍ' },
   surDevis: { fr: 'Sur devis', en: 'On request', ar: 'حسب الطلب' },
   surLaCarte: { fr: 'Nos logements sur la carte', en: 'Our homes on the map', ar: 'مساكننا على الخريطة' },
   // L'espace IA du site (28/10/2026)
