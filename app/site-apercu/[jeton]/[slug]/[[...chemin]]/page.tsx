@@ -62,9 +62,13 @@ export default async function ApercuDuSite(props: Props) {
   }
   const page = site.spec.pages.find((p) => p.chemin === cible.chemin)
   if (!page) notFound()
+  // Champs dynamiques d'une landing : l'adresse de l'aperçu n'est pas toujours le slug du PM (site d'Ali : nommos-beach-resort-ali).
+  // Les tarifs se lisent chez le propriétaire que le JETON autorise, jamais d'après l'adresse.
+  const proprietaire = page.offre ? await lireProprietaireApercu(jeton) : null
+  const sourceLogements = proprietaire ? proprietaireLuPourApercu(proprietaire) : undefined
   return (
     <>
-      <SitePm site={site} slug={slug} base={base} langue={cible.langue} page={page} />
+      <SitePm site={site} slug={slug} base={base} langue={cible.langue} page={page} sourceLogements={sourceLogements} />
       <AnnotationApercu />
     </>
   )
