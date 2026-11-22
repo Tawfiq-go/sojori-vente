@@ -95,13 +95,15 @@ export type Reponse = { statut: number; corps: string; type: string }
 const json = (statut: number, objet: unknown): Reponse => ({ statut, corps: JSON.stringify(objet), type: 'application/json' })
 
 const parMinute = limiteur(12)
+/** Les lectures de créneaux sont plus fréquentes (un visiteur change de date) : une limite plus large, mais une limite. */
+const creneauxParMinute = limiteur(60)
 
 export async function relayer(d: Demande, env: Record<string, string | undefined> = process.env, appeler: typeof fetch = fetch): Promise<Reponse> {
   if (!commandeAllumee(env)) return json(404, { success: false, error: 'commande_eteinte' })
   const g = geste(d.methode, d.slug, d.pageId, d.suite)
   if (!g) return json(404, { success: false, error: 'geste_inconnu' })
   const ip = ipDuVisiteur(d.forwardedFor, d.realIp)
-  if (g.methode === 'POST' && parMinute(ip || 'inconnue')) return json(429, { success: false, error: 'TROP_DE_COMMANDES' })
+  if (g.methode === 'POST' ? parMinute(ip || 'inconnue') : creneauxParMinute(ip || 'inconnue')) return json(429, { success: false, error: 'TROP_DE_COMMANDES' })
 
   let url = `${(env.SITE_API_URL || 'https://api.sojori.com/api/v1/public/sites').replace(/\/+$/, '')}/${g.chemin}`
   if (g.methode === 'GET') {

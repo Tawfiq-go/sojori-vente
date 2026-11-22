@@ -142,7 +142,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes, prixOffreC
             <label key={c.debut} className="offre__commande-creneau">
               <input type="radio" name="creneau" value={c.debut} disabled={!c.disponible} checked={creneau === c.debut} onChange={() => setCreneau(c.debut)} required />
               {c.debut}
-              {c.fin ? `–${c.fin}` : ''}
+              {c.fin ? `-${c.fin}` : ''}
             </label>
           ))}
         </fieldset>

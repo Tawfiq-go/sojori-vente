@@ -156,6 +156,18 @@ describe('relais serveur vers srv-site (vrai faux serveur HTTP)', () => {
     assert.equal(recus.length, n)
     assert.equal((await relayer(demande({ forwardedFor: '4.4.4.5' }), env)).statut, 201)
   })
+  it('les créneaux ont aussi une limite par adresse (60 par minute), séparée de celle des commandes', async () => {
+    repondre = () => ({ statut: 200, corps: '{"success":true,"data":{"creneaux":[]}}' })
+    const lecture = (ip: string) => relayer(demande({ methode: 'GET', suite: ['creneaux'], corps: null, forwardedFor: ip, recherche: new URLSearchParams('date=2030-01-01') }), env)
+    for (let i = 0; i < 60; i++) assert.equal((await lecture('2.2.2.2')).statut, 200)
+    const n = recus.length
+    assert.equal((await lecture('2.2.2.2')).statut, 429)
+    assert.equal(recus.length, n)
+    assert.equal((await lecture('2.2.2.3')).statut, 200)
+    // Les lectures ne consomment pas le budget des commandes de la même adresse.
+    repondre = () => ({ statut: 201, corps: '{"success":true,"data":{}}' })
+    assert.equal((await relayer(demande({ forwardedFor: '2.2.2.2' }), env)).statut, 201)
+  })
   it('les erreurs de srv-site passent avec leur statut ; srv-site injoignable : 503 commande_indisponible', async () => {
     repondre = () => ({ statut: 409, corps: '{"success":false,"error":"CRENEAU_COMPLET"}' })
     const r = await relayer(demande({ forwardedFor: '3.3.3.3' }), env)

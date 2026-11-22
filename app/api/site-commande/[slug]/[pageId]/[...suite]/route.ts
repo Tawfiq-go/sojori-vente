@@ -2,7 +2,7 @@ import { relayer } from '@/lib/site/commande'
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
- * Le panneau de commande d'une landing de service → srv-site, côté serveur (voir lib/site/commandeRelais.ts). Éteint (404) tant que
+ * Le panneau de commande d'une landing de service → srv-site, côté serveur (voir lib/site/commande.ts). Éteint (404) tant que
  * `SITE_COMMANDE_LANDING` ne vaut pas « 1 ». Trois gestes seulement : créneaux (GET), commande (POST), lien de paiement (POST).
  */
 type Contexte = { params: Promise<{ slug: string; pageId: string; suite: string[] }> }
