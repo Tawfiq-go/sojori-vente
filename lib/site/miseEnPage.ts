@@ -1,0 +1,145 @@
+/**
+ * Les MISES EN PAGE d'une landing de service (lot D2, cadrage « générateur de landings ultra design », 22/11/2026).
+ *
+ * Une mise en page est une composition complète et fermée (pas de HTML libre) : un premier écran et ses blocs, avec des
+ * EMPLACEMENTS d'images typés (rôle, format). Elle est faite pour certains types de service (restaurant, brunch, piscine,
+ * spa, navette, séjour). Règle centrale : une landing générée SANS aucune image est toujours belle et publiable :
+ *  - en APERÇU, un emplacement vide montre un repli dessiné (couleurs de la marque, motif) et l'étiquette « Votre photo ici » ;
+ *  - au PUBLIC, la mise en page bascule sur sa variante sans image (le bloc d'image disparaît, la composition reste).
+ * Le client remplit les emplacements quand il veut (chat, dashboard, photo du service). Pur, sans import (testé par `node --test`).
+ */
+
+export const TYPES_SERVICE = ['sejour', 'restaurant', 'brunch', 'piscine', 'spa', 'navette', 'activite'] as const
+export type TypeService = (typeof TYPES_SERVICE)[number]
+
+export const FORMATS = ['16:9', '4:5', '1:1', '3:2'] as const
+export type Format = (typeof FORMATS)[number]
+
+export type Emplacement = {
+  id: string
+  /** Ce que la photo doit montrer : le client et l'agent s'en servent pour choisir la bonne image. */
+  role: 'couverture' | 'ambiance' | 'detail' | 'plat' | 'portrait' | 'lieu'
+  format: Format
+  /** Obligatoire pour la variante AVEC images ; jamais pour publier (la variante sans image existe toujours). */
+  principal?: boolean
+}
+
+export type MiseEnPage = {
+  id: string
+  /** Nom court montré au client (galerie des mises en page). */
+  nom: string
+  description: string
+  /** Les types de service pour lesquels elle est faite, du plus adapté au moins adapté. */
+  pour: readonly TypeService[]
+  emplacements: readonly Emplacement[]
+}
+
+export const MISES_EN_PAGE: readonly MiseEnPage[] = [
+  {
+    id: 'editorial',
+    nom: 'Éditorial, une image',
+    description: 'Une grande photo plein écran, un titre de magazine, le prix en majesté.',
+    pour: ['piscine', 'spa', 'sejour', 'brunch', 'restaurant', 'activite', 'navette'],
+    emplacements: [{ id: 'couverture', role: 'couverture', format: '16:9', principal: true }],
+  },
+  {
+    id: 'diptyque',
+    nom: 'Diptyque, deux images',
+    description: 'Le texte sur un aplat de couleur, une photo d’ambiance et une photo de détail qui se chevauchent.',
+    pour: ['spa', 'restaurant', 'brunch', 'sejour', 'piscine'],
+    emplacements: [
+      { id: 'ambiance', role: 'ambiance', format: '4:5', principal: true },
+      { id: 'detail', role: 'detail', format: '1:1' },
+    ],
+  },
+  {
+    id: 'mosaique',
+    nom: 'Mosaïque',
+    description: 'Cinq photos en grille, pour un lieu qui se raconte en images.',
+    pour: ['sejour', 'piscine', 'restaurant', 'activite'],
+    emplacements: [
+      { id: 'grande', role: 'couverture', format: '1:1', principal: true },
+      { id: 'photo2', role: 'ambiance', format: '1:1' },
+      { id: 'photo3', role: 'detail', format: '1:1' },
+      { id: 'photo4', role: 'lieu', format: '1:1' },
+      { id: 'photo5', role: 'ambiance', format: '1:1' },
+    ],
+  },
+  {
+    id: 'typographique',
+    nom: 'Typographique',
+    description: 'Aucune photo : de grands titres, la couleur de la marque, un motif. Parfaite pour lancer sans attendre.',
+    pour: ['navette', 'activite', 'brunch', 'spa', 'piscine', 'restaurant', 'sejour'],
+    emplacements: [],
+  },
+  {
+    id: 'carte_chef',
+    nom: 'Carte du chef',
+    description: 'Le programme et la carte en colonnes, la photo du plat signature.',
+    pour: ['brunch', 'restaurant'],
+    emplacements: [{ id: 'plat', role: 'plat', format: '1:1', principal: true }],
+  },
+  {
+    id: 'day_pass',
+    nom: 'Day pass',
+    description: 'La photo du lieu, une carte de réservation, le déroulé de la journée.',
+    pour: ['piscine', 'spa', 'activite'],
+    emplacements: [
+      { id: 'lieu', role: 'lieu', format: '16:9', principal: true },
+      { id: 'detail', role: 'detail', format: '4:5' },
+    ],
+  },
+]
+
+export const miseEnPage = (id: string): MiseEnPage | undefined => MISES_EN_PAGE.find((m) => m.id === id)
+
+/** Les mises en page faites pour un type de service, la plus adaptée d'abord (rang dans `pour`), à nombre de photos égal. */
+export function misesEnPagePour(type: TypeService, photosDisponibles = 0): MiseEnPage[] {
+  return MISES_EN_PAGE.filter((m) => m.pour.includes(type))
+    .map((m) => ({
+      m,
+      // Une mise en page qui demande plus de photos qu'il n'y en a passe après (sans être retirée : les emplacements restent à remplir).
+      manque: Math.max(0, m.emplacements.length - photosDisponibles),
+      rang: m.pour.indexOf(type),
+    }))
+    .sort((a, b) => (a.manque > 0 ? 1 : 0) - (b.manque > 0 ? 1 : 0) || a.rang - b.rang)
+    .map((x) => x.m)
+}
+
+/** Les emplacements encore vides (dans l'ordre de la mise en page). */
+export function emplacementsVides(m: MiseEnPage, images: Readonly<Record<string, string | undefined>>): Emplacement[] {
+  return m.emplacements.filter((e) => !imageUtilisable(images[e.id]))
+}
+
+/** Une image n'est posée que si c'est une adresse https (ou un chemin local de démonstration, jamais `//hôte` qui sortirait du site) : jamais `javascript:` ni `data:`. */
+export function imageUtilisable(v: unknown): v is string {
+  return typeof v === 'string' && (/^https:\/\/[^\s"'()]+$/i.test(v) || /^\/(?!\/)[A-Za-z0-9/_.-]+$/.test(v))
+}
+
+/**
+ * La variante à rendre : `avec_images` dès que l'emplacement principal est rempli ; sinon `sans_image` (jamais un trou au public).
+ * Une mise en page sans emplacement (typographique) est toujours `sans_image`.
+ */
+export function variante(m: MiseEnPage, images: Readonly<Record<string, string | undefined>>): 'avec_images' | 'sans_image' {
+  const principal = m.emplacements.find((e) => e.principal)
+  return principal && imageUtilisable(images[principal.id]) ? 'avec_images' : 'sans_image'
+}
+
+/** Ce que montre un emplacement : la photo, ou en aperçu le repli « Votre photo ici », ou rien au public. */
+export function rendreEmplacement(
+  src: unknown,
+  apercu: boolean,
+): { type: 'photo'; src: string } | { type: 'repli'; etiquette: boolean } | { type: 'aucun' } {
+  if (imageUtilisable(src)) return { type: 'photo', src }
+  return apercu ? { type: 'repli', etiquette: true } : { type: 'aucun' }
+}
+
+/** Le libellé d'un format pour l'étiquette du repli. */
+export const libelleRole: Record<Emplacement['role'], string> = {
+  couverture: 'Photo de couverture',
+  ambiance: 'Photo d’ambiance',
+  detail: 'Photo de détail',
+  plat: 'Plat signature',
+  portrait: 'Portrait',
+  lieu: 'Photo du lieu',
+}

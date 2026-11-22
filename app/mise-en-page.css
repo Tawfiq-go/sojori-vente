@@ -1,0 +1,661 @@
+/* Mises en page d'une landing de service (lot D2). Toutes les couleurs et polices viennent de la marque (--mep-*). */
+.mep {
+  --mep-rayon: 22px;
+  --mep-ombre: 0 30px 80px -30px color-mix(in srgb, var(--mep-texte) 45%, transparent);
+  background: var(--mep-fond);
+  color: var(--mep-texte);
+  font-family: var(--mep-police-texte);
+  -webkit-font-smoothing: antialiased;
+}
+.mep *,
+.mep *::before,
+.mep *::after {
+  box-sizing: border-box;
+}
+.mep-motif {
+  background-color: var(--mep-accent);
+  background-image: var(--mep-motif), radial-gradient(120% 90% at 85% 10%, color-mix(in srgb, var(--mep-accent) 70%, #fff) 0%, transparent 55%),
+    linear-gradient(160deg, color-mix(in srgb, var(--mep-accent) 88%, #000) 0%, var(--mep-accent) 60%);
+}
+.mep-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mep-repli {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background-size: 64px 64px, cover;
+}
+.mep-repli__etiquette {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 16px;
+  border: 1.5px dashed color-mix(in srgb, var(--mep-fond) 80%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, #000 22%, transparent);
+  color: var(--mep-fond);
+  font: 600 13px/1 var(--mep-police-texte);
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(6px);
+}
+.mep-surtitre {
+  margin: 0 0 18px;
+  font: 600 12.5px/1 var(--mep-police-texte);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.mep-titre {
+  margin: 0;
+  font-family: var(--mep-police-titre);
+  font-weight: 600;
+  font-size: clamp(44px, 7vw, 104px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.mep-accroche {
+  max-width: 34em;
+  margin: 22px 0 0;
+  font-size: clamp(17px, 1.6vw, 21px);
+  line-height: 1.55;
+  opacity: 0.92;
+  text-wrap: pretty;
+}
+.mep-prix {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  margin: 28px 0 0;
+}
+.mep-prix strong {
+  font-family: var(--mep-police-titre);
+  font-size: clamp(34px, 3.6vw, 52px);
+  font-weight: 600;
+  line-height: 1;
+}
+.mep-prix--grand strong {
+  font-size: clamp(48px, 6vw, 88px);
+}
+.mep-prix span {
+  font-size: 15px;
+  opacity: 0.85;
+}
+.mep-prix s {
+  opacity: 0.8;
+}
+.mep-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 30px;
+}
+.mep-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 30px;
+  border-radius: 999px;
+  background: var(--mep-accent);
+  color: var(--mep-fond);
+  font: 650 16px/1 var(--mep-police-texte);
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--mep-accent) 80%, #000);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.mep-bouton:hover {
+  transform: translateY(-2px);
+}
+.mep-bouton--inverse {
+  background: var(--mep-fond);
+  color: var(--mep-accent);
+}
+.mep-restant {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.mep-restant::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3ddc84;
+  box-shadow: 0 0 0 4px color-mix(in srgb, #3ddc84 30%, transparent);
+}
+.mep-faits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  margin: 0;
+}
+.mep-faits div {
+  padding: 18px 22px;
+}
+.mep-faits dt {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.mep-faits dd {
+  margin: 6px 0 0;
+  font-family: var(--mep-police-titre);
+  font-size: 20px;
+}
+.mep-bas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px 30px;
+  padding: 22px clamp(20px, 6vw, 96px);
+  border-top: 1px solid color-mix(in srgb, var(--mep-texte) 12%, transparent);
+  font-size: 13.5px;
+  opacity: 0.85;
+}
+.mep-bas p {
+  margin: 0;
+}
+.mep-bas code {
+  padding: 2px 10px;
+  border: 1px dashed currentColor;
+  border-radius: 6px;
+  letter-spacing: 0.08em;
+}
+
+/* Sur un fond aux couleurs de la marque (pas de photo), le bouton s'inverse pour rester lisible. */
+.mep--sans-photo .mep-bouton {
+  background: var(--mep-fond);
+  color: var(--mep-accent);
+}
+/* Un repli plein écran (premier écran) porte son étiquette en haut à droite, jamais sur le titre. */
+.mep-editorial__fond.mep-repli,
+.mep-daypass__fond.mep-repli {
+  place-items: start end;
+  padding: clamp(28px, 4vh, 48px) clamp(20px, 6vw, 96px);
+}
+
+/* 1. Éditorial, une image */
+.mep-editorial {
+  position: relative;
+  display: grid;
+  min-height: min(92vh, 860px);
+  align-content: end;
+  overflow: hidden;
+  color: #fff;
+}
+.mep-editorial__fond {
+  position: absolute;
+  inset: 0;
+}
+.mep-editorial__voile {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(0 0 0 / 0.62) 0%, rgb(0 0 0 / 0.25) 55%, transparent 100%), linear-gradient(0deg, rgb(0 0 0 / 0.55) 0%, transparent 45%);
+}
+.mep-editorial--sans .mep-editorial__voile {
+  background: linear-gradient(0deg, rgb(0 0 0 / 0.25) 0%, transparent 50%);
+}
+.mep-editorial__texte {
+  position: relative;
+  padding: clamp(110px, 14vh, 160px) clamp(20px, 6vw, 96px) 40px;
+}
+.mep-editorial .mep-faits {
+  position: relative;
+  border-top: 1px solid rgb(255 255 255 / 0.22);
+  backdrop-filter: blur(10px);
+  background: rgb(0 0 0 / 0.18);
+}
+.mep-editorial .mep-faits div + div {
+  border-left: 1px solid rgb(255 255 255 / 0.18);
+}
+.mep-editorial .mep-faits div:first-child {
+  padding-left: clamp(20px, 6vw, 96px);
+}
+
+/* 2. Diptyque */
+.mep-diptyque {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 80px);
+  align-items: center;
+  min-height: min(92vh, 860px);
+  padding: clamp(96px, 12vh, 140px) clamp(20px, 6vw, 96px) clamp(48px, 8vh, 96px);
+  background: linear-gradient(180deg, var(--mep-doux) 0%, var(--mep-fond) 100%);
+}
+.mep-diptyque--sans {
+  grid-template-columns: minmax(0, 760px);
+  justify-content: center;
+  text-align: center;
+}
+.mep-diptyque--sans .mep-accroche {
+  margin-inline: auto;
+}
+.mep-diptyque .mep-titre {
+  color: var(--mep-accent);
+}
+.mep-carte-prix {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px 28px;
+  margin-top: 34px;
+  padding: 22px 26px;
+  border-radius: var(--mep-rayon);
+  background: var(--mep-fond);
+  box-shadow: var(--mep-ombre);
+}
+.mep-carte-prix .mep-prix {
+  margin: 0;
+}
+.mep-diptyque .mep-faits {
+  margin-top: 26px;
+}
+.mep-diptyque .mep-faits div {
+  padding-left: 0;
+}
+.mep-diptyque__images {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  max-height: 78vh;
+}
+.mep-diptyque__grande {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 82%;
+  height: 88%;
+  border-radius: 200px 200px var(--mep-rayon) var(--mep-rayon);
+  box-shadow: var(--mep-ombre);
+}
+.mep-diptyque__petite {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 46%;
+  aspect-ratio: 1;
+  height: auto;
+  border: 8px solid var(--mep-fond);
+  border-radius: 50%;
+  box-shadow: var(--mep-ombre);
+}
+
+/* 3. Mosaïque */
+.mep-mosaique {
+  padding: clamp(96px, 12vh, 140px) clamp(20px, 5vw, 80px) 40px;
+}
+.mep-mosaique__tete {
+  max-width: 900px;
+  margin: 0 auto 44px;
+  text-align: center;
+}
+.mep-mosaique__tete .mep-accroche {
+  margin-inline: auto;
+}
+.mep-mosaique__grille {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: repeat(2, minmax(160px, 26vh));
+  gap: 14px;
+}
+.mep-mosaique__grille > * {
+  border-radius: var(--mep-rayon);
+  overflow: hidden;
+}
+.mep-mosaique__grande {
+  grid-row: span 2;
+}
+.mep-mosaique__grille--sans {
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(180px, 30vh);
+  border-radius: var(--mep-rayon);
+}
+.mep-mosaique__pied {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: min(760px, 100%);
+  margin: -46px auto 0;
+  padding: 22px 28px;
+  border-radius: var(--mep-rayon);
+  background: var(--mep-fond);
+  box-shadow: var(--mep-ombre);
+}
+.mep-mosaique__pied .mep-prix {
+  margin: 0;
+}
+.mep-mosaique .mep-faits {
+  max-width: 900px;
+  margin: 28px auto 0;
+  text-align: center;
+}
+
+/* 4. Typographique, sans image */
+.mep-typo {
+  display: grid;
+  min-height: min(92vh, 860px);
+  align-content: center;
+  padding: clamp(110px, 14vh, 160px) clamp(20px, 6vw, 96px) 48px;
+  background-size: 64px 64px, cover, cover;
+  color: var(--mep-fond);
+}
+.mep-typo__titre {
+  margin: 0;
+  font-family: var(--mep-police-titre);
+  font-size: clamp(64px, 12vw, 200px);
+  font-weight: 700;
+  line-height: 0.86;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.mep-typo__creux {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--mep-fond);
+  font-style: italic;
+}
+.mep-typo__bas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+.mep-tampon {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 190px;
+  aspect-ratio: 1;
+  border: 2px solid var(--mep-fond);
+  border-radius: 50%;
+  outline: 1px solid color-mix(in srgb, var(--mep-fond) 50%, transparent);
+  outline-offset: 6px;
+  transform: rotate(-8deg);
+  text-align: center;
+}
+.mep-tampon strong {
+  font-family: var(--mep-police-titre);
+  font-size: 42px;
+  line-height: 1;
+}
+.mep-tampon s {
+  margin-top: 6px;
+  font-size: 15px;
+  opacity: 0.8;
+}
+.mep-typo .mep-faits {
+  margin-top: 40px;
+  border-top: 1px solid color-mix(in srgb, var(--mep-fond) 30%, transparent);
+}
+.mep-typo .mep-faits div {
+  padding-left: 0;
+}
+
+/* 5. Carte du chef */
+.mep-chef {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.4fr);
+  gap: clamp(32px, 6vw, 96px);
+  padding: clamp(96px, 12vh, 140px) clamp(20px, 6vw, 96px) 60px;
+}
+.mep-chef__intro {
+  align-self: start;
+  position: sticky;
+  top: 90px;
+}
+.mep-chef .mep-titre {
+  font-size: clamp(44px, 5.6vw, 84px);
+  color: var(--mep-accent);
+}
+.mep-chef__plat {
+  width: min(320px, 80%);
+  aspect-ratio: 1;
+  height: auto;
+  margin: 30px 0 4px;
+  border-radius: 50%;
+  box-shadow: var(--mep-ombre);
+}
+.mep-chef__plat--sans {
+  background-size: 64px 64px, cover, cover;
+}
+.mep-chef .mep-bouton {
+  margin-top: 22px;
+}
+.mep-programme {
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+  border-left: 2px solid var(--mep-accent);
+}
+.mep-programme li {
+  position: relative;
+  padding: 0 0 14px 22px;
+  font-size: 15px;
+}
+.mep-programme li::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--mep-fond);
+  border: 2px solid var(--mep-accent);
+}
+.mep-programme time {
+  display: inline-block;
+  min-width: 56px;
+  font-weight: 700;
+  color: var(--mep-accent);
+}
+.mep-chef__carte {
+  columns: 2 280px;
+  column-gap: 48px;
+}
+.mep-chef__categorie {
+  break-inside: avoid;
+  margin-bottom: 38px;
+}
+.mep-chef__categorie h2 {
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--mep-texte) 18%, transparent);
+  font-family: var(--mep-police-titre);
+  font-size: 26px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--mep-accent);
+}
+.mep-chef__categorie ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mep-chef__categorie li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin-bottom: 14px;
+}
+.mep-chef__nom {
+  font-weight: 600;
+}
+.mep-chef__points {
+  border-bottom: 1.5px dotted color-mix(in srgb, var(--mep-texte) 35%, transparent);
+  transform: translateY(-4px);
+}
+.mep-chef__prixligne {
+  font-family: var(--mep-police-titre);
+  font-weight: 600;
+}
+.mep-chef__detail {
+  grid-column: 1 / -1;
+  font-size: 13.5px;
+  opacity: 0.75;
+}
+
+/* 6. Day pass */
+.mep-daypass__haut {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.8fr);
+  gap: 32px;
+  align-items: end;
+  min-height: min(88vh, 820px);
+  padding: clamp(110px, 14vh, 160px) clamp(20px, 6vw, 96px) 56px;
+  overflow: hidden;
+  color: #fff;
+}
+.mep-daypass__fond {
+  position: absolute;
+  inset: 0;
+  background-size: 64px 64px, cover, cover;
+}
+.mep-daypass__voile {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgb(0 0 0 / 0.6) 0%, rgb(0 0 0 / 0.1) 60%);
+}
+.mep-daypass__titre,
+.mep-daypass__carte {
+  position: relative;
+}
+.mep-daypass__carte {
+  padding: 28px;
+  border-radius: var(--mep-rayon);
+  background: var(--mep-fond);
+  color: var(--mep-texte);
+  box-shadow: var(--mep-ombre);
+}
+.mep-daypass__carte .mep-prix {
+  margin: 0;
+}
+.mep-daypass__carte .mep-prix strong {
+  color: var(--mep-accent);
+}
+.mep-daypass__restant {
+  margin: 14px 0 0;
+  font-weight: 600;
+  font-size: 14.5px;
+}
+.mep-daypass__carte .mep-bouton {
+  width: 100%;
+  margin-top: 20px;
+}
+.mep-atouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.mep-atouts li {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--mep-doux);
+  font-size: 13px;
+  font-weight: 600;
+}
+.mep-frise {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  margin: 0;
+  padding: 44px clamp(20px, 6vw, 96px);
+  list-style: none;
+  counter-reset: etape;
+}
+.mep-frise li {
+  position: relative;
+  padding-top: 26px;
+  border-top: 2px solid color-mix(in srgb, var(--mep-accent) 35%, transparent);
+}
+.mep-frise li::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--mep-accent);
+}
+.mep-frise time {
+  display: block;
+  font-family: var(--mep-police-titre);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--mep-accent);
+}
+.mep-frise span {
+  display: block;
+  margin-top: 4px;
+  padding-right: 16px;
+  font-size: 15px;
+}
+.mep-daypass__detail {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 40px;
+  align-items: center;
+  padding: 0 clamp(20px, 6vw, 96px) 56px;
+}
+.mep-daypass__detailphoto {
+  aspect-ratio: 4 / 5;
+  height: auto;
+  border-radius: var(--mep-rayon);
+  box-shadow: var(--mep-ombre);
+}
+
+/* Mobile d'abord : tout passe sur une colonne sous 820 px. */
+@media (max-width: 820px) {
+  .mep-diptyque,
+  .mep-chef,
+  .mep-daypass__haut,
+  .mep-daypass__detail {
+    grid-template-columns: 1fr;
+  }
+  .mep-chef__intro {
+    position: static;
+  }
+  .mep-diptyque__images {
+    max-height: none;
+  }
+  .mep-mosaique__grille {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+  }
+  .mep-mosaique__grande {
+    grid-column: span 2;
+    grid-row: auto;
+    aspect-ratio: 4 / 3;
+  }
+  .mep-mosaique__case {
+    aspect-ratio: 1;
+  }
+  .mep-frise {
+    grid-auto-flow: row;
+    gap: 26px;
+  }
+  .mep-tampon {
+    width: 150px;
+  }
+}
