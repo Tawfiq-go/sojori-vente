@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { describe, it } from 'node:test'
-import { MISES_EN_PAGE, TYPES_SERVICE, emplacementsVides, imageUtilisable, miseEnPage, misesEnPagePour, rendreEmplacement, variante } from '../../lib/site/miseEnPage.ts'
+import { MISES_EN_PAGE, REPLI_MARQUE, TYPES_SERVICE, couleurSure, emplacementsVides, imageUtilisable, imagesDesEmplacements, marqueSure, policeSure, miseEnPage, misesEnPagePour, rendreEmplacement, variante } from '../../lib/site/miseEnPage.ts'
 
 const ed = miseEnPage('editorial')!
 const dip = miseEnPage('diptyque')!
@@ -63,5 +63,45 @@ describe('mises en page : générer SANS images, toujours publiable', () => {
     for (const ok of ['https://cdn.example.com/a.webp', '/maquettes/a.webp']) assert.equal(imageUtilisable(ok), true, ok)
     for (const ko of ['javascript:alert(1)', 'data:image/png;base64,AAA', 'http://x.example/a.jpg', 'https://x.example/a.jpg") , url(evil', '//x.example/a.jpg', '', undefined, 42]) assert.equal(imageUtilisable(ko), false, String(ko))
     assert.deepEqual(rendreEmplacement('javascript:alert(1)', true), { type: 'repli', etiquette: true })
+  })
+})
+
+describe('emplacements servis par srv-site : média du site ou photo du service', () => {
+  const medias = { 'media:abc123': { url: 'https://cdn.example.com/a.webp', type: 'image' }, 'media:vid123': { url: 'https://cdn.example.com/v.mp4', type: 'video' }, 'media:http01': { url: 'http://cdn.example.com/h.jpg', type: 'image' } }
+  it('media:<id> → adresse du média ; service:auto → photo du service lue en direct', () => {
+    assert.deepEqual(imagesDesEmplacements({ lieu: 'media:abc123', detail: 'service:auto' }, medias, 'https://cdn.example.com/s.jpg'), {
+      lieu: 'https://cdn.example.com/a.webp',
+      detail: 'https://cdn.example.com/s.jpg',
+    })
+  })
+  it('média inconnu, vidéo, adresse http, service sans photo : emplacement VIDE (jamais une autre image)', () => {
+    assert.deepEqual(imagesDesEmplacements({ a: 'media:inconnu', b: 'media:vid123', c: 'media:http01', d: 'service:auto' }, medias, undefined), {})
+    assert.deepEqual(imagesDesEmplacements(undefined, medias, 'https://x.example/s.jpg'), {})
+    // Un chemin local n'est jamais servi depuis srv-site : seulement https.
+    assert.deepEqual(imagesDesEmplacements({ a: 'service:auto' }, medias, '/maquettes/x.webp'), {})
+  })
+})
+
+describe('style en ligne : couleurs et polices validées (aucune injection CSS)', () => {
+  it('couleur #RRGGBB et police en clair passent', () => {
+    assert.equal(couleurSure('#0D7A85', '#000000'), '#0D7A85')
+    assert.equal(policeSure('Cormorant Garamond', 'Inter'), 'Cormorant Garamond')
+  })
+  it('une valeur piégée retombe sur le repli sûr', () => {
+    for (const v of ['red; background:url(https://x.example/a)', '#0d7a85;color:red', 'rgb(0,0,0)', 'url(x)', '#0d7a8', '', 42, undefined])
+      assert.equal(couleurSure(v, '#111111'), '#111111', String(v))
+    for (const v of ["x'; background:url(https://x.example/a)", 'Inter;', 'Inter)', 'a'.repeat(41), "Playfair'", '', 7, undefined])
+      assert.equal(policeSure(v, 'Inter'), 'Inter', String(v))
+  })
+  it('marqueSure remplace chaque champ piégé par son repli et garde les autres', () => {
+    const r = marqueSure({ accent: '#c25c33', fond: 'x;y', texte: undefined, doux: '#eeeeee' }, { titre: "x'; background:url(z)", texte: 'Inter' })
+    assert.deepEqual(r, {
+      couleurs: { accent: '#c25c33', fond: REPLI_MARQUE.couleurs.fond, texte: REPLI_MARQUE.couleurs.texte, doux: '#eeeeee' },
+      polices: { titre: REPLI_MARQUE.polices.titre, texte: 'Inter' },
+    })
+  })
+  it('le rendu passe TOUJOURS par marqueSure avant le style en ligne', () => {
+    const rendu = readFileSync(new URL('../../components/site/miseEnPage/MisesEnPage.tsx', import.meta.url), 'utf8')
+    assert.match(rendu, /const d: DonneesLanding = \{ \.\.\.brut, \.\.\.marqueSure\(brut\.couleurs, brut\.polices\) \}/)
   })
 })

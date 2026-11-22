@@ -5,7 +5,7 @@
  * marque (variables `--mep-*`), jamais d'une valeur en dur.
  */
 import type { CSSProperties, ReactNode } from 'react'
-import { type Emplacement, type MiseEnPage, libelleRole, rendreEmplacement, variante } from '@/lib/site/miseEnPage'
+import { type Emplacement, type MiseEnPage, libelleRole, marqueSure, rendreEmplacement, variante } from '@/lib/site/miseEnPage'
 
 export type DonneesLanding = {
   marque: string
@@ -17,6 +17,8 @@ export type DonneesLanding = {
   /** Prix déjà résolus par le serveur (jamais saisis) : le prix de l'offre et le prix d'origine. */
   prix?: { offre?: string; origine?: string; unite?: string }
   bouton: string
+  /** Où mène le bouton : le panneau de commande (#reserver), la réservation du site ou WhatsApp. */
+  lien?: string
   conditions?: string
   code?: string
   faits?: Array<{ libelle: string; valeur: string }>
@@ -110,7 +112,7 @@ function Editorial({ m, d, apercu }: Props) {
           {d.accroche && <p className="mep-accroche">{d.accroche}</p>}
           <Prix d={d} grand />
           <div className="mep-actions">
-            <a className="mep-bouton" href="#reserver">
+            <a className="mep-bouton" href={d.lien ?? '#reserver'}>
               {d.bouton}
             </a>
             {d.restant && <span className="mep-restant">{d.restant}</span>}
@@ -134,7 +136,7 @@ function Diptyque({ m, d, apercu }: Props) {
           {d.accroche && <p className="mep-accroche">{d.accroche}</p>}
           <div className="mep-carte-prix">
             <Prix d={d} />
-            <a className="mep-bouton" href="#reserver">
+            <a className="mep-bouton" href={d.lien ?? '#reserver'}>
               {d.bouton}
             </a>
           </div>
@@ -173,7 +175,7 @@ function Mosaique({ m, d, apercu }: Props) {
         )}
         <div className="mep-mosaique__pied">
           <Prix d={d} />
-          <a className="mep-bouton" href="#reserver">
+          <a className="mep-bouton" href={d.lien ?? '#reserver'}>
             {d.bouton}
           </a>
         </div>
@@ -207,7 +209,7 @@ function Typographique({ d }: Props) {
           )}
         </div>
         <div className="mep-actions">
-          <a className="mep-bouton mep-bouton--inverse" href="#reserver">
+          <a className="mep-bouton mep-bouton--inverse" href={d.lien ?? '#reserver'}>
             {d.bouton}
           </a>
           {d.restant && <span className="mep-restant">{d.restant}</span>}
@@ -230,10 +232,10 @@ function CarteChef({ m, d, apercu }: Props) {
           {d.accroche && <p className="mep-accroche">{d.accroche}</p>}
           {avec ? <Photo e={empl(m, 'plat')} d={d} apercu={apercu} className="mep-chef__plat" /> : <div className="mep-chef__plat mep-motif mep-chef__plat--sans" />}
           <Prix d={d} />
-          <a className="mep-bouton" href="#reserver">
+          <a className="mep-bouton" href={d.lien ?? '#reserver'}>
             {d.bouton}
           </a>
-          {d.programme && (
+          {d.programme && d.carte?.length ? (
             <ol className="mep-programme">
               {d.programme.map((p) => (
                 <li key={p.heure}>
@@ -241,9 +243,20 @@ function CarteChef({ m, d, apercu }: Props) {
                 </li>
               ))}
             </ol>
-          )}
+          ) : null}
         </aside>
-        <div className="mep-chef__carte">
+        {/* Sans carte lue (prestation), la colonne de droite raconte le déroulé, en grand. */}
+        {!d.carte?.length && d.programme?.length ? (
+          <ol className="mep-chef__deroule">
+            {d.programme.map((p) => (
+              <li key={p.heure}>
+                <time>{p.heure}</time>
+                <span>{p.quoi}</span>
+              </li>
+            ))}
+          </ol>
+        ) : null}
+        <div className="mep-chef__carte" hidden={!d.carte?.length}>
           {(d.carte ?? []).map((c) => (
             <div key={c.categorie} className="mep-chef__categorie">
               <h2>{c.categorie}</h2>
@@ -282,7 +295,7 @@ function DayPass({ m, d, apercu }: Props) {
           <div className="mep-daypass__carte">
             <Prix d={d} grand />
             {d.restant && <p className="mep-daypass__restant">{d.restant}</p>}
-            <a className="mep-bouton" href="#reserver">
+            <a className="mep-bouton" href={d.lien ?? '#reserver'}>
               {d.bouton}
             </a>
             {d.atouts && (
@@ -326,9 +339,11 @@ const RENDUS: Record<string, (p: Props) => ReactNode> = {
 }
 
 /** Une landing rendue dans sa mise en page, aux couleurs et polices de la marque. */
-export function LandingMiseEnPage({ m, d, apercu }: Props) {
+export function LandingMiseEnPage({ m, d: brut, apercu }: Props) {
   const Rendu = RENDUS[m.id]
   if (!Rendu) return null
+  // Jamais une valeur non validée dans le style en ligne (ni dans les replis dessinés) : couleurs #RRGGBB, polices en clair.
+  const d: DonneesLanding = { ...brut, ...marqueSure(brut.couleurs, brut.polices) }
   const style = {
     '--mep-accent': d.couleurs.accent,
     '--mep-fond': d.couleurs.fond,
