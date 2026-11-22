@@ -3,13 +3,17 @@
  * valeur de l'offre, conditions, décompte jusqu'à la fin et boutons. Les dates et le design sont ceux de la PAGE
  * (`page.offre`, calculés par srv-site) ; ici, seulement l'affichage. Aucun élément de la plateforme : tout vient de
  * la fiche du PM et de son thème. Le bouton mène au moteur de réservation du site (`/reserver`) ou à WhatsApp ;
- * l'offre ne crée ni réservation ni paiement. Rendu serveur (le décompte seul est client).
+ * l'offre ne crée ni réservation ni paiement, SAUF une landing de service commandable avec l'interrupteur allumé : le panneau de
+ * commande (CommandeLanding, lib/site/commande.ts) crée la commande de la prestation liée. Rendu serveur (décompte et panneau sont clients).
  */
 import type { CSSProperties } from 'react'
+import { commandeAllumee, panneauCommande } from '@/lib/site/commande'
+import { prixServiceRemise } from '@/lib/site/jetons'
 import { cibleDeLOffre, couleurValeurSurVoile, lienWhatsappOffre, secondBoutonUtile } from '@/lib/site/offre'
 import { lien } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
 import type { Media, Section } from '@/lib/site/types'
+import { CommandeLanding } from './CommandeLanding'
 import { Decompte } from './Decompte'
 import { FondLogement } from './Sojori'
 import type { Contexte } from './Sections'
@@ -117,6 +121,16 @@ export function SectionOffre({ s, ctx }: { s: Extract<Section, { niveau: 'biblio
               <BoutonOffre texte={c.bouton} cible={c.lien} ctx={ctx} titre={titre} code={code} />
               {secondBoutonUtile(c.lien2, offre?.paiement) && <BoutonOffre texte={c.bouton2} cible={c.lien2} ctx={ctx} titre={titre} code={code} second />}
             </div>
+            {panneauCommande(offre, ctx.site.apercu, commandeAllumee()) && ctx.pageId && (
+              <CommandeLanding
+                slug={ctx.slug}
+                pageId={ctx.pageId}
+                langue={ctx.langue}
+                devise={offre?.serviceLu?.devise ?? 'MAD'}
+                prixCentimes={offre?.serviceLu?.prixCentimes}
+                prixOffreCentimes={typeof offre?.serviceLu?.prixCentimes === 'number' && offre.remise ? prixServiceRemise(offre.serviceLu.prixCentimes, offre.remise.pourcent, offre.remise.arrondi) : undefined}
+              />
+            )}
             {ctx.offre?.cadeauLu && t(ctx.offre.cadeauLu.nom, ctx.langue, ctx.defaut) && (
               <p className="offre__cadeau">
                 <strong>{mot('cadeauOffert', ctx.langue)}</strong> {t(ctx.offre.cadeauLu.nom, ctx.langue, ctx.defaut)}
