@@ -75,6 +75,11 @@ export default clerkMiddleware(async (auth, req) => {
     // Site composé par l'agent Site web : ses pages viennent de sa fiche publiée (srv-site) ;
     // logements, réservation et compte restent les pages de sojori-vente.
     const site = await pagesDuSite(tenant);
+    // Zone d'essai : tant que le site du client n'est pas publié, l'adresse ne montre RIEN (jamais la marketplace Sojori, dont
+    // la page d'accueil porterait la marque Sojori sous l'adresse d'un client). Constaté le 22/11/2026 sur nommos.sites.sojori.com.
+    if (!site && estHoteEssai(req.headers.get('host'))) {
+      return noindex(new NextResponse('Not found', { status: 404 }));
+    }
     // Isolation : sur le domaine d'un client qui a son site, ni la recherche ni les fiches du marché Sojori ne
     // s'ouvrent (logements d'autres PM, design Sojori) — la réservation et la fiche d'une villa sont des pages du site.
     if (site) {
