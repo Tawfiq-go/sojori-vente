@@ -11,7 +11,8 @@ import { mot } from '@/lib/site/texte'
 import type { Langue } from '@/lib/site/types'
 
 type Creneau = { debut: string; fin?: string; restant: number | null; disponible: boolean }
-type Commande = { commandeId: string; numero: string; totalCentimes: number; devise: string; retenueJusquA: string | null }
+/** `jeton` : la preuve, rendue à la création, que cette commande est la nôtre ; le paiement l'exige (jamais l'identifiant seul). */
+type Commande = { commandeId: string; numero: string; totalCentimes: number; devise: string; retenueJusquA: string | null; jeton: string }
 
 type Props = {
   slug: string
@@ -86,7 +87,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes, prixOffreC
     if (!commande || occupe) return
     setOccupe(true)
     setErreur('')
-    const r = await appeler(api(slug, pageId, `commande/${commande.commandeId}/paiement`), { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })
+    const r = await appeler(api(slug, pageId, `commande/${commande.commandeId}/paiement`), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jeton: commande.jeton }) })
     setOccupe(false)
     const lien = r.donnees?.data?.lienPaiement
     if (!r.ok || !lienOuvrable(lien)) return dire(r.donnees?.error ?? 'paiement_indisponible')
