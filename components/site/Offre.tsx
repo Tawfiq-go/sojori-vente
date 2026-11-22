@@ -16,6 +16,11 @@ import type { Contexte } from './Sections'
 
 function Visuel({ c, ctx }: { c: Record<string, unknown>; ctx: Contexte }) {
   if (c.media === 'logement:auto') return <FondLogement ctx={ctx} className="offre__media" />
+  // La photo de couverture du service lié, lue en direct par srv-site (https seulement ; absente = pas de visuel, jamais une autre image).
+  if (c.media === 'service:auto') {
+    const url = ctx.offre?.serviceLu?.image
+    return typeof url === 'string' && /^https:\/\//i.test(url) ? <img className="offre__media" src={url} alt={t(ctx.offre?.serviceLu?.nom, ctx.langue, ctx.defaut)} loading="eager" decoding="async" /> : null
+  }
   const m: Media | undefined = typeof c.media === 'string' ? ctx.site.medias[c.media] : undefined
   if (!m) return null
   const attente = typeof c.imageAttente === 'string' ? ctx.site.medias[c.imageAttente] : undefined
@@ -112,6 +117,11 @@ export function SectionOffre({ s, ctx }: { s: Extract<Section, { niveau: 'biblio
               <BoutonOffre texte={c.bouton} cible={c.lien} ctx={ctx} titre={titre} code={code} />
               {secondBoutonUtile(c.lien2, offre?.paiement) && <BoutonOffre texte={c.bouton2} cible={c.lien2} ctx={ctx} titre={titre} code={code} second />}
             </div>
+            {ctx.offre?.cadeauLu && t(ctx.offre.cadeauLu.nom, ctx.langue, ctx.defaut) && (
+              <p className="offre__cadeau">
+                <strong>{mot('cadeauOffert', ctx.langue)}</strong> {t(ctx.offre.cadeauLu.nom, ctx.langue, ctx.defaut)}
+              </p>
+            )}
             {code && (
               <p className="offre__code">
                 {mot('offreCode', ctx.langue)} : <code>{code}</code>

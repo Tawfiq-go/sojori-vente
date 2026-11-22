@@ -15,6 +15,7 @@ const MOTS = {
   voyageurs: { fr: 'voyageurs', en: 'guests', ar: 'ضيوف' },
   chambres: { fr: 'chambres', en: 'bedrooms', ar: 'غرف' },
   reserver: { fr: 'Réserver', en: 'Book', ar: 'احجز' },
+  cadeauOffert: { fr: 'Offert :', en: 'Included:', ar: 'هدية:' },
   voir: { fr: 'Voir', en: 'View', ar: 'عرض' },
   reserverSur: { fr: 'Villas & suites', en: 'Villas & suites', ar: 'فيلات وأجنحة' },
   reserverTitre: { fr: 'Réservez votre séjour', en: 'Book your stay', ar: 'احجز إقامتك' },

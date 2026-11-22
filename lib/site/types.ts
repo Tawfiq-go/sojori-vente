@@ -37,7 +37,16 @@ export type OffreServie = {
   logements?: string[]
   /** Le design propre à la page (listes fermées de srv-site). */
   design?: { accent?: string; accentDoux?: string; police?: string; style?: string }
+  /** Le service lié (carte ou prestation du catalogue) : une référence. Son contenu est dans `serviceLu`. */
+  service?: { source: 'services'; id: string; forme: 'carte' | 'prestation'; nom: string }
+  /** Le service lié, LU EN DIRECT par srv-site dans le catalogue (jamais figé) ; absent = illisible ou introuvable. */
+  serviceLu?: ServiceLu
+  /** Le cadeau offert d'un séjour, lu en direct (son nom seulement). */
+  cadeauLu?: { nom: Texte }
 }
+
+/** Ce que le public peut lire d'un service : nom, prix TTC EN CENTIMES (prestation), photo, vendable depuis la landing. */
+export type ServiceLu = { nom: Texte; prixCentimes?: number; devise?: string; image?: string; commandable: boolean }
 
 export type SiteSpec = {
   v: 1

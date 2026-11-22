@@ -10,7 +10,7 @@
  */
 import { getRemoteApiBaseUrl } from '@/lib/config/apiBase'
 import { lireLogements } from './api'
-import { type Jour, type LogementLu, calculerValeurs, contientJeton, fenetre, resoudreContenu } from './jetons'
+import { type Jour, type LogementLu, calculerValeurs, contientJeton, contientJetonLogement, fenetre, resoudreContenu } from './jetons'
 import { prix } from './texte'
 import type { Langue, Page } from './types'
 
@@ -50,13 +50,19 @@ async function lireJours(slug: string, id: string, from: string, to: string): Pr
 export async function pageAvecChampsDynamiques(slug: string, page: Page, langue: Langue, maintenantMs = Date.now()): Promise<Page> {
   if (!page.offre || !contientJeton(page.sections)) return page
   const offre = page.offre
-  const sien = await lireLogements(slug)
-  const voulus = offre.logements?.length ? sien.filter((l) => offre.logements?.includes(l.id.split(':')[0])) : sien
-  const perimetre = voulus.slice(0, PERIMETRE_MAX)
-  const fen = fenetre(offre, maintenantMs)
-  const lus: LogementLu[] = await Promise.all(
-    perimetre.map(async (l) => ({ id: l.id, devise: l.currency || 'MAD', jours: fen ? await lireJours(slug, l.id, fen.from, fen.to) : null })),
-  )
-  const valeurs = calculerValeurs(lus, offre.remise)
+  // Les calendriers des logements ne se lisent que si un jeton de logement est employé ({service_*} n'en a pas besoin).
+  let valeurs = calculerValeurs([], offre.remise)
+  if (contientJetonLogement(page.sections)) {
+    const sien = await lireLogements(slug)
+    const voulus = offre.logements?.length ? sien.filter((l) => offre.logements?.includes(l.id.split(':')[0])) : sien
+    const perimetre = voulus.slice(0, PERIMETRE_MAX)
+    const fen = fenetre(offre, maintenantMs)
+    const lus: LogementLu[] = await Promise.all(
+      perimetre.map(async (l) => ({ id: l.id, devise: l.currency || 'MAD', jours: fen ? await lireJours(slug, l.id, fen.from, fen.to) : null })),
+    )
+    valeurs = calculerValeurs(lus, offre.remise)
+  }
+  // Le service lié, déjà lu en direct par srv-site (prix TTC en centimes) : jamais un prix recopié dans la fiche.
+  if (offre.serviceLu) valeurs = { ...valeurs, service: { nom: offre.serviceLu.nom as Record<string, string>, prixCentimes: offre.serviceLu.prixCentimes, devise: offre.serviceLu.devise, commandable: offre.serviceLu.commandable } }
   return { ...page, sections: resoudreContenu(page.sections, valeurs, langue, prix) }
 }

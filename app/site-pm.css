@@ -1445,6 +1445,11 @@
   font-size: 1.05em;
   letter-spacing: 0.06em;
 }
+.site-pm .offre__cadeau {
+  margin: 0.75rem 0 0;
+  font-size: 0.95rem;
+}
+
 .site-pm .offre__conditions {
   margin-top: 16px;
   max-width: 62ch;
