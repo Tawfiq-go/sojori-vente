@@ -5,12 +5,13 @@
  */
 import { CarteVilla } from '@/components/site/CarteVilla'
 import { CHEMIN_RESERVER } from '@/components/site/Chrome'
-import { formaterPrix, type Sejour, type TypeChambre } from '@/lib/site/moteur'
+import { aujourdhui, formaterPrix, type Sejour, type TypeChambre } from '@/lib/site/moteur'
 import { mm, phrasesAnnulation } from '@/lib/site/moteur-mots'
 import { lien } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
 import type { Langue, SitePublic } from '@/lib/site/types'
 import type { Villa } from '@/lib/site/logement'
+import { Calendrier, type JourCal } from './Calendrier'
 import { FormulaireSejour } from './FormulaireSejour'
 
 export function FicheType({
@@ -21,6 +22,7 @@ export function FicheType({
   villa,
   sejour,
   valeurs,
+  jours = [],
 }: {
   site: SitePublic
   base: string
@@ -29,6 +31,8 @@ export function FicheType({
   villa: Villa
   sejour: Sejour | null
   valeurs: { checkIn?: string; checkOut?: string; adults?: string }
+  /** Le calendrier du type (jour par jour) : absent, la fiche garde ses champs de dates. */
+  jours?: JourCal[]
 }) {
   const { defaut } = site.spec.langues
   const l = (c: string) => lien(base, langue, defaut, c)
@@ -110,14 +114,27 @@ export function FicheType({
         </div>
         <aside className="villa__demande moteur-devis">
           <h2>{mm('votreSejour', langue)}</h2>
-          <FormulaireSejour
-            action={fiche}
-            langue={langue}
-            valeurs={valeurs}
-            maxVoyageurs={Math.max(villa.voyageurs ?? 12, 1)}
-            libelle={sejour ? mm('modifier', langue) : mm('recalculer', langue)}
-            secondaire
-          />
+          {jours.length > 0 ? (
+            <Calendrier
+              jours={jours}
+              devise={type.devise}
+              langue={langue}
+              action={fiche}
+              aujourdhui={aujourdhui()}
+              valeurs={valeurs}
+              maxVoyageurs={Math.max(villa.voyageurs ?? 12, 1)}
+              libelle={sejour ? mm('modifier', langue) : mm('recalculer', langue)}
+            />
+          ) : (
+            <FormulaireSejour
+              action={fiche}
+              langue={langue}
+              valeurs={valeurs}
+              maxVoyageurs={Math.max(villa.voyageurs ?? 12, 1)}
+              libelle={sejour ? mm('modifier', langue) : mm('recalculer', langue)}
+              secondaire
+            />
+          )}
           {sejour && type.etat === 'libre' && devis ? (
             <div className="moteur-devis__prix">
               <dl>

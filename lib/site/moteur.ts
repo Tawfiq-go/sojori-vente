@@ -236,6 +236,40 @@ export async function lireType(slug: string, id: string, sejour: Sejour | null, 
   return { ...base, ...(await evaluerType(slug, id, sejour, base.voyageurs)) }
 }
 
+/** Un jour du calendrier d'un type : libre ou non, prix de la nuit, séjour minimum. */
+export type JourCalendrier = { date: string; libre: boolean; prix: number | null; sejourMin?: number }
+
+const MOIS_CALENDRIER = 6
+
+/**
+ * Le calendrier d'un type de CE PM sur les prochains mois : jour par jour, libre ou non et prix de la nuit (même source que
+ * la disponibilité et le prix du séjour : srv-calendar via le service des logements, filtré par le PM). Jamais d'exception :
+ * sans calendrier lisible, la fiche garde ses champs de dates.
+ */
+export const lireCalendrier = cache(async (slug: string, id: string): Promise<JourCalendrier[]> => {
+  const ids = decomposerId(id)
+  if (!ids) return []
+  const debut = aujourdhui()
+  const fin = new Date(Date.parse(`${debut.slice(0, 8)}01T00:00:00Z`))
+  fin.setUTCMonth(fin.getUTCMonth() + MOIS_CALENDRIER + 1)
+  const unite = ids.roomTypeId ? { roomTypeId: ids.roomTypeId } : {}
+  const r = await lire(`${encodeURIComponent(ids.listingId)}/calendar`, slug, { from: debut, to: fin.toISOString().slice(0, 10), ...unite })
+  const jours = r.corps?.success ? r.corps.data?.days : null
+  if (!Array.isArray(jours)) return []
+  const sortie: JourCalendrier[] = []
+  for (const j of jours as Record<string, unknown>[]) {
+    if (typeof j.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(j.date)) continue
+    const prix = nombre(j.price)
+    sortie.push({
+      date: j.date,
+      libre: j.available === true && j.stopSell !== true,
+      prix: prix !== undefined && prix > 0 ? prix : null,
+      ...(nombre(j.minStay) ? { sejourMin: nombre(j.minStay) } : {}),
+    })
+  }
+  return sortie
+})
+
 export function formaterPrix(montant: number, devise: string, langue: string): string {
   const nb = new Intl.NumberFormat(langue === 'ar' ? 'ar-MA' : langue === 'en' ? 'en-GB' : 'fr-FR', { maximumFractionDigits: 0 }).format(montant)
   return `${nb} ${devise}`
