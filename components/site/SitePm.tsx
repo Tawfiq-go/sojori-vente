@@ -32,7 +32,7 @@ export async function SitePm({
   const { defaut } = site.spec.langues
   // Champs dynamiques d'une landing (prix, remise, nuits, disponibilité) : vrais tarifs lus à chaque rendu, aperçu comme public.
   const page = await pageAvecChampsDynamiques(sourceLogements ?? slug, pageBrute, langue)
-  const ctx = { site, slug, base, langue, defaut, offre: page.offre, titrePage: page.titre }
+  const ctx = { site, slug, base, langue, defaut, offre: page.offre, titrePage: page.titre, pageId: page.id }
   // Une landing a son design (accent, police, style) ; le cadre le lit dans le thème : site, en-tête et pied suivent.
   const vue: SitePublic = page.offre ? { ...site, spec: { ...site.spec, theme: themeDeLaPage(site.spec.theme, page.offre) } } : site
   // Une offre terminée n'a plus d'appel vers l'offre : on garde son message de fin et le reste de la page.
