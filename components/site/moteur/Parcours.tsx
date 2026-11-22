@@ -12,6 +12,7 @@ import { notFound } from 'next/navigation'
 import { lireVilla } from '@/lib/site/logement'
 import { lireSejour, lireType, lireTypes, formaterPrix } from '@/lib/site/moteur'
 import { mm } from '@/lib/site/moteur-mots'
+import type { SurchargeMoteur } from '@/lib/site/moteur-theme'
 import { lien } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
 import type { Langue, SitePublic } from '@/lib/site/types'
@@ -38,6 +39,7 @@ export async function Parcours({
   langue,
   sousChemin,
   valeurs,
+  moteur,
 }: {
   site: SitePublic
   slug: string
@@ -46,6 +48,8 @@ export async function Parcours({
   /** Ce qui suit `reserver/` : '' | '<id>' | '<id>/paiement' | '<id>/confirmation'. */
   sousChemin: string
   valeurs: Valeurs
+  /** La charte du moteur : titre et sous-titre du premier écran (texte du client) à la place de ceux par défaut. */
+  moteur?: SurchargeMoteur | null
 }) {
   const { defaut } = site.spec.langues
   const l = (c: string) => lien(base, langue, defaut, c)
@@ -64,8 +68,8 @@ export async function Parcours({
       <>
         <section className="section moteur-entete">
           <p className="recherche__script">{mot('reserverSur', langue)}</p>
-          <h1>{mot('reserverTitre', langue)}</h1>
-          <p className="moteur-entete__sous">{mm('sousTitre', langue)}</p>
+          <h1>{moteur?.titre ?? mot('reserverTitre', langue)}</h1>
+          <p className="moteur-entete__sous">{moteur?.sousTitre ?? mm('sousTitre', langue)}</p>
           <FormulaireSejour action={l(CHEMIN_RESERVER)} langue={langue} valeurs={valeurs} maxVoyageurs={maxVoy} />
           {aDesDates && !sejour && <p className="moteur-alerte">{mm('datesInvalides', langue)}</p>}
         </section>

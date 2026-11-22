@@ -5,7 +5,8 @@ import { CadreSite, CHEMIN_RESERVER } from '@/components/site/Chrome'
 import { Parcours } from '@/components/site/moteur/Parcours'
 import { metaMarqueBlanche, metaNeutre } from '@/lib/site/meta'
 import { SitePm } from '@/components/site/SitePm'
-import { lireSitePm } from '@/lib/site/api'
+import { lireMoteurPublic, lireSitePm } from '@/lib/site/api'
+import { surchargeMoteur } from '@/lib/site/moteur-theme'
 import { offreTerminee } from '@/lib/site/offre'
 import { lien, lireCible } from '@/lib/site/route'
 import { mot, t } from '@/lib/site/texte'
@@ -69,9 +70,10 @@ export default async function SitePublie(props: Props) {
     // `/reserver…` : le parcours de réservation du site (liste, fiche, paiement, confirmation) dans son cadre,
     // limité aux logements de CE PM (404 pour tout autre logement).
     const valeurs = await props.searchParams
+    const moteur = surchargeMoteur(await lireMoteurPublic(c.slug), c.cible.langue, c.site.spec.langues.defaut)
     return (
-      <CadreSite site={c.site} base="" langue={c.cible.langue} chemin={c.cible.chemin}>
-        <Parcours site={c.site} slug={c.slug} base="" langue={c.cible.langue} sousChemin={c.cible.chemin.slice(CHEMIN_RESERVER.length + 1)} valeurs={valeurs} />
+      <CadreSite site={c.site} base="" langue={c.cible.langue} chemin={c.cible.chemin} moteur={moteur}>
+        <Parcours site={c.site} slug={c.slug} base="" langue={c.cible.langue} sousChemin={c.cible.chemin.slice(CHEMIN_RESERVER.length + 1)} valeurs={valeurs} moteur={moteur} />
       </CadreSite>
     )
   }
