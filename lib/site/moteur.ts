@@ -253,16 +253,26 @@ export const lireCalendrier = cache(async (slug: string, id: string): Promise<Jo
   const fin = new Date(Date.parse(`${debut.slice(0, 8)}01T00:00:00Z`))
   fin.setUTCMonth(fin.getUTCMonth() + MOIS_CALENDRIER + 1)
   const unite = ids.roomTypeId ? { roomTypeId: ids.roomTypeId } : {}
-  const r = await lire(`${encodeURIComponent(ids.listingId)}/calendar`, slug, { from: debut, to: fin.toISOString().slice(0, 10), ...unite })
+  const fenetre = { from: debut, to: fin.toISOString().slice(0, 10), ...unite }
+  // Deux lectures, comme le prix du séjour : le calendrier (inventaire jour par jour, prix) ET la disponibilité (nuits prises par
+  // une réservation ou un blocage). Une nuit n'est libre que si les DEUX le disent, sinon le calendrier montrerait libre un jour
+  // que le séjour refuse (constaté sur Nommos le 22/11/2026).
+  const [r, dispo] = await Promise.all([
+    lire(`${encodeURIComponent(ids.listingId)}/calendar`, slug, fenetre),
+    lire(`${encodeURIComponent(ids.listingId)}/availability`, slug, fenetre),
+  ])
   const jours = r.corps?.success ? r.corps.data?.days : null
   if (!Array.isArray(jours)) return []
+  // Disponibilité illisible : on ne montre AUCUN jour libre (mieux vaut les champs de dates qu'un calendrier qui ment).
+  if (!dispo.corps?.success || !Array.isArray(dispo.corps.data?.blockedDates)) return []
+  const prises = new Set((dispo.corps.data.blockedDates as unknown[]).filter((d): d is string => typeof d === 'string'))
   const sortie: JourCalendrier[] = []
   for (const j of jours as Record<string, unknown>[]) {
     if (typeof j.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(j.date)) continue
     const prix = nombre(j.price)
     sortie.push({
       date: j.date,
-      libre: j.available === true && j.stopSell !== true,
+      libre: j.available === true && j.stopSell !== true && !prises.has(j.date),
       prix: prix !== undefined && prix > 0 ? prix : null,
       ...(nombre(j.minStay) ? { sejourMin: nombre(j.minStay) } : {}),
     })
