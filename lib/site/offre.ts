@@ -57,3 +57,29 @@ export const cibleDeLOffre = (cible: unknown, paiement: OffreServie['paiement'])
 /** Le second bouton « WhatsApp » ferait doublon avec le premier quand le paiement est déjà WhatsApp. */
 export const secondBoutonUtile = (lien2: unknown, paiement: OffreServie['paiement']): boolean =>
   !(paiement === 'whatsapp' && lien2 === '#whatsapp')
+
+/** Le voile sombre d'une landing en plein écran : la couleur sur laquelle la valeur de l'offre doit se lire. */
+export const VOILE_SOMBRE = '#14130f'
+
+const lumin = (hex: string): number => {
+  const [r, g, b] = [1, 3, 5].map((i) => {
+    const c = Number.parseInt(hex.slice(i, i + 2), 16) / 255
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+/** Rapport de contraste WCAG entre deux couleurs `#RRGGBB` (1 à 21). */
+export function contraste(a: string, b: string): number {
+  const [la, lb] = [lumin(a), lumin(b)]
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
+}
+
+/**
+ * La couleur de la valeur de l'offre (« -20 % ») sur le voile sombre d'un premier écran : l'accent de la page s'il s'y lit
+ * (contraste 4,5 au moins), sinon le blanc — l'accent reste en filet sous la valeur. srv-site a validé l'accent contre le
+ * FOND du site, pas contre ce voile : un accent sombre (vert Ramadan #1F5F5B) y serait illisible.
+ */
+export function couleurValeurSurVoile(accent: string): string {
+  return /^#[0-9a-fA-F]{6}$/.test(accent) && contraste(accent, VOILE_SOMBRE) >= 4.5 ? accent : '#ffffff'
+}
