@@ -19,7 +19,12 @@ export type LogementLu = { id: string; jours: Jour[] | null; devise: string }
 
 export type Remise = { pourcent: number; arrondi?: 'unite' | 'cinq' | 'dix' }
 
+/** Le service lié, tel que srv-site l'a lu dans le catalogue : prix TTC en CENTIMES (prestation), `commandable` = service du PM. */
+export type ServiceValeur = { nom: Record<string, string>; prixCentimes?: number; devise?: string; commandable: boolean }
+
 export type Valeurs = {
+  /** Le service lié ; absent = catalogue illisible ou service introuvable (ses jetons disparaissent). */
+  service?: ServiceValeur
   total: number
   /** `undefined` quand aucun calendrier n'a pu être lu. */
   disponibles?: number
@@ -70,8 +75,41 @@ export function calculerValeurs(logements: LogementLu[], remise?: Remise): Valeu
 
 type Format = (montant: number, devise: string, langue: Langue) => string
 
+/**
+ * Le prix d'une prestation après remise, en CENTIMES entiers (jamais un flottant) : `pourcent` % en moins, arrondi VERS LE BAS
+ * au pas de l'offre (1, 5 ou 10 MAD), jamais négatif ni au-dessus du prix. La MÊME règle que srv-site (`prixServiceRemise`) et
+ * que le serveur de commandes : ce qui s'affiche est ce qui se facture.
+ */
+export function prixServiceRemise(centimes: number, pourcent: number, arrondi: Remise['arrondi'] = 'unite'): number {
+  if (!Number.isInteger(centimes) || centimes < 0 || !Number.isInteger(pourcent)) return centimes
+  const pas = (arrondi === 'dix' ? 10 : arrondi === 'cinq' ? 5 : 1) * 100
+  return Math.max(0, Math.min(centimes, Math.floor((centimes * (100 - pourcent)) / 100 / pas) * pas))
+}
+
+const JETONS_SERVICE = new Set(['service_nom', 'service_prix', 'service_prix_offre'])
+
+/** Le nom d'un service dans la langue demandée, sinon français, sinon n'importe laquelle. */
+const nomDans = (nom: Record<string, string>, langue: Langue): string | undefined =>
+  nom[langue] ?? nom.fr ?? Object.values(nom)[0]
+
+/** La valeur d'un jeton de SERVICE, ou `undefined` (service absent, pas de prix, pas de remise, pas du PM). */
+function valeurService(nom: string, v: Valeurs, langue: Langue, fmt: Format): string | undefined {
+  const s = v.service
+  if (!s) return undefined
+  if (nom === 'service_nom') return nomDans(s.nom, langue)
+  if (s.prixCentimes === undefined) return undefined
+  const devise = s.devise || 'MAD'
+  if (nom === 'service_prix') return fmt(s.prixCentimes / 100, devise, langue)
+  // `service_prix_offre` : la remise ne s'applique qu'aux prestations DU PM (commandables), jamais à un partenaire ni à Mews.
+  if (!v.remise || !s.commandable) return undefined
+  const offre = prixServiceRemise(s.prixCentimes, v.remise.pourcent, v.remise.arrondi)
+  // Une « offre » qui ne baisse pas le prix ne s'affiche pas.
+  return offre < s.prixCentimes ? fmt(offre / 100, devise, langue) : undefined
+}
+
 /** La valeur d'un jeton, ou `undefined` (donnée absente : la chaîne entière disparaît). */
 function valeurDe(nom: string, id: string | undefined, v: Valeurs, langue: Langue, fmt: Format): string | undefined {
+  if (JETONS_SERVICE.has(nom)) return id === undefined ? valeurService(nom, v, langue, fmt) : undefined
   // L'identifiant d'un jeton est celui du logement ; ses types de chambre (`<logement>:<type>`) comptent avec lui.
   // Un identifiant qui n'est pas dans le périmètre lu (logements du PM) ne désigne rien : le champ disparaît.
   const cibles = id
@@ -144,6 +182,17 @@ export function resoudreContenu<T>(contenu: T, v: Valeurs, langue: Langue, fmt: 
 
 /** Ce qui n'est jamais un texte affiché. */
 const CLES_FIXES = new Set(['id', 'niveau', 'type', 'variante', 'media', 'medias', 'lien', 'lien2', 'code', 'imageAttente', 'css'])
+
+/** Les noms des jetons qu'emploie un contenu (sans doublon). */
+export function jetonsEmployes(contenu: unknown): string[] {
+  const s = JSON.stringify(contenu) ?? ''
+  return [...new Set([...s.matchAll(/\{([a-z_]+)(?::[a-f0-9]{24})?\}/g)].map((m) => m[1]))]
+}
+
+/** Le contenu emploie-t-il un jeton de LOGEMENT (tarif, disponibilité…) ? Sinon la lecture des calendriers est inutile. */
+export function contientJetonLogement(contenu: unknown): boolean {
+  return jetonsEmployes(contenu).some((n) => !JETONS_SERVICE.has(n) && n !== 'remise')
+}
 
 /** La landing emploie-t-elle au moins un jeton ? (sinon aucun appel aux tarifs) */
 export function contientJeton(contenu: unknown): boolean {
