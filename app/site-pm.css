@@ -1450,6 +1450,62 @@
   font-size: 0.95rem;
 }
 
+.site-pm .offre__commande {
+  display: grid;
+  gap: 10px;
+  max-width: 420px;
+  margin: 18px 0 0;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  background: color-mix(in srgb, var(--fond) 82%, transparent);
+  color: inherit;
+}
+.site-pm .offre__commande h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.site-pm .offre__commande label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+.site-pm .offre__commande input {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+.site-pm .offre__commande fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.site-pm .offre__commande-creneau {
+  display: flex !important;
+  align-items: center;
+  gap: 6px !important;
+}
+.site-pm .offre__commande-creneau input {
+  min-height: 0;
+}
+.site-pm .offre__commande-erreur {
+  margin: 0;
+  color: #b42318;
+  font-weight: 600;
+}
+.site-pm .offre__commande-prix,
+.site-pm .offre__commande-total,
+.site-pm .offre__commande-note {
+  margin: 0;
+}
+
 .site-pm .offre__conditions {
   margin-top: 16px;
   max-width: 62ch;

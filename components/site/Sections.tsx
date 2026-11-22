@@ -25,6 +25,8 @@ export type Contexte = {
   offre?: OffreServie
   /** Le titre de la page : celui de l'offre quand la section n'en a pas. */
   titrePage?: Texte
+  /** L'identifiant de la page (landing) : le panneau de commande s'adresse à elle. */
+  pageId?: string
 }
 
 function MediaVue({
