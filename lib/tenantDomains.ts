@@ -22,6 +22,20 @@ export const TENANT_DOMAINS: Record<string, string> = {
 const OWN_HOSTS =
   /(^|\.)sojori\.com$|\.vercel\.app$|^localhost$|^127\.0\.0\.1$|^10\.\d+\.\d+\.\d+$|^192\.168\.\d+\.\d+$|^172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+$/
 
+/**
+ * La zone d'ESSAI des sites de clients (Tawfiq, 22/11/2026) : `<nom>.sites.sojori.com`. Le client essaie son site publié sur une
+ * adresse à nous, sans toucher à son domaine ni à son DNS, avant de basculer le sien. Un seul niveau (`nommos.sites.sojori.com`,
+ * jamais `a.b.sites.sojori.com`), lettres, chiffres et tirets. Le PM est trouvé comme pour un domaine client (l'adresse est celle
+ * de sa configuration de réservation directe) : aucun nom n'est supposé. Jamais référencée (en-tête et robots.txt).
+ */
+export const ZONE_ESSAI = 'sites.sojori.com'
+const HOTE_ESSAI = /^[a-z0-9]([a-z0-9-]{0,40}[a-z0-9])?\.sites\.sojori\.com$/
+export const estHoteEssai = (hote: string | null | undefined): boolean =>
+  HOTE_ESSAI.test((hote ?? '').toLowerCase().split(':')[0])
+
+/** Un hôte à nous (marketplace, Vercel, local), sauf la zone d'essai qui, elle, désigne le site d'un client. */
+export const estHoteDeLaPlateforme = (hote: string): boolean => OWN_HOSTS.test(hote) && !HOTE_ESSAI.test(hote)
+
 export let lastResolveDebug = ''
 
 type CacheEntry = { slug: string | null; at: number }
@@ -33,7 +47,7 @@ export async function resolveTenantFromHost(
 ): Promise<string | null> {
   if (!host) return null
   const clean = host.toLowerCase().split(':')[0]
-  if (OWN_HOSTS.test(clean)) return null
+  if (estHoteDeLaPlateforme(clean)) return null
 
   const cached = domainCache.get(clean)
   if (cached && Date.now() - cached.at < CACHE_MS) return cached.slug

@@ -3,12 +3,16 @@
  */
 
 import { MetadataRoute } from 'next';
+import { headers } from 'next/headers';
+import { estHoteEssai } from '@/lib/tenantDomains';
 
 // 2026-09-11 : le site de location déménage de sojori.com (repris par le
 // SaaS) vers book.sojori.com. Le repli suit la nouvelle adresse.
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://book.sojori.com';
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  // Zone d'essai des sites de clients : rien ne s'indexe.
+  if (estHoteEssai((await headers()).get('host'))) return { rules: [{ userAgent: '*', disallow: '/' }] };
   return {
     rules: [
       {
