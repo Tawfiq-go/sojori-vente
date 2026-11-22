@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { describe, it } from 'node:test'
-import { MISES_EN_PAGE, TYPES_SERVICE, emplacementsVides, imageUtilisable, miseEnPage, misesEnPagePour, rendreEmplacement, variante } from '../../lib/site/miseEnPage.ts'
+import { MISES_EN_PAGE, TYPES_SERVICE, emplacementsVides, imageUtilisable, imagesDesEmplacements, miseEnPage, misesEnPagePour, rendreEmplacement, variante } from '../../lib/site/miseEnPage.ts'
 
 const ed = miseEnPage('editorial')!
 const dip = miseEnPage('diptyque')!
@@ -63,5 +63,21 @@ describe('mises en page : générer SANS images, toujours publiable', () => {
     for (const ok of ['https://cdn.example.com/a.webp', '/maquettes/a.webp']) assert.equal(imageUtilisable(ok), true, ok)
     for (const ko of ['javascript:alert(1)', 'data:image/png;base64,AAA', 'http://x.example/a.jpg', 'https://x.example/a.jpg") , url(evil', '//x.example/a.jpg', '', undefined, 42]) assert.equal(imageUtilisable(ko), false, String(ko))
     assert.deepEqual(rendreEmplacement('javascript:alert(1)', true), { type: 'repli', etiquette: true })
+  })
+})
+
+describe('emplacements servis par srv-site : média du site ou photo du service', () => {
+  const medias = { 'media:abc123': { url: 'https://cdn.example.com/a.webp', type: 'image' }, 'media:vid123': { url: 'https://cdn.example.com/v.mp4', type: 'video' }, 'media:http01': { url: 'http://cdn.example.com/h.jpg', type: 'image' } }
+  it('media:<id> → adresse du média ; service:auto → photo du service lue en direct', () => {
+    assert.deepEqual(imagesDesEmplacements({ lieu: 'media:abc123', detail: 'service:auto' }, medias, 'https://cdn.example.com/s.jpg'), {
+      lieu: 'https://cdn.example.com/a.webp',
+      detail: 'https://cdn.example.com/s.jpg',
+    })
+  })
+  it('média inconnu, vidéo, adresse http, service sans photo : emplacement VIDE (jamais une autre image)', () => {
+    assert.deepEqual(imagesDesEmplacements({ a: 'media:inconnu', b: 'media:vid123', c: 'media:http01', d: 'service:auto' }, medias, undefined), {})
+    assert.deepEqual(imagesDesEmplacements(undefined, medias, 'https://x.example/s.jpg'), {})
+    // Un chemin local n'est jamais servi depuis srv-site : seulement https.
+    assert.deepEqual(imagesDesEmplacements({ a: 'service:auto' }, medias, '/maquettes/x.webp'), {})
   })
 })

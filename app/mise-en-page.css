@@ -511,6 +511,32 @@
   opacity: 0.75;
 }
 
+.mep-chef__deroule {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  align-self: center;
+}
+.mep-chef__deroule li {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: baseline;
+  gap: 24px;
+  padding: 26px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--mep-texte) 14%, transparent);
+}
+.mep-chef__deroule time {
+  font-family: var(--mep-police-titre);
+  font-size: 44px;
+  font-weight: 600;
+  color: var(--mep-accent);
+}
+.mep-chef__deroule span {
+  font-family: var(--mep-police-titre);
+  font-size: 26px;
+  font-style: italic;
+}
+
 /* 6. Day pass */
 .mep-daypass__haut {
   position: relative;
@@ -658,4 +684,24 @@
   .mep-tampon {
     width: 150px;
   }
+}
+
+/* Dans le site d'un PM : la mise en page occupe toute la largeur et garde ses couleurs (les règles générales du site ne s'appliquent pas). */
+.site-pm .section.offre--mise-en-page {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.site-pm .mep h1 {
+  margin: 0;
+}
+.site-pm .mep a.mep-bouton {
+  color: var(--mep-fond);
+}
+.site-pm .mep a.mep-bouton--inverse,
+.site-pm .mep--sans-photo a.mep-bouton {
+  color: var(--mep-accent);
+}
+.site-pm .offre__commande-zone {
+  padding: 0 clamp(20px, 6vw, 96px) 48px;
 }

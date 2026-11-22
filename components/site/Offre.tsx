@@ -7,7 +7,9 @@
  * commande (CommandeLanding, lib/site/commande.ts) crée la commande de la prestation liée. Rendu serveur (décompte et panneau sont clients).
  */
 import type { CSSProperties } from 'react'
+import '@/app/mise-en-page.css'
 import { commandeAllumee, panneauCommande } from '@/lib/site/commande'
+import { imagesDesEmplacements, miseEnPage } from '@/lib/site/miseEnPage'
 import { prixServiceRemise } from '@/lib/site/jetons'
 import { cibleDeLOffre, couleurValeurSurVoile, lienWhatsappOffre, secondBoutonUtile } from '@/lib/site/offre'
 import { lien } from '@/lib/site/route'
@@ -15,6 +17,7 @@ import { mot, t } from '@/lib/site/texte'
 import type { Media, Section } from '@/lib/site/types'
 import { CommandeLanding } from './CommandeLanding'
 import { Decompte } from './Decompte'
+import { LandingMiseEnPage } from './miseEnPage/MisesEnPage'
 import { FondLogement } from './Sojori'
 import type { Contexte } from './Sections'
 
@@ -53,7 +56,73 @@ function BoutonOffre({ texte, cible: brut, ctx, titre, code, second }: { texte: 
   )
 }
 
+/**
+ * Une landing qui porte une MISE EN PAGE (srv-site, lot D1) : rendue dans sa composition (carte du chef, day pass…), aux couleurs
+ * et polices de la page, avec ses emplacements d'images (médias du site ou photo du service). Les textes et les prix viennent de la
+ * section « offre », champs dynamiques déjà remplacés par les vrais prix. Le bouton mène au panneau de commande quand il existe,
+ * sinon à la cible de l'offre (réservation, WhatsApp).
+ */
+function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque' }>; ctx: Contexte }) {
+  const offre = ctx.offre
+  const mep = offre?.miseEnPage
+  const m = mep ? miseEnPage(mep.id) : undefined
+  if (!offre || !mep || !m) return null
+  const c = s.contenu
+  const tx = (k: string) => t(c[k], ctx.langue, ctx.defaut) || undefined
+  const theme = ctx.site.spec.theme
+  const commande = panneauCommande(offre, ctx.site.apercu, commandeAllumee())
+  const titre = tx('titre') || t(ctx.titrePage, ctx.langue, ctx.defaut)
+  const valeur = tx('valeur')
+  // Le bouton : le panneau de commande s'il existe, sinon la cible de l'offre (réservation du site, WhatsApp), comme le rendu classique.
+  const cible = cibleDeLOffre(c.lien, offre.paiement)
+  const lienBouton = commande
+    ? '#reserver'
+    : cible === '#whatsapp'
+      ? lienWhatsappOffre(ctx.site.contact?.whatsapp, ctx.langue, titre, typeof c.code === 'string' ? c.code : undefined)
+      : typeof cible === 'string' && cible.startsWith('/')
+        ? lien(ctx.base, ctx.langue, ctx.defaut, cible.slice(1))
+        : undefined
+  return (
+    <section className="section offre offre--mise-en-page" data-section={s.id} id={s.id}>
+      <LandingMiseEnPage
+        m={m}
+        apercu={ctx.site.apercu}
+        d={{
+          marque: ctx.site.spec.identite.nom,
+          couleurs: { accent: offre.design?.accent ?? theme.couleurs.accent, fond: theme.couleurs.fond, texte: theme.couleurs.texte, doux: offre.design?.accentDoux ?? theme.couleurs.accentDoux },
+          polices: { titre: offre.design?.police ?? theme.polices.titres, texte: theme.polices.texte },
+          surtitre: tx('surTitre'),
+          titre,
+          accroche: tx('accroche'),
+          prix: valeur ? { offre: valeur, unite: tx('valeurLibelle') } : undefined,
+          bouton: tx('bouton') || mot('reserver', ctx.langue),
+          lien: lienBouton,
+          conditions: tx('conditions'),
+          code: typeof c.code === 'string' ? c.code : undefined,
+          programme: mep.programme?.map((p) => ({ heure: p.heure, quoi: t(p.quoi, ctx.langue, ctx.defaut) })).filter((p) => p.quoi),
+          atouts: mep.atouts?.map((a) => t(a, ctx.langue, ctx.defaut)).filter(Boolean),
+          images: imagesDesEmplacements(mep.emplacements, ctx.site.medias, offre.serviceLu?.image),
+        }}
+      />
+      {commande && ctx.pageId && (
+        <div id="reserver" className="offre__commande-zone">
+          <CommandeLanding
+            slug={ctx.slug}
+            pageId={ctx.pageId}
+            langue={ctx.langue}
+            devise={offre.serviceLu?.devise ?? 'MAD'}
+            prixCentimes={offre.serviceLu?.prixCentimes}
+            prixOffreCentimes={typeof offre.serviceLu?.prixCentimes === 'number' && offre.remise ? prixServiceRemise(offre.serviceLu.prixCentimes, offre.remise.pourcent, offre.remise.arrondi) : undefined}
+          />
+        </div>
+      )}
+    </section>
+  )
+}
+
 export function SectionOffre({ s, ctx }: { s: Extract<Section, { niveau: 'bibliotheque' }>; ctx: Contexte }) {
+  // Une offre terminée garde le rendu classique (message de fin) ; sinon, une mise en page connue prend la main.
+  if (ctx.offre?.miseEnPage && miseEnPage(ctx.offre.miseEnPage.id) && !(ctx.offre.etat === 'terminee' && !ctx.site.apercu)) return <OffreEnMiseEnPage s={s} ctx={ctx} />
   const c = s.contenu
   const tx = (k: string) => t(c[k], ctx.langue, ctx.defaut)
   const offre = ctx.offre

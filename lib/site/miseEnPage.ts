@@ -143,3 +143,21 @@ export const libelleRole: Record<Emplacement['role'], string> = {
   portrait: 'Portrait',
   lieu: 'Photo du lieu',
 }
+
+/**
+ * Les photos des emplacements telles que le site les sert : `media:<id>` → l'adresse du média du site, `service:auto` → la photo
+ * du service lié (lue en direct par srv-site). Une référence inconnue, ou une adresse qui n'est pas sûre, laisse l'emplacement VIDE
+ * (repli en aperçu, variante sans image au public), jamais une autre image.
+ */
+export function imagesDesEmplacements(
+  emplacements: Readonly<Record<string, string>> | undefined,
+  medias: Readonly<Record<string, { url?: string; type?: string } | undefined>>,
+  imageService: string | undefined,
+): Record<string, string | undefined> {
+  const r: Record<string, string | undefined> = {}
+  for (const [k, ref] of Object.entries(emplacements ?? {})) {
+    const url = ref === 'service:auto' ? imageService : medias[ref]?.type === 'video' ? undefined : medias[ref]?.url
+    if (imageUtilisable(url) && /^https:/i.test(url)) r[k] = url
+  }
+  return r
+}
