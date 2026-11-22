@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { estUnCheminDuSite } from '@/lib/site/route';
 import { pagesDuSite } from '@/lib/site/routage';
-import { TENANT_COOKIE, lastResolveDebug, resolveTenantFromHost } from '@/lib/tenantDomains';
+import { TENANT_COOKIE, estHoteEssai, lastResolveDebug, resolveTenantFromHost } from '@/lib/tenantDomains';
 
 /** Seules ces routes exigent une session — tout le reste (homepage, listings…) reste public. */
 const isProtectedRoute = createRouteMatcher(['/profile(.*)']);
@@ -51,6 +51,11 @@ export default clerkMiddleware(async (auth, req) => {
   // via le cookie `pm_tenant` — sojori.com n'en pose jamais et reste la
   // marketplace. Le cookie étant par domaine, aucune fuite entre les deux.
   const tenant = await resolveTenantFromHost(req.headers.get('host'));
+  // Zone d'essai (`<nom>.sites.sojori.com`) : jamais référencée, quelle que soit la page.
+  const noindex = <T extends NextResponse>(r: T): T => {
+    if (estHoteEssai(req.headers.get('host'))) r.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return r;
+  };
   if (tenant) {
     // Routes 100 % marketplace Sojori (annuaire des PMs, recrutement, expériences)
     // interdites sur un site client — retour à son accueil. Sa propre vitrine
@@ -92,17 +97,21 @@ export default clerkMiddleware(async (auth, req) => {
       rw.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
       rw.headers.set('x-pm-resolve', lastResolveDebug || 'static');
       rw.headers.set('x-pm-site', 'fiche');
-      return rw;
+      return noindex(rw);
     }
     const res = suite();
     res.cookies.set(TENANT_COOKIE, tenant, { path: '/', sameSite: 'lax' });
     res.headers.set('x-pm-resolve', lastResolveDebug || 'static');
-    return res;
+    return noindex(res);
   }
   const res = suite();
   res.headers.set('x-pm-resolve', lastResolveDebug || 'none');
   if (req.cookies.has(TENANT_COOKIE)) {
     res.cookies.delete(TENANT_COOKIE);
+  }
+  // Une adresse de la zone d'essai sans client rattaché ne montre jamais la marketplace comme si c'était son site.
+  if (estHoteEssai(req.headers.get('host'))) {
+    return noindex(new NextResponse('Not found', { status: 404 }));
   }
   return res;
 });
