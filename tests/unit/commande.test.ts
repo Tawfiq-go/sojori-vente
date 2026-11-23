@@ -185,3 +185,15 @@ describe('relais serveur vers srv-site (vrai faux serveur HTTP)', () => {
     assert.deepEqual([mort.statut, JSON.parse(mort.corps).error], [503, 'commande_indisponible'])
   })
 })
+
+describe('événement : le panneau de réservation', () => {
+  it('une landing d’événement en vente a son panneau ; fermé, en aperçu ou éteint : non', () => {
+    const evt = { etat: 'en_cours', service: { forme: 'evenement' }, serviceLu: { commandable: true } }
+    assert.equal(panneauCommande(evt, false, true), true)
+    assert.equal(panneauCommande({ ...evt, serviceLu: { commandable: false } }, false, true), false)
+    assert.equal(panneauCommande(evt, true, true), false)
+    assert.equal(panneauCommande(evt, false, false), false)
+    assert.equal(panneauCommande({ ...evt, service: { forme: 'carte' } }, false, true), false)
+  })
+})
+

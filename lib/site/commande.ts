@@ -21,7 +21,14 @@ export function panneauCommande(
   apercu: boolean,
   allume: boolean,
 ): boolean {
-  return allume && !apercu && offre?.etat === 'en_cours' && offre.service?.forme === 'prestation' && offre.serviceLu?.commandable === true
+  // Une prestation commandable, ou un ÉVÉNEMENT en vente (ses formules se choisissent dans le panneau).
+  return (
+    allume &&
+    !apercu &&
+    offre?.etat === 'en_cours' &&
+    (offre.service?.forme === 'prestation' || offre.service?.forme === 'evenement') &&
+    offre.serviceLu?.commandable === true
+  )
 }
 
 const SLUG = /^[a-z0-9-]{3,40}$/

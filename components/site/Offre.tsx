@@ -84,7 +84,31 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
         : undefined
   // Soirée : les formules lisibles (prix du catalogue, jamais remisé), chacune menant au panneau avec SA formule choisie.
   const lang = ctx.langue === 'ar' || ctx.langue === 'en' ? ctx.langue : 'fr'
-  const formules = (mep.formules ?? []).flatMap((f, indice) => {
+  // Landing d'un ÉVÉNEMENT : ses formules viennent de Services (ordre de l'événement), avec ce qui est compris et la taille d'une table.
+  const evenement = offre.service?.forme === 'evenement'
+  const formulesEvenement = (offre.formulesLues ?? []).flatMap((lu, indice) => {
+    if (!lu) return []
+    const table = lu.par === 'table' && lu.personnesParTable ? mot('soireeTable', ctx.langue).replace('{n}', String(lu.personnesParTable)) : ''
+    return [
+      {
+        indice,
+        nom: t(lu.nom, ctx.langue, ctx.defaut),
+        prixCentimes: lu.prixCentimes,
+        prix: typeof lu.prixCentimes === 'number' ? montantMad(lu.prixCentimes, lu.devise ?? 'MAD', lang) : undefined,
+        points: [table, t(lu.description, ctx.langue, ctx.defaut)].filter(Boolean),
+        badge: undefined,
+        lien: commande && lu.commandable ? `#reserver-f${indice}` : lienBouton,
+        commandable: lu.commandable,
+        par: lu.par,
+      },
+    ]
+  })
+  const restantes = offre.evenementLu
+    ? offre.evenementLu.restantes > 0
+      ? mot('soireeRestantes', ctx.langue).replace('{n}', String(offre.evenementLu.restantes))
+      : mot('soireeComplet', ctx.langue)
+    : undefined
+  const formulesPage = (mep.formules ?? []).flatMap((f, indice) => {
     const lu = offre.formulesLues?.[indice]
     if (!lu) return []
     return [
@@ -97,9 +121,11 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
         badge: t(f.badge, ctx.langue, ctx.defaut) || undefined,
         lien: commande && lu.commandable ? `#reserver-f${indice}` : lienBouton,
         commandable: lu.commandable,
+        par: lu.par,
       },
     ]
   })
+  const formules = evenement ? formulesEvenement : formulesPage
   const lieu = t(mep.evenement?.lieu, ctx.langue, ctx.defaut)
   const moment = mep.evenement?.quand ? dateDuMoment(mep.evenement.quand, lang) : ''
   return (
@@ -124,6 +150,7 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
           images: imagesDesEmplacements(mep.emplacements, ctx.site.medias, offre.serviceLu?.image),
           lieuDate: [lieu, moment].filter(Boolean).join(' · ') || undefined,
           momentUtc: offre.momentUtc,
+          ...(restantes ? { restant: restantes } : {}),
           decompte: {
             j: mot('decompteJours', ctx.langue),
             h: mot('decompteHeures', ctx.langue),
@@ -154,7 +181,8 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
             devise={offre.serviceLu?.devise ?? 'MAD'}
             prixCentimes={offre.serviceLu?.prixCentimes}
             prixOffreCentimes={typeof offre.serviceLu?.prixCentimes === 'number' && offre.remise ? prixServiceRemise(offre.serviceLu.prixCentimes, offre.remise.pourcent, offre.remise.arrondi) : undefined}
-            formules={formules.some((f) => f.commandable) ? formules.filter((f) => f.commandable).map((f) => ({ indice: f.indice, nom: f.nom, prixCentimes: f.prixCentimes })) : undefined}
+            formules={formules.some((f) => f.commandable) ? formules.filter((f) => f.commandable).map((f) => ({ indice: f.indice, nom: f.nom, prixCentimes: f.prixCentimes, par: f.par })) : undefined}
+            whatsapp={evenement}
           />
         </div>
       )}

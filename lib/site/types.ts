@@ -40,7 +40,9 @@ export type OffreServie = {
   /** Le design propre à la page (listes fermées de srv-site). */
   design?: { accent?: string; accentDoux?: string; police?: string; style?: string }
   /** Le service lié (carte ou prestation du catalogue) : une référence. Son contenu est dans `serviceLu`. */
-  service?: { source: 'services'; id: string; forme: 'carte' | 'prestation'; nom: string }
+  service?: { source: 'services'; id: string; forme: 'carte' | 'prestation' | 'evenement'; nom: string }
+  /** Landing d'un ÉVÉNEMENT (Services) : date, statut et places, lus en direct par srv-site ; jamais la liste des invités. */
+  evenementLu?: { debut: string; fuseau: string; statut: string; maxPersonnes: number; restantes: number; reservable: boolean }
   /** Le service lié, LU EN DIRECT par srv-site dans le catalogue (jamais figé) ; absent = illisible ou introuvable. */
   serviceLu?: ServiceLu
   /** Le cadeau offert d'un séjour, lu en direct (son nom seulement). */
@@ -63,7 +65,17 @@ export type OffreServie = {
 }
 
 /** Ce que le public peut lire d'un service : nom, prix TTC EN CENTIMES (prestation), photo, vendable depuis la landing. */
-export type ServiceLu = { nom: Texte; prixCentimes?: number; devise?: string; image?: string; commandable: boolean }
+export type ServiceLu = {
+  nom: Texte
+  prixCentimes?: number
+  devise?: string
+  image?: string
+  commandable: boolean
+  /** Formule d'événement : billet (par personne) ou table, et ce qui est compris (texte libre). */
+  par?: 'personne' | 'table'
+  personnesParTable?: number | null
+  description?: Texte
+}
 
 export type SiteSpec = {
   v: 1

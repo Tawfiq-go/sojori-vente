@@ -26,7 +26,9 @@ type Props = {
    * Soirée : les formules (indice dans `miseEnPage.formules`, nom, prix du catalogue pour l'AFFICHAGE). Le visiteur en choisit une ;
    * seul l'INDICE part au serveur, qui retrouve la prestation dans la landing publiée. Un lien `#reserver-f<indice>` la présélectionne.
    */
-  formules?: Array<{ indice: number; nom: string; prixCentimes?: number }>
+  formules?: Array<{ indice: number; nom: string; prixCentimes?: number; par?: 'personne' | 'table' }>
+  /** Événement : le téléphone se demande comme WhatsApp (facultatif, pour la confirmation et le suivi). */
+  whatsapp?: boolean
 }
 
 const api = (slug: string, pageId: string, suite: string) => `/api/site-commande/${encodeURIComponent(slug)}/${encodeURIComponent(pageId)}/${suite}`
@@ -44,7 +46,7 @@ async function appeler(url: string, init?: RequestInit): Promise<{ ok: boolean; 
   }
 }
 
-export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrincipal, prixOffreCentimes: offrePrincipal, devise, formules }: Props) {
+export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrincipal, prixOffreCentimes: offrePrincipal, devise, formules, whatsapp }: Props) {
   const [formule, setFormule] = useState<number | undefined>(formules?.[0]?.indice)
   const [nom, setNom] = useState('')
   const [email, setEmail] = useState('')
@@ -182,7 +184,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
       )}
       {unite !== undefined && (
         <p className="offre__commande-prix">
-          {prixOffreCentimes !== undefined && prixCentimes !== undefined && prixOffreCentimes < prixCentimes && <s>{montantMad(prixCentimes, devise, langue)}</s>} <strong>{montantMad(unite, devise, langue)}</strong> {mot('cmdPrixUnite', langue)}
+          {prixOffreCentimes !== undefined && prixCentimes !== undefined && prixOffreCentimes < prixCentimes && <s>{montantMad(prixCentimes, devise, langue)}</s>} <strong>{montantMad(unite, devise, langue)}</strong> {mot(choisie?.par === 'table' ? 'cmdPrixTable' : 'cmdPrixUnite', langue)}
         </p>
       )}
       <label>
@@ -215,7 +217,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
         <input type="email" required maxLength={254} autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       </label>
       <label>
-        {mot('cmdTel', langue)}
+        {mot(whatsapp ? 'cmdWhatsapp' : 'cmdTel', langue)}
         <input type="tel" maxLength={30} autoComplete="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)} />
       </label>
       {erreur && (

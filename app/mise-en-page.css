@@ -771,6 +771,13 @@
 .mep-soiree__decompte {
   margin: 36px auto 0;
 }
+.mep-soiree__restant {
+  margin: 22px 0 0;
+  font: 650 13px/1 var(--mep-police-texte);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mep-accent);
+}
 .mep-soiree__decompte .offre__decompte {
   display: inline-flex;
   gap: clamp(14px, 3vw, 34px);

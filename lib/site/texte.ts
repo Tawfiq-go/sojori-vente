@@ -112,6 +112,11 @@ const MOTS = {
   soireeChoisir: { fr: 'Choisir', en: 'Choose', ar: 'اختر' },
   soireeAmbiance: { fr: 'L’ambiance', en: 'The mood', ar: 'الأجواء' },
   cmdFormule: { fr: 'Votre formule', en: 'Your package', ar: 'عرضك' },
+  cmdWhatsapp: { fr: 'WhatsApp (facultatif, pour le suivi)', en: 'WhatsApp (optional, for updates)', ar: 'واتساب (اختياري، للمتابعة)' },
+  cmdPrixTable: { fr: 'par table', en: 'per table', ar: 'للطاولة' },
+  soireeRestantes: { fr: 'Il reste {n} places', en: '{n} places left', ar: 'تبقى {n} أماكن' },
+  soireeComplet: { fr: 'Complet', en: 'Sold out', ar: 'اكتمل العدد' },
+  soireeTable: { fr: 'Table de {n}', en: 'Table for {n}', ar: 'طاولة لـ{n}' },
   surDevis: { fr: 'Sur devis', en: 'On request', ar: 'حسب الطلب' },
   surLaCarte: { fr: 'Nos logements sur la carte', en: 'Our homes on the map', ar: 'مساكننا على الخريطة' },
   // L'espace IA du site (28/10/2026)
