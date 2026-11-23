@@ -203,7 +203,7 @@ describe('événement : le panneau de réservation', () => {
 
 describe('événement : les refus se disent', () => {
   it('EVENEMENT_FERME, EVENEMENT_PASSE et EVENEMENT_SEUL sont des codes connus du panneau', () => {
-    for (const c of ['EVENEMENT_FERME', 'EVENEMENT_PASSE', 'EVENEMENT_SEUL']) assert.equal(codeErreur(c), c)
+    for (const c of ['EVENEMENT_FERME', 'EVENEMENT_PASSE', 'EVENEMENT_SEUL', 'MODE_PAIEMENT_REFUSE', 'SUR_PLACE_PLAFOND']) assert.equal(codeErreur(c), c)
   })
 })
 
