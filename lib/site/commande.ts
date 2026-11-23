@@ -73,7 +73,7 @@ export function limiteur(max: number, fenetreMs = 60_000, maintenant: () => numb
 }
 
 /** Les erreurs que le panneau sait dire (codes stables de srv-services, relayés par srv-site), sinon le message générique. */
-export const ERREURS = ['CRENEAU_COMPLET', 'CRENEAU_INDISPONIBLE', 'STOCK_INSUFFISANT', 'HORS_PORTEE', 'CATALOGUE_EXTERNE', 'PROMOTION_INDISPONIBLE', 'TROP_DE_COMMANDES', 'VALIDATION', 'EMAIL_INVALIDE', 'paiement_indisponible', 'landing_non_servie', 'EVENEMENT_FERME', 'EVENEMENT_PASSE', 'EVENEMENT_SEUL', 'MODE_PAIEMENT_REFUSE'] as const
+export const ERREURS = ['CRENEAU_COMPLET', 'CRENEAU_INDISPONIBLE', 'STOCK_INSUFFISANT', 'HORS_PORTEE', 'CATALOGUE_EXTERNE', 'PROMOTION_INDISPONIBLE', 'TROP_DE_COMMANDES', 'VALIDATION', 'EMAIL_INVALIDE', 'paiement_indisponible', 'landing_non_servie', 'EVENEMENT_FERME', 'EVENEMENT_PASSE', 'EVENEMENT_SEUL', 'MODE_PAIEMENT_REFUSE', 'SUR_PLACE_PLAFOND'] as const
 export type CodeErreur = (typeof ERREURS)[number]
 export const codeErreur = (v: unknown): CodeErreur | 'autre' => ((ERREURS as readonly string[]).includes(v as string) ? (v as CodeErreur) : 'autre')
 
