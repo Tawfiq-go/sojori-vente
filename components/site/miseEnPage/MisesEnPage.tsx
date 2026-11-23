@@ -365,6 +365,7 @@ function Soiree({ m, d, apercu }: Props) {
             <h1 className="mep-titre mep-soiree__titre">{d.titre}</h1>
             {d.accroche && <p className="mep-accroche">{d.accroche}</p>}
             {d.surtitre && d.lieuDate && <p className="mep-soiree__date">{d.lieuDate}</p>}
+            {d.restant && <p className="mep-soiree__restant">{d.restant}</p>}
             {d.momentUtc && d.decompte && (
               <div className="mep-soiree__decompte">
                 <Decompte finUtc={d.momentUtc} libelles={d.decompte} />

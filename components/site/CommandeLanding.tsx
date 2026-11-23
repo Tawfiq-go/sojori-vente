@@ -12,7 +12,7 @@ import type { Langue } from '@/lib/site/types'
 
 type Creneau = { debut: string; fin?: string; restant: number | null; disponible: boolean }
 /** `jeton` : la preuve, rendue à la création, que cette commande est la nôtre ; le paiement l'exige (jamais l'identifiant seul). */
-type Commande = { commandeId: string; numero: string; totalCentimes: number; devise: string; retenueJusquA: string | null; jeton: string }
+type Commande = { commandeId: string; numero: string; totalCentimes: number; devise: string; retenueJusquA: string | null; jeton: string; statut?: string }
 
 type Props = {
   slug: string
@@ -26,7 +26,14 @@ type Props = {
    * Soirée : les formules (indice dans `miseEnPage.formules`, nom, prix du catalogue pour l'AFFICHAGE). Le visiteur en choisit une ;
    * seul l'INDICE part au serveur, qui retrouve la prestation dans la landing publiée. Un lien `#reserver-f<indice>` la présélectionne.
    */
-  formules?: Array<{ indice: number; nom: string; prixCentimes?: number }>
+  formules?: Array<{ indice: number; nom: string; prixCentimes?: number; par?: 'personne' | 'table'; id?: string }>
+  /** Événement : le téléphone se demande comme WhatsApp (facultatif, pour la confirmation et le suivi). */
+  whatsapp?: boolean
+  /**
+   * Comment on paie (événement) : carte en ligne et/ou sur place. Sur place seul : « Réserver » confirme sans carte ; les deux : le
+   * visiteur choisit. Absent : carte en ligne, comme aujourd'hui.
+   */
+  paiement?: { carte: boolean; surPlace: boolean }
 }
 
 const api = (slug: string, pageId: string, suite: string) => `/api/site-commande/${encodeURIComponent(slug)}/${encodeURIComponent(pageId)}/${suite}`
@@ -44,7 +51,10 @@ async function appeler(url: string, init?: RequestInit): Promise<{ ok: boolean; 
   }
 }
 
-export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrincipal, prixOffreCentimes: offrePrincipal, devise, formules }: Props) {
+export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrincipal, prixOffreCentimes: offrePrincipal, devise, formules, whatsapp, paiement }: Props) {
+  const surPlacePossible = paiement?.surPlace === true
+  const cartePossible = paiement ? paiement.carte : true
+  const [surPlace, setSurPlace] = useState(surPlacePossible && !cartePossible)
   const [formule, setFormule] = useState<number | undefined>(formules?.[0]?.indice)
   const [nom, setNom] = useState('')
   const [email, setEmail] = useState('')
@@ -63,7 +73,10 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
   // Une formule n'est jamais remisée : son prix est celui du catalogue. Sans formule, la prestation principale (et sa remise).
   const prixCentimes = formules?.length ? choisie?.prixCentimes : prixPrincipal
   const prixOffreCentimes = formules?.length ? undefined : offrePrincipal
-  const avecFormule = formules?.length && formule !== undefined ? `&formule=${formule}` : ''
+  // Ce qui part au serveur : l'IDENTIFIANT de la prestation pour une formule d'événement (jamais sa position, qui peut changer entre
+  // l'affichage et la commande), sinon l'indice d'une formule posée dans la page.
+  const choixEnvoye = choisie?.id ?? (formules?.length && formule !== undefined ? formule : undefined)
+  const avecFormule = choixEnvoye !== undefined ? `&formule=${choixEnvoye}` : ''
 
   // Un bouton « Choisir » d'une carte de formule mène à `#reserver-f<indice>` : la formule est présélectionnée, le panneau vient à l'écran.
   useEffect(() => {
@@ -106,7 +119,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
     const r = await appeler(api(slug, pageId, 'commande'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ client: { nom, email, ...(telephone ? { telephone } : {}) }, quantite, ...(date ? { date } : {}), ...(creneau ? { creneau } : {}), ...(formules?.length && formule !== undefined ? { formule } : {}) }),
+      body: JSON.stringify({ client: { nom, email, ...(telephone ? { telephone } : {}) }, quantite, ...(date ? { date } : {}), ...(creneau ? { creneau } : {}), ...(choixEnvoye !== undefined ? { formule: choixEnvoye } : {}), ...(surPlace ? { paiement: 'sur_place' } : {}) }),
     })
     setOccupe(false)
     if (!r.ok) return dire(r.donnees?.error)
@@ -136,19 +149,25 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
         <p className="offre__commande-total">
           {mot('cmdTotal', langue)} : <strong>{montantMad(commande.totalCentimes, commande.devise, langue)}</strong>
         </p>
-        {heure && (
-          <p>
-            {mot('cmdRetenue', langue)} {heure}
-          </p>
+        {commande.statut === 'validee' ? (
+          <p data-commande="sur-place">{mot('cmdSurPlaceConfirme', langue)}</p>
+        ) : (
+          heure && (
+            <p>
+              {mot('cmdRetenue', langue)} {heure}
+            </p>
+          )
         )}
         {erreur && (
           <p role="alert" className="offre__commande-erreur">
             {erreur}
           </p>
         )}
-        <button type="button" className="bouton" onClick={payer} disabled={occupe}>
-          {occupe ? mot('cmdEnCours', langue) : mot('cmdPayer', langue)}
-        </button>
+        {commande.statut !== 'validee' && (
+          <button type="button" className="bouton" onClick={payer} disabled={occupe}>
+            {occupe ? mot('cmdEnCours', langue) : mot('cmdPayer', langue)}
+          </button>
+        )}
       </div>
     )
 
@@ -182,7 +201,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
       )}
       {unite !== undefined && (
         <p className="offre__commande-prix">
-          {prixOffreCentimes !== undefined && prixCentimes !== undefined && prixOffreCentimes < prixCentimes && <s>{montantMad(prixCentimes, devise, langue)}</s>} <strong>{montantMad(unite, devise, langue)}</strong> {mot('cmdPrixUnite', langue)}
+          {prixOffreCentimes !== undefined && prixCentimes !== undefined && prixOffreCentimes < prixCentimes && <s>{montantMad(prixCentimes, devise, langue)}</s>} <strong>{montantMad(unite, devise, langue)}</strong> {mot(choisie?.par === 'table' ? 'cmdPrixTable' : 'cmdPrixUnite', langue)}
         </p>
       )}
       <label>
@@ -215,7 +234,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
         <input type="email" required maxLength={254} autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       </label>
       <label>
-        {mot('cmdTel', langue)}
+        {mot(whatsapp ? 'cmdWhatsapp' : 'cmdTel', langue)}
         <input type="tel" maxLength={30} autoComplete="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)} />
       </label>
       {erreur && (
@@ -223,6 +242,20 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
           {erreur}
         </p>
       )}
+      {surPlacePossible && cartePossible && (
+        <fieldset className="offre__commande-formules">
+          <legend>{mot('cmdModePaiement', langue)}</legend>
+          <label className="offre__commande-creneau">
+            <input type="radio" name="paiement" checked={!surPlace} onChange={() => setSurPlace(false)} />
+            {mot('cmdPayerEnLigne', langue)}
+          </label>
+          <label className="offre__commande-creneau">
+            <input type="radio" name="paiement" checked={surPlace} onChange={() => setSurPlace(true)} />
+            {mot('cmdPayerSurPlace', langue)}
+          </label>
+        </fieldset>
+      )}
+      {surPlacePossible && !cartePossible && <p className="offre__commande-note">{mot('cmdSurPlaceSeul', langue)}</p>}
       <button type="submit" className="bouton" disabled={occupe}>
         {occupe ? mot('cmdEnCours', langue) : mot('cmdEnvoyer', langue)}
       </button>

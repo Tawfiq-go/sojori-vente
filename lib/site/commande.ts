@@ -21,7 +21,14 @@ export function panneauCommande(
   apercu: boolean,
   allume: boolean,
 ): boolean {
-  return allume && !apercu && offre?.etat === 'en_cours' && offre.service?.forme === 'prestation' && offre.serviceLu?.commandable === true
+  // Une prestation commandable, ou un ÉVÉNEMENT en vente (ses formules se choisissent dans le panneau).
+  return (
+    allume &&
+    !apercu &&
+    offre?.etat === 'en_cours' &&
+    (offre.service?.forme === 'prestation' || offre.service?.forme === 'evenement') &&
+    offre.serviceLu?.commandable === true
+  )
 }
 
 const SLUG = /^[a-z0-9-]{3,40}$/
@@ -66,7 +73,7 @@ export function limiteur(max: number, fenetreMs = 60_000, maintenant: () => numb
 }
 
 /** Les erreurs que le panneau sait dire (codes stables de srv-services, relayés par srv-site), sinon le message générique. */
-export const ERREURS = ['CRENEAU_COMPLET', 'CRENEAU_INDISPONIBLE', 'STOCK_INSUFFISANT', 'HORS_PORTEE', 'CATALOGUE_EXTERNE', 'PROMOTION_INDISPONIBLE', 'TROP_DE_COMMANDES', 'VALIDATION', 'EMAIL_INVALIDE', 'paiement_indisponible', 'landing_non_servie'] as const
+export const ERREURS = ['CRENEAU_COMPLET', 'CRENEAU_INDISPONIBLE', 'STOCK_INSUFFISANT', 'HORS_PORTEE', 'CATALOGUE_EXTERNE', 'PROMOTION_INDISPONIBLE', 'TROP_DE_COMMANDES', 'VALIDATION', 'EMAIL_INVALIDE', 'paiement_indisponible', 'landing_non_servie', 'EVENEMENT_FERME', 'EVENEMENT_PASSE', 'EVENEMENT_SEUL', 'MODE_PAIEMENT_REFUSE'] as const
 export type CodeErreur = (typeof ERREURS)[number]
 export const codeErreur = (v: unknown): CodeErreur | 'autre' => ((ERREURS as readonly string[]).includes(v as string) ? (v as CodeErreur) : 'autre')
 
@@ -109,9 +116,10 @@ export async function relayer(d: Demande, env: Record<string, string | undefined
   if (g.methode === 'GET') {
     const date = d.recherche.get('date') || ''
     url += `?date=${encodeURIComponent(date.slice(0, 10))}`
-    // Soirée : l'indice de la formule choisie (un chiffre de 0 à 5), sinon rien (la prestation principale). srv-site revérifie.
+    // La formule choisie : l'identifiant de sa prestation (événement) ou l'indice d'une formule de la page (0 à 5), sinon rien
+    // (la prestation principale). srv-site revérifie tout.
     const formule = d.recherche.get('formule') || ''
-    if (/^[0-5]$/.test(formule)) url += `&formule=${formule}`
+    if (/^[0-5]$/.test(formule) || /^[a-f0-9]{24}$/i.test(formule)) url += `&formule=${formule.toLowerCase()}`
   }
   const init: RequestInit = { method: g.methode, headers: { 'x-forwarded-for': ip, 'content-type': 'application/json' }, cache: 'no-store', signal: AbortSignal.timeout(15_000) }
   if (g.methode === 'POST') {
