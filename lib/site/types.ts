@@ -42,7 +42,15 @@ export type OffreServie = {
   /** Le service lié (carte ou prestation du catalogue) : une référence. Son contenu est dans `serviceLu`. */
   service?: { source: 'services'; id: string; forme: 'carte' | 'prestation' | 'evenement'; nom: string }
   /** Landing d'un ÉVÉNEMENT (Services) : date, statut et places, lus en direct par srv-site ; jamais la liste des invités. */
-  evenementLu?: { debut: string; fuseau: string; statut: string; maxPersonnes: number; restantes: number; reservable: boolean }
+  evenementLu?: {
+    debut: string
+    fuseau: string
+    statut: string
+    maxPersonnes: number
+    restantes: number
+    reservable: boolean
+    paiement?: { carte: boolean; surPlace: boolean }
+  }
   /** Le service lié, LU EN DIRECT par srv-site dans le catalogue (jamais figé) ; absent = illisible ou introuvable. */
   serviceLu?: ServiceLu
   /** Le cadeau offert d'un séjour, lu en direct (son nom seulement). */
