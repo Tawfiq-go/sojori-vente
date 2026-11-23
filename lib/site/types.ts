@@ -71,7 +71,8 @@ export type ServiceLu = {
   devise?: string
   image?: string
   commandable: boolean
-  /** Formule d'événement : billet (par personne) ou table, et ce qui est compris (texte libre). */
+  /** Formule d'événement : l'identifiant de sa prestation (la commande la désigne par lui), billet ou table, ce qui est compris. */
+  id?: string
   par?: 'personne' | 'table'
   personnesParTable?: number | null
   description?: Texte

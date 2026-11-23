@@ -100,6 +100,7 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
         lien: commande && lu.commandable ? `#reserver-f${indice}` : lienBouton,
         commandable: lu.commandable,
         par: lu.par,
+        id: lu.id,
       },
     ]
   })
@@ -181,7 +182,7 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
             devise={offre.serviceLu?.devise ?? 'MAD'}
             prixCentimes={offre.serviceLu?.prixCentimes}
             prixOffreCentimes={typeof offre.serviceLu?.prixCentimes === 'number' && offre.remise ? prixServiceRemise(offre.serviceLu.prixCentimes, offre.remise.pourcent, offre.remise.arrondi) : undefined}
-            formules={formules.some((f) => f.commandable) ? formules.filter((f) => f.commandable).map((f) => ({ indice: f.indice, nom: f.nom, prixCentimes: f.prixCentimes, par: f.par })) : undefined}
+            formules={formules.some((f) => f.commandable) ? formules.filter((f) => f.commandable).map((f) => ({ indice: f.indice, nom: f.nom, prixCentimes: f.prixCentimes, par: f.par, id: 'id' in f ? f.id : undefined })) : undefined}
             whatsapp={evenement}
           />
         </div>

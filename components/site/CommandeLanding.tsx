@@ -26,7 +26,7 @@ type Props = {
    * Soirée : les formules (indice dans `miseEnPage.formules`, nom, prix du catalogue pour l'AFFICHAGE). Le visiteur en choisit une ;
    * seul l'INDICE part au serveur, qui retrouve la prestation dans la landing publiée. Un lien `#reserver-f<indice>` la présélectionne.
    */
-  formules?: Array<{ indice: number; nom: string; prixCentimes?: number; par?: 'personne' | 'table' }>
+  formules?: Array<{ indice: number; nom: string; prixCentimes?: number; par?: 'personne' | 'table'; id?: string }>
   /** Événement : le téléphone se demande comme WhatsApp (facultatif, pour la confirmation et le suivi). */
   whatsapp?: boolean
 }
@@ -65,7 +65,10 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
   // Une formule n'est jamais remisée : son prix est celui du catalogue. Sans formule, la prestation principale (et sa remise).
   const prixCentimes = formules?.length ? choisie?.prixCentimes : prixPrincipal
   const prixOffreCentimes = formules?.length ? undefined : offrePrincipal
-  const avecFormule = formules?.length && formule !== undefined ? `&formule=${formule}` : ''
+  // Ce qui part au serveur : l'IDENTIFIANT de la prestation pour une formule d'événement (jamais sa position, qui peut changer entre
+  // l'affichage et la commande), sinon l'indice d'une formule posée dans la page.
+  const choixEnvoye = choisie?.id ?? (formules?.length && formule !== undefined ? formule : undefined)
+  const avecFormule = choixEnvoye !== undefined ? `&formule=${choixEnvoye}` : ''
 
   // Un bouton « Choisir » d'une carte de formule mène à `#reserver-f<indice>` : la formule est présélectionnée, le panneau vient à l'écran.
   useEffect(() => {
@@ -108,7 +111,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
     const r = await appeler(api(slug, pageId, 'commande'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ client: { nom, email, ...(telephone ? { telephone } : {}) }, quantite, ...(date ? { date } : {}), ...(creneau ? { creneau } : {}), ...(formules?.length && formule !== undefined ? { formule } : {}) }),
+      body: JSON.stringify({ client: { nom, email, ...(telephone ? { telephone } : {}) }, quantite, ...(date ? { date } : {}), ...(creneau ? { creneau } : {}), ...(choixEnvoye !== undefined ? { formule: choixEnvoye } : {}) }),
     })
     setOccupe(false)
     if (!r.ok) return dire(r.donnees?.error)

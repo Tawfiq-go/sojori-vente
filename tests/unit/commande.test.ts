@@ -133,6 +133,10 @@ describe('relais serveur vers srv-site (vrai faux serveur HTTP)', () => {
     assert.equal(recus[0].methode, 'GET')
     assert.equal(recus[0].url, '/api/v1/public/sites/pm/pm-test/landings/page_1/commande/creneaux?date=2030-01-01')
   })
+  it('événement : l’identifiant de la formule (24 hexadécimaux) suit la date, ramené en minuscules', async () => {
+    await relayer(demande({ methode: 'GET', suite: ['creneaux'], corps: null, recherche: new URLSearchParams(`date=2030-01-01&formule=${'A'.repeat(24)}`) }), env)
+    assert.equal(recus[0].url, `/api/v1/public/sites/pm/pm-test/landings/page_1/commande/creneaux?date=2030-01-01&formule=${'a'.repeat(24)}`)
+  })
   it('soirée : l’indice de formule (un chiffre de 0 à 5) suit la date ; toute autre valeur est ignorée', async () => {
     await relayer(demande({ methode: 'GET', suite: ['creneaux'], corps: null, recherche: new URLSearchParams('date=2030-01-01&formule=2') }), env)
     assert.equal(recus[0].url, '/api/v1/public/sites/pm/pm-test/landings/page_1/commande/creneaux?date=2030-01-01&formule=2')
@@ -194,6 +198,12 @@ describe('événement : le panneau de réservation', () => {
     assert.equal(panneauCommande(evt, true, true), false)
     assert.equal(panneauCommande(evt, false, false), false)
     assert.equal(panneauCommande({ ...evt, service: { forme: 'carte' } }, false, true), false)
+  })
+})
+
+describe('événement : les refus se disent', () => {
+  it('EVENEMENT_FERME, EVENEMENT_PASSE et EVENEMENT_SEUL sont des codes connus du panneau', () => {
+    for (const c of ['EVENEMENT_FERME', 'EVENEMENT_PASSE', 'EVENEMENT_SEUL']) assert.equal(codeErreur(c), c)
   })
 })
 
