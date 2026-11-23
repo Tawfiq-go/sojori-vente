@@ -185,6 +185,7 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
             formules={formules.some((f) => f.commandable) ? formules.filter((f) => f.commandable).map((f) => ({ indice: f.indice, nom: f.nom, prixCentimes: f.prixCentimes, par: f.par, id: 'id' in f ? f.id : undefined })) : undefined}
             whatsapp={evenement}
             paiement={evenement ? offre.evenementLu?.paiement : undefined}
+            evenement={evenement && offre.evenementLu?.debut ? { debut: offre.evenementLu.debut } : undefined}
           />
         </div>
       )}

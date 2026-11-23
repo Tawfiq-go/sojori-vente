@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import http from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { after, before, beforeEach, describe, it } from 'node:test'
-import { codeErreur, commandeAllumee, geste, ipDuVisiteur, lienOuvrable, limiteur, montantMad, panneauCommande, relayer } from '../../lib/site/commande.ts'
+import { codeErreur, commandeAllumee, dateEvenement, geste, ipDuVisiteur, lienOuvrable, limiteur, montantMad, panneauCommande, relayer } from '../../lib/site/commande.ts'
 
 const ID = 'ab'.repeat(12)
 const prestationEnCours = { etat: 'en_cours', service: { forme: 'prestation' }, serviceLu: { commandable: true } }
@@ -207,3 +207,15 @@ describe('événement : les refus se disent', () => {
   })
 })
 
+
+describe('dateEvenement : la date d\'un événement, heure du LIEU, jamais convertie', () => {
+  it('lit AAAA-MM-JJThh:mm telle quelle, et rend vide sinon', () => {
+    const fr = dateEvenement('2026-12-31T21:00', 'fr')
+    assert.match(fr, /31/)
+    assert.match(fr, /décembre/)
+    assert.match(fr, /21:00|21 h 00/)
+    assert.equal(dateEvenement('2026-12-31', 'fr'), '')
+    assert.equal(dateEvenement('n’importe quoi', 'en'), '')
+    assert.equal(dateEvenement('2026-02-30T10:00x', 'fr'), '')
+  })
+})

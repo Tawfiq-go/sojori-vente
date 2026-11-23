@@ -140,3 +140,15 @@ export async function relayer(d: Demande, env: Record<string, string | undefined
     return json(503, { success: false, error: 'commande_indisponible' })
   }
 }
+
+/**
+ * La date et l'heure d'un événement telles qu'écrites dans Services (`AAAA-MM-JJThh:mm`, heure du lieu), lues SANS conversion de fuseau :
+ * le visiteur voit l'heure du lieu, jamais celle de son navigateur. Vide si la valeur n'a pas cette forme.
+ */
+export function dateEvenement(debut: string, langue: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(debut)) return ''
+  const d = new Date(`${debut}:00Z`)
+  if (Number.isNaN(d.getTime())) return ''
+  const loc = langue === 'ar' ? 'ar-MA' : langue
+  return d.toLocaleString(loc, { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
