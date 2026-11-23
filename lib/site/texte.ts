@@ -40,6 +40,8 @@ const MOTS = {
   cmdErreur_EVENEMENT_FERME: { fr: 'Les réservations de cet événement ne sont pas encore ouvertes.', en: 'Bookings for this event are not open yet.', ar: 'لم تُفتح حجوزات هذه الفعالية بعد.' },
   cmdErreur_EVENEMENT_PASSE: { fr: 'Cet événement a commencé : les réservations sont fermées.', en: 'This event has started: bookings are closed.', ar: 'بدأت هذه الفعالية: أُغلقت الحجوزات.' },
   cmdErreur_EVENEMENT_SEUL: { fr: 'Réservez cet événement seul, sans autre article.', en: 'Book this event on its own, without other items.', ar: 'احجز هذه الفعالية وحدها دون أي عنصر آخر.' },
+  cmdErreur_DATE_EVENEMENT_INVALIDE: { fr: 'Cette date n’est plus proposée. Choisissez-en une autre.', en: 'This date is no longer available. Please choose another.', ar: 'هذا التاريخ لم يعد متاحًا. اختر تاريخًا آخر.' },
+  cmdErreur_EVENEMENT_UNE_DATE: { fr: 'Une réservation porte sur une seule date. Réservez chaque date à part.', en: 'A booking covers one date only. Book each date separately.', ar: 'كل حجز يخص تاريخًا واحدًا. احجز كل تاريخ على حدة.' },
   cmdErreur_SUR_PLACE_PLAFOND: { fr: 'Sur place, 10 personnes au plus par réservation. Réservez en plusieurs fois, ou payez en ligne.', en: 'On-site payment: 10 people at most per booking. Book in several parts, or pay online.', ar: 'الدفع في المكان: 10 أشخاص كحد أقصى لكل حجز. احجز على عدة مرات أو ادفع عبر الإنترنت.' },
   cmdErreur_CRENEAU_COMPLET: { fr: 'Ce créneau est complet. Choisissez-en un autre.', en: 'This slot is full. Please choose another.', ar: 'هذه الفترة ممتلئة. اختر فترة أخرى.' },
   cmdErreur_CRENEAU_INDISPONIBLE: { fr: 'Ce créneau n’est pas disponible. Choisissez-en un autre.', en: 'This slot is not available. Please choose another.', ar: 'هذه الفترة غير متاحة. اختر فترة أخرى.' },

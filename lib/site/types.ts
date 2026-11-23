@@ -49,6 +49,9 @@ export type OffreServie = {
     maxPersonnes: number
     restantes: number
     reservable: boolean
+    /** Périodique (brunch du dimanche, day pass) : les prochaines dates ouvertes et leurs places ; la page en fait choisir une. */
+    prochaines?: Array<{ date: string; restantes: number }>
+    repetition?: { jours: number[]; heure: string; heureFin: string | null; au: string | null }
     paiement?: { carte: boolean; surPlace: boolean }
   }
   /** Le service lié, LU EN DIRECT par srv-site dans le catalogue (jamais figé) ; absent = illisible ou introuvable. */

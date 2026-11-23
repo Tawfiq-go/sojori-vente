@@ -1470,7 +1470,8 @@
   gap: 4px;
   font-size: 0.9rem;
 }
-.site-pm .offre__commande input {
+.site-pm .offre__commande input,
+.site-pm .offre__commande select {
   min-height: 44px;
   padding: 8px 12px;
   border-radius: 10px;
@@ -1478,6 +1479,12 @@
   background: transparent;
   color: inherit;
   font: inherit;
+}
+/* Une date longue ne pousse jamais le panneau hors de l'écran (téléphone) : la liste prend la largeur du panneau, pas celle de son texte. */
+.site-pm .offre__commande select {
+  width: 0;
+  min-width: 100%;
+  text-overflow: ellipsis;
 }
 .site-pm .offre__commande fieldset {
   display: flex;
