@@ -143,3 +143,47 @@ export const libelleRole: Record<Emplacement['role'], string> = {
   portrait: 'Portrait',
   lieu: 'Photo du lieu',
 }
+
+/**
+ * Les photos des emplacements telles que le site les sert : `media:<id>` → l'adresse du média du site, `service:auto` → la photo
+ * du service lié (lue en direct par srv-site). Une référence inconnue, ou une adresse qui n'est pas sûre, laisse l'emplacement VIDE
+ * (repli en aperçu, variante sans image au public), jamais une autre image.
+ */
+export function imagesDesEmplacements(
+  emplacements: Readonly<Record<string, string>> | undefined,
+  medias: Readonly<Record<string, { url?: string; type?: string } | undefined>>,
+  imageService: string | undefined,
+): Record<string, string | undefined> {
+  const r: Record<string, string | undefined> = {}
+  for (const [k, ref] of Object.entries(emplacements ?? {})) {
+    const url = ref === 'service:auto' ? imageService : medias[ref]?.type === 'video' ? undefined : medias[ref]?.url
+    if (imageUtilisable(url) && /^https:/i.test(url)) r[k] = url
+  }
+  return r
+}
+
+/**
+ * Couleurs et polices posées dans le style en ligne de la mise en page (variables `--mep-*`) : validées ICI aussi (défense en
+ * profondeur, srv-site les valide déjà à l'écriture). Un « ; » ou une parenthèse dans une valeur ouvrirait une déclaration CSS :
+ * seules passent une couleur #RRGGBB et un nom de police fait de lettres, chiffres et espaces ; sinon, le repli sûr.
+ */
+export const REPLI_MARQUE = {
+  couleurs: { accent: '#0d7a85', fond: '#f7f1e6', texte: '#1d1a16', doux: '#e2eeec' },
+  polices: { titre: 'Cormorant Garamond', texte: 'Inter' },
+} as const
+const COULEUR = /^#[0-9a-fA-F]{6}$/
+const POLICE = /^[A-Za-z0-9 ]{1,40}$/
+export const couleurSure = (v: unknown, repli: string): string => (typeof v === 'string' && COULEUR.test(v) ? v : repli)
+export const policeSure = (v: unknown, repli: string): string => (typeof v === 'string' && POLICE.test(v) ? v : repli)
+export function marqueSure(couleurs: Partial<Record<keyof typeof REPLI_MARQUE.couleurs, unknown>>, polices: Partial<Record<keyof typeof REPLI_MARQUE.polices, unknown>>) {
+  const r = REPLI_MARQUE
+  return {
+    couleurs: {
+      accent: couleurSure(couleurs.accent, r.couleurs.accent),
+      fond: couleurSure(couleurs.fond, r.couleurs.fond),
+      texte: couleurSure(couleurs.texte, r.couleurs.texte),
+      doux: couleurSure(couleurs.doux, r.couleurs.doux),
+    },
+    polices: { titre: policeSure(polices.titre, r.polices.titre), texte: policeSure(polices.texte, r.polices.texte) },
+  }
+}

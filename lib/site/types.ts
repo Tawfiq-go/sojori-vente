@@ -43,6 +43,8 @@ export type OffreServie = {
   serviceLu?: ServiceLu
   /** Le cadeau offert d'un séjour, lu en direct (son nom seulement). */
   cadeauLu?: { nom: Texte }
+  /** La composition de la page et ses emplacements d'images (srv-site, lot D1). Absente : rendu d'aujourd'hui. */
+  miseEnPage?: { id: string; emplacements?: Record<string, string>; programme?: Array<{ heure: string; quoi: Texte }>; atouts?: Texte[] }
 }
 
 /** Ce que le public peut lire d'un service : nom, prix TTC EN CENTIMES (prestation), photo, vendable depuis la landing. */
