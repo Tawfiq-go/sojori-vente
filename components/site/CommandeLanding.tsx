@@ -6,7 +6,7 @@
  * y applique la remise de la landing. Le paiement s'ouvre sur le lien que srv-site rend (https seulement). Voir lib/site/commande.ts.
  */
 import { type FormEvent, useEffect, useState } from 'react'
-import { codeErreur, lienOuvrable, montantMad } from '@/lib/site/commande'
+import { codeErreur, dateEvenement, lienOuvrable, montantMad } from '@/lib/site/commande'
 import { mot } from '@/lib/site/texte'
 import type { Langue } from '@/lib/site/types'
 
@@ -34,6 +34,8 @@ type Props = {
    * visiteur choisit. Absent : carte en ligne, comme aujourd'hui.
    */
   paiement?: { carte: boolean; surPlace: boolean }
+  /** Événement : sa date est FIXE (celle de Services) ; le panneau l'affiche au lieu de la demander, et ne cherche aucun créneau. */
+  evenement?: { debut: string }
 }
 
 const api = (slug: string, pageId: string, suite: string) => `/api/site-commande/${encodeURIComponent(slug)}/${encodeURIComponent(pageId)}/${suite}`
@@ -51,7 +53,7 @@ async function appeler(url: string, init?: RequestInit): Promise<{ ok: boolean; 
   }
 }
 
-export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrincipal, prixOffreCentimes: offrePrincipal, devise, formules, whatsapp, paiement }: Props) {
+export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrincipal, prixOffreCentimes: offrePrincipal, devise, formules, whatsapp, paiement, evenement }: Props) {
   const surPlacePossible = paiement?.surPlace === true
   const cartePossible = paiement ? paiement.carte : true
   const [surPlace, setSurPlace] = useState(surPlacePossible && !cartePossible)
@@ -142,7 +144,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
   if (commande)
     return (
       <div className="offre__commande" dir={dir} data-commande="recap">
-        <h2>{mot('cmdTitre', langue)}</h2>
+        <h2>{mot(evenement ? 'cmdTitreEvenement' : 'cmdTitre', langue)}</h2>
         <p>
           <strong>{commande.numero}</strong>
         </p>
@@ -174,7 +176,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
   const unite = prixOffreCentimes !== undefined && prixCentimes !== undefined && prixOffreCentimes < prixCentimes ? prixOffreCentimes : prixCentimes
   return (
     <form className="offre__commande" dir={dir} onSubmit={reserver} data-commande="formulaire">
-      <h2>{mot('cmdTitre', langue)}</h2>
+      <h2>{mot(evenement ? 'cmdTitreEvenement' : 'cmdTitre', langue)}</h2>
       {formules && formules.length > 0 && (
         <fieldset className="offre__commande-formules">
           <legend>{mot('cmdFormule', langue)}</legend>
@@ -204,10 +206,16 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
           {prixOffreCentimes !== undefined && prixCentimes !== undefined && prixOffreCentimes < prixCentimes && <s>{montantMad(prixCentimes, devise, langue)}</s>} <strong>{montantMad(unite, devise, langue)}</strong> {mot(choisie?.par === 'table' ? 'cmdPrixTable' : 'cmdPrixUnite', langue)}
         </p>
       )}
-      <label>
-        {mot('cmdDate', langue)}
-        <input type="date" required value={date} onChange={(e) => void choisirDate(e.target.value)} />
-      </label>
+      {evenement ? (
+        <p className="offre__commande-note" data-commande="date-evenement">
+          {dateEvenement(evenement.debut, langue)}
+        </p>
+      ) : (
+        <label>
+          {mot('cmdDate', langue)}
+          <input type="date" required value={date} onChange={(e) => void choisirDate(e.target.value)} />
+        </label>
+      )}
       {creneaux && creneaux.length === 0 && date && <p className="offre__commande-note">{mot('cmdAucunCreneau', langue)}</p>}
       {creneaux && creneaux.length > 0 && (
         <fieldset>

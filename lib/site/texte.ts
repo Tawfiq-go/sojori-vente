@@ -17,6 +17,7 @@ const MOTS = {
   reserver: { fr: 'Réserver', en: 'Book', ar: 'احجز' },
   cadeauOffert: { fr: 'Offert :', en: 'Included:', ar: 'هدية:' },
   cmdTitre: { fr: 'Réserver cette prestation', en: 'Book this service', ar: 'احجز هذه الخدمة' },
+  cmdTitreEvenement: { fr: 'Réserver vos places', en: 'Book your places', ar: 'احجز أماكنك' },
   cmdNom: { fr: 'Votre nom', en: 'Your name', ar: 'اسمك' },
   cmdEmail: { fr: 'Votre e-mail', en: 'Your email', ar: 'بريدك الإلكتروني' },
   cmdTel: { fr: 'Téléphone (facultatif)', en: 'Phone (optional)', ar: 'الهاتف (اختياري)' },
