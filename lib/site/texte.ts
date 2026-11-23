@@ -103,6 +103,15 @@ const MOTS = {
   decompteHeures: { fr: 'heures', en: 'hours', ar: 'ساعات' },
   decompteMinutes: { fr: 'min', en: 'min', ar: 'دقائق' },
   decompteSecondes: { fr: 'sec', en: 'sec', ar: 'ثوانٍ' },
+  // La mise en page « soirée » (23/11/2026)
+  soireeMoment: { fr: 'C’est le moment', en: 'It’s time', ar: 'حان الوقت' },
+  soireeDecompte: { fr: 'Le compte à rebours', en: 'The countdown', ar: 'العد التنازلي' },
+  soireeFormules: { fr: 'Les formules', en: 'Packages', ar: 'العروض' },
+  soireeVoirFormules: { fr: 'Voir les formules', en: 'See packages', ar: 'شاهد العروض' },
+  soireeProgramme: { fr: 'La nuit, heure par heure', en: 'The night, hour by hour', ar: 'الليلة، ساعة بساعة' },
+  soireeChoisir: { fr: 'Choisir', en: 'Choose', ar: 'اختر' },
+  soireeAmbiance: { fr: 'L’ambiance', en: 'The mood', ar: 'الأجواء' },
+  cmdFormule: { fr: 'Votre formule', en: 'Your package', ar: 'عرضك' },
   surDevis: { fr: 'Sur devis', en: 'On request', ar: 'حسب الطلب' },
   surLaCarte: { fr: 'Nos logements sur la carte', en: 'Our homes on the map', ar: 'مساكننا على الخريطة' },
   // L'espace IA du site (28/10/2026)

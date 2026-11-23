@@ -133,6 +133,15 @@ describe('relais serveur vers srv-site (vrai faux serveur HTTP)', () => {
     assert.equal(recus[0].methode, 'GET')
     assert.equal(recus[0].url, '/api/v1/public/sites/pm/pm-test/landings/page_1/commande/creneaux?date=2030-01-01')
   })
+  it('soirée : l’indice de formule (un chiffre de 0 à 5) suit la date ; toute autre valeur est ignorée', async () => {
+    await relayer(demande({ methode: 'GET', suite: ['creneaux'], corps: null, recherche: new URLSearchParams('date=2030-01-01&formule=2') }), env)
+    assert.equal(recus[0].url, '/api/v1/public/sites/pm/pm-test/landings/page_1/commande/creneaux?date=2030-01-01&formule=2')
+    for (const f of ['9', '01', '-1', 'x', '2&ownerId=evil']) {
+      recus = []
+      await relayer(demande({ methode: 'GET', suite: ['creneaux'], corps: null, recherche: new URLSearchParams(`date=2030-01-01&formule=${encodeURIComponent(f)}`) }), env)
+      assert.equal(recus[0].url, '/api/v1/public/sites/pm/pm-test/landings/page_1/commande/creneaux?date=2030-01-01', f)
+    }
+  })
   it('une date trop longue ou piégée est coupée à 10 caractères avant d’être transmise', async () => {
     await relayer(demande({ methode: 'GET', suite: ['creneaux'], corps: null, recherche: new URLSearchParams('date=2030-01-01%26ownerId%3Devil') }), env)
     assert.equal(recus[0].url, '/api/v1/public/sites/pm/pm-test/landings/page_1/commande/creneaux?date=2030-01-01')

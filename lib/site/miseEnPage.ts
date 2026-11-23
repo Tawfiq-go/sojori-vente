@@ -9,7 +9,7 @@
  * Le client remplit les emplacements quand il veut (chat, dashboard, photo du service). Pur, sans import (testé par `node --test`).
  */
 
-export const TYPES_SERVICE = ['sejour', 'restaurant', 'brunch', 'piscine', 'spa', 'navette', 'activite'] as const
+export const TYPES_SERVICE = ['sejour', 'restaurant', 'brunch', 'piscine', 'spa', 'navette', 'activite', 'soiree'] as const
 export type TypeService = (typeof TYPES_SERVICE)[number]
 
 export const FORMATS = ['16:9', '4:5', '1:1', '3:2'] as const
@@ -87,6 +87,17 @@ export const MISES_EN_PAGE: readonly MiseEnPage[] = [
     emplacements: [
       { id: 'lieu', role: 'lieu', format: '16:9', principal: true },
       { id: 'detail', role: 'detail', format: '4:5' },
+    ],
+  },
+  {
+    id: 'soiree',
+    nom: 'Soirée, événement',
+    description: 'Un premier écran sombre et le compte à rebours, l’ambiance, la nuit heure par heure, plusieurs formules à réserver.',
+    pour: ['soiree', 'restaurant', 'activite'],
+    emplacements: [
+      { id: 'fond', role: 'couverture', format: '16:9', principal: true },
+      { id: 'decor', role: 'ambiance', format: '4:5' },
+      { id: 'table', role: 'plat', format: '1:1' },
     ],
   },
 ]
@@ -186,4 +197,18 @@ export function marqueSure(couleurs: Partial<Record<keyof typeof REPLI_MARQUE.co
     },
     polices: { titre: policeSure(polices.titre, r.polices.titre), texte: policeSure(polices.texte, r.polices.texte) },
   }
+}
+
+/**
+ * Le moment fort d'une soirée tel qu'écrit par le PM (heure LOCALE, `2026-12-31T23:59`), en clair : « 31 décembre 2026, 23:59 ». Lu sans
+ * fuseau (c'est l'heure du lieu, jamais convertie) ; une date mal formée donne une chaîne vide.
+ */
+export function dateDuMoment(quand: string, langue: 'fr' | 'en' | 'ar'): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(quand)
+  if (!m) return ''
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]))
+  if (Number.isNaN(d.getTime()) || d.getUTCDate() !== +m[3]) return ''
+  const locale = langue === 'ar' ? 'ar-MA' : langue === 'en' ? 'en-GB' : 'fr-FR'
+  const jour = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(d)
+  return `${jour}, ${m[4]}:${m[5]}`
 }

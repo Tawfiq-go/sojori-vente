@@ -5,7 +5,8 @@
  * marque (variables `--mep-*`), jamais d'une valeur en dur.
  */
 import type { CSSProperties, ReactNode } from 'react'
-import { type Emplacement, type MiseEnPage, libelleRole, marqueSure, rendreEmplacement, variante } from '@/lib/site/miseEnPage'
+import { type Emplacement, type MiseEnPage, couleurSure, libelleRole, marqueSure, rendreEmplacement, variante } from '@/lib/site/miseEnPage'
+import { Decompte } from '../Decompte'
 
 export type DonneesLanding = {
   marque: string
@@ -28,6 +29,17 @@ export type DonneesLanding = {
   /** Places restantes, lues en direct (absent = non affiché). */
   restant?: string
   images: Record<string, string | undefined>
+  /** Soirée : la ligne au-dessus du titre (lieu, date du moment fort). */
+  lieuDate?: string
+  /** Soirée : le moment fort en UTC (srv-site) et les libellés du compte à rebours. */
+  momentUtc?: string
+  decompte?: { j: string; h: string; m: string; s: string; fin: string }
+  /** Soirée : l'ambiance en couleurs nommées (couleur revalidée au rendu). */
+  palette?: Array<{ nom: string; couleur: string }>
+  sections?: Array<{ titre: string; points: string[] }>
+  /** Soirée : les formules (prix du catalogue déjà mis en forme, lien vers le panneau avec la formule choisie). */
+  formules?: Array<{ indice: number; nom: string; prix?: string; points: string[]; badge?: string; lien?: string }>
+  libelles?: { formules: string; voirFormules: string; programme: string; choisir: string; ambiance: string }
 }
 
 type Props = { m: MiseEnPage; d: DonneesLanding; apercu: boolean }
@@ -329,6 +341,135 @@ function DayPass({ m, d, apercu }: Props) {
   )
 }
 
+
+/**
+ * Soirée, événement (réveillon, concert, gala) : un premier écran sombre plein cadre avec le compte à rebours, l'ambiance en couleurs
+ * nommées, les sections (décor, accueil, dress code…), la nuit heure par heure, puis les formules à réserver. Sans photo : le motif
+ * de la marque sur fond de nuit, et la page reste complète.
+ */
+function Soiree({ m, d, apercu }: Props) {
+  const avec = variante(m, d.images) === 'avec_images' || apercu
+  const lib = d.libelles
+  const decor = empl(m, 'decor')
+  const table = empl(m, 'table')
+  const photoDecor = avec && (apercu || d.images.decor)
+  const photoTable = avec && (apercu || d.images.table)
+  return (
+    <>
+      <section className={`mep-soiree${avec ? '' : ' mep-soiree--sans'}`}>
+        <header className="mep-soiree__hero">
+          {avec ? <Photo e={empl(m, 'fond')} d={d} apercu={apercu} className="mep-soiree__fond" /> : <div className="mep-soiree__fond mep-soiree__nuit" />}
+          <div className="mep-soiree__voile" />
+          <div className="mep-soiree__centre">
+            {(d.surtitre || d.lieuDate) && <p className="mep-surtitre">{d.surtitre || d.lieuDate}</p>}
+            <h1 className="mep-titre mep-soiree__titre">{d.titre}</h1>
+            {d.accroche && <p className="mep-accroche">{d.accroche}</p>}
+            {d.surtitre && d.lieuDate && <p className="mep-soiree__date">{d.lieuDate}</p>}
+            {d.momentUtc && d.decompte && (
+              <div className="mep-soiree__decompte">
+                <Decompte finUtc={d.momentUtc} libelles={d.decompte} />
+              </div>
+            )}
+            <div className="mep-actions mep-soiree__actions">
+              <a className="mep-bouton" href={d.lien ?? '#reserver'}>
+                {d.bouton}
+              </a>
+              {d.formules && d.formules.length > 0 && lib && (
+                <a className="mep-bouton mep-soiree__second" href="#formules">
+                  {lib.voirFormules}
+                </a>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {d.palette && d.palette.length > 0 && (
+          <div className="mep-soiree__ambiance">
+            {lib && <p className="mep-surtitre">{lib.ambiance}</p>}
+            <ul className="mep-soiree__palette">
+              {d.palette.map((c) => (
+                <li key={c.nom}>
+                  <span className="mep-soiree__pastille" style={{ background: couleurSure(c.couleur, d.couleurs.accent) }} />
+                  {c.nom}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {(d.sections?.length || photoDecor) && (
+          <div className={`mep-soiree__sections${photoDecor ? ' mep-soiree__sections--photo' : ''}`}>
+            {photoDecor && <Photo e={decor} d={d} apercu={apercu} className="mep-soiree__decor" />}
+            <div className="mep-soiree__cartes">
+              {d.sections?.map((s) => (
+                <article key={s.titre} className="mep-soiree__carte">
+                  <h2>{s.titre}</h2>
+                  <ul>
+                    {s.points.map((p) => (
+                      <li key={p}>{p}</li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {d.programme && d.programme.length > 0 && (
+          <div className="mep-soiree__nuit-bloc">
+            {lib && <h2 className="mep-soiree__h2">{lib.programme}</h2>}
+            <ol className="mep-soiree__frise">
+              {d.programme.map((p) => (
+                <li key={`${p.heure}-${p.quoi}`}>
+                  <time>{p.heure}</time>
+                  <span>{p.quoi}</span>
+                </li>
+              ))}
+            </ol>
+            {photoTable && <Photo e={table} d={d} apercu={apercu} className="mep-soiree__table" />}
+          </div>
+        )}
+
+        {d.formules && d.formules.length > 0 && (
+          <div className="mep-soiree__formules-bloc" id="formules">
+            {lib && <h2 className="mep-soiree__h2">{lib.formules}</h2>}
+            <div className="mep-soiree__formules">
+              {d.formules.map((f) => (
+                <article key={f.indice} className="mep-soiree__formule">
+                  {f.badge && <p className="mep-soiree__badge">{f.badge}</p>}
+                  <h3>{f.nom}</h3>
+                  {f.prix && <p className="mep-soiree__prix">{f.prix}</p>}
+                  {f.points.length > 0 && (
+                    <ul>
+                      {f.points.map((p) => (
+                        <li key={p}>{p}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {f.lien && lib && (
+                    <a className="mep-bouton" href={f.lien}>
+                      {lib.choisir}
+                    </a>
+                  )}
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {d.atouts && d.atouts.length > 0 && (
+          <ul className="mep-atouts mep-soiree__atouts">
+            {d.atouts.map((a) => (
+              <li key={a}>{a}</li>
+            ))}
+          </ul>
+        )}
+      </section>
+      <Bas d={d} />
+    </>
+  )
+}
+
 const RENDUS: Record<string, (p: Props) => ReactNode> = {
   editorial: Editorial,
   diptyque: Diptyque,
@@ -336,6 +477,7 @@ const RENDUS: Record<string, (p: Props) => ReactNode> = {
   typographique: Typographique,
   carte_chef: CarteChef,
   day_pass: DayPass,
+  soiree: Soiree,
 }
 
 /** Une landing rendue dans sa mise en page, aux couleurs et polices de la marque. */

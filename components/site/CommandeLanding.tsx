@@ -5,7 +5,7 @@
  * AUCUN prix : le prix par place affiché vient du catalogue (lu par srv-site), le total vient de la réponse du serveur de commandes, qui
  * y applique la remise de la landing. Le paiement s'ouvre sur le lien que srv-site rend (https seulement). Voir lib/site/commande.ts.
  */
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 import { codeErreur, lienOuvrable, montantMad } from '@/lib/site/commande'
 import { mot } from '@/lib/site/texte'
 import type { Langue } from '@/lib/site/types'
@@ -22,6 +22,11 @@ type Props = {
   prixCentimes?: number
   prixOffreCentimes?: number
   devise: string
+  /**
+   * Soirée : les formules (indice dans `miseEnPage.formules`, nom, prix du catalogue pour l'AFFICHAGE). Le visiteur en choisit une ;
+   * seul l'INDICE part au serveur, qui retrouve la prestation dans la landing publiée. Un lien `#reserver-f<indice>` la présélectionne.
+   */
+  formules?: Array<{ indice: number; nom: string; prixCentimes?: number }>
 }
 
 const api = (slug: string, pageId: string, suite: string) => `/api/site-commande/${encodeURIComponent(slug)}/${encodeURIComponent(pageId)}/${suite}`
@@ -39,7 +44,8 @@ async function appeler(url: string, init?: RequestInit): Promise<{ ok: boolean; 
   }
 }
 
-export function CommandeLanding({ slug, pageId, langue, prixCentimes, prixOffreCentimes, devise }: Props) {
+export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrincipal, prixOffreCentimes: offrePrincipal, devise, formules }: Props) {
+  const [formule, setFormule] = useState<number | undefined>(formules?.[0]?.indice)
   const [nom, setNom] = useState('')
   const [email, setEmail] = useState('')
   const [telephone, setTelephone] = useState('')
@@ -53,6 +59,30 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes, prixOffreC
   const dir = langue === 'ar' ? 'rtl' : 'ltr'
 
   const dire = (code: unknown) => setErreur(mot(`cmdErreur_${codeErreur(code)}` as never, langue))
+  const choisie = formules?.find((f) => f.indice === formule)
+  // Une formule n'est jamais remisée : son prix est celui du catalogue. Sans formule, la prestation principale (et sa remise).
+  const prixCentimes = formules?.length ? choisie?.prixCentimes : prixPrincipal
+  const prixOffreCentimes = formules?.length ? undefined : offrePrincipal
+  const avecFormule = formules?.length && formule !== undefined ? `&formule=${formule}` : ''
+
+  // Un bouton « Choisir » d'une carte de formule mène à `#reserver-f<indice>` : la formule est présélectionnée, le panneau vient à l'écran.
+  useEffect(() => {
+    if (!formules?.length) return
+    const lire = () => {
+      const m = /^#reserver-f([0-5])$/.exec(window.location.hash)
+      if (!m) return
+      const i = Number(m[1])
+      if (!formules.some((f) => f.indice === i)) return
+      setFormule(i)
+      setCreneaux(null)
+      setCreneau('')
+      setDate('')
+      document.getElementById('reserver')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+    lire()
+    window.addEventListener('hashchange', lire)
+    return () => window.removeEventListener('hashchange', lire)
+  }, [formules])
 
   async function choisirDate(v: string) {
     setDate(v)
@@ -60,7 +90,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes, prixOffreC
     setCreneaux(null)
     setErreur('')
     if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return
-    const r = await appeler(`${api(slug, pageId, 'creneaux')}?date=${v}`)
+    const r = await appeler(`${api(slug, pageId, 'creneaux')}?date=${v}${avecFormule}`)
     if (!r.ok) return dire(r.donnees?.error)
     const liste = r.donnees?.data?.creneaux
     // Une prestation sans créneau (instantanée, sur demande) renvoie une liste vide : aucun choix à faire.
@@ -76,7 +106,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes, prixOffreC
     const r = await appeler(api(slug, pageId, 'commande'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ client: { nom, email, ...(telephone ? { telephone } : {}) }, quantite, ...(date ? { date } : {}), ...(creneau ? { creneau } : {}) }),
+      body: JSON.stringify({ client: { nom, email, ...(telephone ? { telephone } : {}) }, quantite, ...(date ? { date } : {}), ...(creneau ? { creneau } : {}), ...(formules?.length && formule !== undefined ? { formule } : {}) }),
     })
     setOccupe(false)
     if (!r.ok) return dire(r.donnees?.error)
@@ -126,6 +156,30 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes, prixOffreC
   return (
     <form className="offre__commande" dir={dir} onSubmit={reserver} data-commande="formulaire">
       <h2>{mot('cmdTitre', langue)}</h2>
+      {formules && formules.length > 0 && (
+        <fieldset className="offre__commande-formules">
+          <legend>{mot('cmdFormule', langue)}</legend>
+          {formules.map((f) => (
+            <label key={f.indice} className="offre__commande-creneau">
+              <input
+                type="radio"
+                name="formule"
+                value={f.indice}
+                checked={formule === f.indice}
+                onChange={() => {
+                  setFormule(f.indice)
+                  setCreneaux(null)
+                  setCreneau('')
+                  setDate('')
+                }}
+                required
+              />
+              {f.nom}
+              {f.prixCentimes !== undefined ? ` · ${montantMad(f.prixCentimes, devise, langue)}` : ''}
+            </label>
+          ))}
+        </fieldset>
+      )}
       {unite !== undefined && (
         <p className="offre__commande-prix">
           {prixOffreCentimes !== undefined && prixCentimes !== undefined && prixOffreCentimes < prixCentimes && <s>{montantMad(prixCentimes, devise, langue)}</s>} <strong>{montantMad(unite, devise, langue)}</strong> {mot('cmdPrixUnite', langue)}

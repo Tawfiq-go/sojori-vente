@@ -109,6 +109,9 @@ export async function relayer(d: Demande, env: Record<string, string | undefined
   if (g.methode === 'GET') {
     const date = d.recherche.get('date') || ''
     url += `?date=${encodeURIComponent(date.slice(0, 10))}`
+    // Soirée : l'indice de la formule choisie (un chiffre de 0 à 5), sinon rien (la prestation principale). srv-site revérifie.
+    const formule = d.recherche.get('formule') || ''
+    if (/^[0-5]$/.test(formule)) url += `&formule=${formule}`
   }
   const init: RequestInit = { method: g.methode, headers: { 'x-forwarded-for': ip, 'content-type': 'application/json' }, cache: 'no-store', signal: AbortSignal.timeout(15_000) }
   if (g.methode === 'POST') {
