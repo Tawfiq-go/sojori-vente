@@ -6,7 +6,7 @@
  * y applique la remise de la landing. Le paiement s'ouvre sur le lien que srv-site rend (https seulement). Voir lib/site/commande.ts.
  */
 import { type FormEvent, useEffect, useState } from 'react'
-import { codeErreur, dateEvenement, lienOuvrable, montantMad } from '@/lib/site/commande'
+import { codeErreur, dateEvenement, lienOuvrable, montantMad, premiereDateLibre } from '@/lib/site/commande'
 import { mot } from '@/lib/site/texte'
 import type { Langue } from '@/lib/site/types'
 
@@ -35,7 +35,7 @@ type Props = {
    */
   paiement?: { carte: boolean; surPlace: boolean }
   /** Événement : sa date est FIXE (celle de Services) ; le panneau l'affiche au lieu de la demander, et ne cherche aucun créneau. */
-  evenement?: { debut: string }
+  evenement?: { debut: string; /** Périodique : les dates ouvertes, une seule se réserve par commande. */ dates?: Array<{ date: string; debut: string; restantes: number }> }
 }
 
 const api = (slug: string, pageId: string, suite: string) => `/api/site-commande/${encodeURIComponent(slug)}/${encodeURIComponent(pageId)}/${suite}`
@@ -63,6 +63,8 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
   const [telephone, setTelephone] = useState('')
   const [quantite, setQuantite] = useState(1)
   const [date, setDate] = useState('')
+  // Événement périodique : la date choisie (à part de `date`, qu'un changement de formule remet à zéro).
+  const [dateChoisie, setDateChoisie] = useState(premiereDateLibre(evenement?.dates))
   const [creneaux, setCreneaux] = useState<Creneau[] | null>(null)
   const [creneau, setCreneau] = useState('')
   const [occupe, setOccupe] = useState(false)
@@ -121,7 +123,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
     const r = await appeler(api(slug, pageId, 'commande'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ client: { nom, email, ...(telephone ? { telephone } : {}) }, quantite, ...(date ? { date } : {}), ...(creneau ? { creneau } : {}), ...(choixEnvoye !== undefined ? { formule: choixEnvoye } : {}), ...(surPlace ? { paiement: 'sur_place' } : {}) }),
+      body: JSON.stringify({ client: { nom, email, ...(telephone ? { telephone } : {}) }, quantite, ...(evenement?.dates ? { date: dateChoisie } : date ? { date } : {}), ...(creneau ? { creneau } : {}), ...(choixEnvoye !== undefined ? { formule: choixEnvoye } : {}), ...(surPlace ? { paiement: 'sur_place' } : {}) }),
     })
     setOccupe(false)
     if (!r.ok) return dire(r.donnees?.error)
@@ -206,7 +208,19 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
           {prixOffreCentimes !== undefined && prixCentimes !== undefined && prixOffreCentimes < prixCentimes && <s>{montantMad(prixCentimes, devise, langue)}</s>} <strong>{montantMad(unite, devise, langue)}</strong> {mot(choisie?.par === 'table' ? 'cmdPrixTable' : 'cmdPrixUnite', langue)}
         </p>
       )}
-      {evenement ? (
+      {evenement?.dates ? (
+        <label>
+          {mot('cmdDate', langue)}
+          <select required value={dateChoisie} onChange={(e) => setDateChoisie(e.target.value)} data-commande="date-periodique">
+            {!dateChoisie && <option value="">{mot('soireeComplet', langue)}</option>}
+            {evenement.dates.map((d) => (
+              <option key={d.date} value={d.date} disabled={d.restantes < 1}>
+                {`${dateEvenement(d.debut, langue)} · ${d.restantes < 1 ? mot('soireeComplet', langue) : mot('soireeRestantes', langue).replace('{n}', String(d.restantes))}`}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : evenement ? (
         <p className="offre__commande-note" data-commande="date-evenement">
           {dateEvenement(evenement.debut, langue)}
         </p>

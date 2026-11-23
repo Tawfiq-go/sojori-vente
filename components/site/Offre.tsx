@@ -8,7 +8,7 @@
  */
 import type { CSSProperties } from 'react'
 import '@/app/mise-en-page.css'
-import { commandeAllumee, montantMad, panneauCommande } from '@/lib/site/commande'
+import { commandeAllumee, datesAChoisir, montantMad, panneauCommande } from '@/lib/site/commande'
 import { dateDuMoment, imagesDesEmplacements, miseEnPage } from '@/lib/site/miseEnPage'
 import { prixServiceRemise } from '@/lib/site/jetons'
 import { cibleDeLOffre, couleurValeurSurVoile, lienWhatsappOffre, secondBoutonUtile } from '@/lib/site/offre'
@@ -104,8 +104,11 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
       },
     ]
   })
+  // Périodique : les places se lisent date par date dans le panneau, jamais un seul nombre en tête de page.
   const restantes = offre.evenementLu
-    ? offre.evenementLu.restantes > 0
+    ? offre.evenementLu.repetition && offre.evenementLu.reservable
+      ? undefined
+      : offre.evenementLu.restantes > 0
       ? mot('soireeRestantes', ctx.langue).replace('{n}', String(offre.evenementLu.restantes))
       : mot('soireeComplet', ctx.langue)
     : undefined
@@ -182,10 +185,10 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
             devise={offre.serviceLu?.devise ?? 'MAD'}
             prixCentimes={offre.serviceLu?.prixCentimes}
             prixOffreCentimes={typeof offre.serviceLu?.prixCentimes === 'number' && offre.remise ? prixServiceRemise(offre.serviceLu.prixCentimes, offre.remise.pourcent, offre.remise.arrondi) : undefined}
-            formules={formules.some((f) => f.commandable) ? formules.filter((f) => f.commandable).map((f) => ({ indice: f.indice, nom: f.nom, prixCentimes: f.prixCentimes, par: f.par, id: 'id' in f ? f.id : undefined })) : undefined}
+            formules={formules.some((f) => f.commandable) ? formules.filter((f) => f.commandable).map((f) => ({ indice: f.indice, nom: f.nom, prixCentimes: f.prixCentimes, par: f.par, id: 'id' in f && typeof f.id === 'string' ? f.id : undefined })) : undefined}
             whatsapp={evenement}
             paiement={evenement ? offre.evenementLu?.paiement : undefined}
-            evenement={evenement && offre.evenementLu?.debut ? { debut: offre.evenementLu.debut } : undefined}
+            evenement={evenement && offre.evenementLu?.debut ? { debut: offre.evenementLu.debut, dates: datesAChoisir(offre.evenementLu) } : undefined}
           />
         </div>
       )}

@@ -73,7 +73,7 @@ export function limiteur(max: number, fenetreMs = 60_000, maintenant: () => numb
 }
 
 /** Les erreurs que le panneau sait dire (codes stables de srv-services, relayés par srv-site), sinon le message générique. */
-export const ERREURS = ['CRENEAU_COMPLET', 'CRENEAU_INDISPONIBLE', 'STOCK_INSUFFISANT', 'HORS_PORTEE', 'CATALOGUE_EXTERNE', 'PROMOTION_INDISPONIBLE', 'TROP_DE_COMMANDES', 'VALIDATION', 'EMAIL_INVALIDE', 'paiement_indisponible', 'landing_non_servie', 'EVENEMENT_FERME', 'EVENEMENT_PASSE', 'EVENEMENT_SEUL', 'MODE_PAIEMENT_REFUSE', 'SUR_PLACE_PLAFOND'] as const
+export const ERREURS = ['CRENEAU_COMPLET', 'CRENEAU_INDISPONIBLE', 'STOCK_INSUFFISANT', 'HORS_PORTEE', 'CATALOGUE_EXTERNE', 'PROMOTION_INDISPONIBLE', 'TROP_DE_COMMANDES', 'VALIDATION', 'EMAIL_INVALIDE', 'paiement_indisponible', 'landing_non_servie', 'EVENEMENT_FERME', 'EVENEMENT_PASSE', 'EVENEMENT_SEUL', 'MODE_PAIEMENT_REFUSE', 'SUR_PLACE_PLAFOND', 'DATE_EVENEMENT_INVALIDE', 'EVENEMENT_UNE_DATE'] as const
 export type CodeErreur = (typeof ERREURS)[number]
 export const codeErreur = (v: unknown): CodeErreur | 'autre' => ((ERREURS as readonly string[]).includes(v as string) ? (v as CodeErreur) : 'autre')
 
@@ -152,3 +152,16 @@ export function dateEvenement(debut: string, langue: string): string {
   const loc = langue === 'ar' ? 'ar-MA' : langue
   return d.toLocaleString(loc, { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
+
+/**
+ * Les dates à proposer pour un événement PÉRIODIQUE (dates lues par srv-site, jamais calculées ici), chacune avec ses places. Absent :
+ * événement à date unique (ou répétition illisible) : la date se montre, elle ne se choisit pas.
+ */
+export function datesAChoisir(e: { repetition?: { heure: string }; prochaines?: Array<{ date: string; restantes: number }> } | undefined): Array<{ date: string; debut: string; restantes: number }> | undefined {
+  const heure = e?.repetition?.heure
+  if (!heure) return undefined
+  return (e?.prochaines ?? []).filter((p) => /^\d{4}-\d{2}-\d{2}$/.test(p.date)).map((p) => ({ date: p.date, debut: `${p.date}T${heure}`, restantes: p.restantes }))
+}
+
+/** La date proposée d'abord : la première qui a encore de la place (sinon aucune : rien n'est présélectionné sur une date complète). */
+export const premiereDateLibre = (dates: ReadonlyArray<{ date: string; restantes: number }> | undefined): string => dates?.find((d) => d.restantes > 0)?.date ?? ''

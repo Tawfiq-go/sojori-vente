@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import http from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { after, before, beforeEach, describe, it } from 'node:test'
-import { codeErreur, commandeAllumee, dateEvenement, geste, ipDuVisiteur, lienOuvrable, limiteur, montantMad, panneauCommande, relayer } from '../../lib/site/commande.ts'
+import { codeErreur, commandeAllumee, dateEvenement, datesAChoisir, geste, ipDuVisiteur, lienOuvrable, limiteur, montantMad, panneauCommande, premiereDateLibre, relayer } from '../../lib/site/commande.ts'
 
 const ID = 'ab'.repeat(12)
 const prestationEnCours = { etat: 'en_cours', service: { forme: 'prestation' }, serviceLu: { commandable: true } }
@@ -203,7 +203,7 @@ describe('événement : le panneau de réservation', () => {
 
 describe('événement : les refus se disent', () => {
   it('EVENEMENT_FERME, EVENEMENT_PASSE et EVENEMENT_SEUL sont des codes connus du panneau', () => {
-    for (const c of ['EVENEMENT_FERME', 'EVENEMENT_PASSE', 'EVENEMENT_SEUL', 'MODE_PAIEMENT_REFUSE', 'SUR_PLACE_PLAFOND']) assert.equal(codeErreur(c), c)
+    for (const c of ['EVENEMENT_FERME', 'EVENEMENT_PASSE', 'EVENEMENT_SEUL', 'MODE_PAIEMENT_REFUSE', 'SUR_PLACE_PLAFOND', 'DATE_EVENEMENT_INVALIDE', 'EVENEMENT_UNE_DATE']) assert.equal(codeErreur(c), c)
   })
 })
 
@@ -217,5 +217,21 @@ describe('dateEvenement : la date d\'un événement, heure du LIEU, jamais conve
     assert.equal(dateEvenement('2026-12-31', 'fr'), '')
     assert.equal(dateEvenement('n’importe quoi', 'en'), '')
     assert.equal(dateEvenement('2026-02-30T10:00x', 'fr'), '')
+  })
+})
+
+describe('événement périodique : les dates à choisir', () => {
+  it('seulement si la répétition est lue ; dates servies, jamais calculées ; la première libre est proposée', () => {
+    assert.equal(datesAChoisir(undefined), undefined)
+    assert.equal(datesAChoisir({ prochaines: [{ date: '2026-12-31', restantes: 4 }] }), undefined, 'date unique')
+    const dates = datesAChoisir({ repetition: { heure: '12:00' }, prochaines: [{ date: '2026-12-06', restantes: 0 }, { date: '2026-12-13', restantes: 3 }, { date: 'x', restantes: 9 }] })
+    assert.deepEqual(dates, [
+      { date: '2026-12-06', debut: '2026-12-06T12:00', restantes: 0 },
+      { date: '2026-12-13', debut: '2026-12-13T12:00', restantes: 3 },
+    ])
+    assert.equal(premiereDateLibre(dates), '2026-12-13', 'jamais une date complète')
+    assert.equal(premiereDateLibre([{ date: '2026-12-06', restantes: 0 }]), '')
+    assert.equal(premiereDateLibre(undefined), '')
+    assert.deepEqual(datesAChoisir({ repetition: { heure: '12:00' } }), [])
   })
 })
