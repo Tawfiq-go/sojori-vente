@@ -28,6 +28,8 @@ export type OffreServie = {
   etat: 'a_venir' | 'en_cours' | 'terminee'
   debutUtc?: string
   finUtc?: string
+  /** Soirée : le moment fort (`miseEnPage.evenement.quand`) en UTC, calculé par srv-site : le compte à rebours. */
+  momentUtc?: string
   apresFin?: 'terminee' | 'masquer'
   /** Point d'accroche du paiement : seul `whatsapp` change l'affichage (le bouton mène à WhatsApp) ; `moteur` n'est pas branché. */
   paiement?: 'demonstration' | 'whatsapp' | 'moteur'
@@ -44,7 +46,20 @@ export type OffreServie = {
   /** Le cadeau offert d'un séjour, lu en direct (son nom seulement). */
   cadeauLu?: { nom: Texte }
   /** La composition de la page et ses emplacements d'images (srv-site, lot D1). Absente : rendu d'aujourd'hui. */
-  miseEnPage?: { id: string; emplacements?: Record<string, string>; programme?: Array<{ heure: string; quoi: Texte }>; atouts?: Texte[] }
+  miseEnPage?: {
+    id: string
+    emplacements?: Record<string, string>
+    programme?: Array<{ heure: string; quoi: Texte }>
+    atouts?: Texte[]
+    /** Soirée : le moment fort (heure locale) et le lieu. */
+    evenement?: { quand: string; lieu?: Texte }
+    palette?: Array<{ nom: Texte; couleur: string }>
+    sections?: Array<{ titre: Texte; points: Texte[] }>
+    /** Soirée : les formules, chacune une prestation ; leur nom et leur prix sont dans `formulesLues` (même indice). */
+    formules?: Array<{ service: { id: string; nom: string }; points?: Texte[]; badge?: Texte }>
+  }
+  /** Soirée : les formules lues en direct par srv-site, même ordre que `miseEnPage.formules` ; `null` = illisible, non montrée. */
+  formulesLues?: Array<ServiceLu | null>
 }
 
 /** Ce que le public peut lire d'un service : nom, prix TTC EN CENTIMES (prestation), photo, vendable depuis la landing. */

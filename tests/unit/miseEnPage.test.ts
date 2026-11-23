@@ -1,15 +1,15 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { describe, it } from 'node:test'
-import { MISES_EN_PAGE, REPLI_MARQUE, TYPES_SERVICE, couleurSure, emplacementsVides, imageUtilisable, imagesDesEmplacements, marqueSure, policeSure, miseEnPage, misesEnPagePour, rendreEmplacement, variante } from '../../lib/site/miseEnPage.ts'
+import { MISES_EN_PAGE, REPLI_MARQUE, TYPES_SERVICE, couleurSure, dateDuMoment, emplacementsVides, imageUtilisable, imagesDesEmplacements, marqueSure, policeSure, miseEnPage, misesEnPagePour, rendreEmplacement, variante } from '../../lib/site/miseEnPage.ts'
 
 const ed = miseEnPage('editorial')!
 const dip = miseEnPage('diptyque')!
 
 describe('mises en page : catalogue', () => {
-  it('six mises en page, identifiants uniques, au moins une par type de service, un emplacement principal quand il y a des photos', () => {
-    assert.equal(MISES_EN_PAGE.length, 6)
-    assert.equal(new Set(MISES_EN_PAGE.map((m) => m.id)).size, 6)
+  it('sept mises en page, identifiants uniques, au moins une par type de service, un emplacement principal quand il y a des photos', () => {
+    assert.equal(MISES_EN_PAGE.length, 7)
+    assert.equal(new Set(MISES_EN_PAGE.map((m) => m.id)).size, 7)
     for (const t of TYPES_SERVICE) assert.ok(misesEnPagePour(t).length > 0, t)
     for (const m of MISES_EN_PAGE) {
       if (m.emplacements.length) assert.equal(m.emplacements.filter((e) => e.principal).length, 1, m.id)
@@ -105,3 +105,19 @@ describe('style en ligne : couleurs et polices validées (aucune injection CSS)'
     assert.match(rendu, /const d: DonneesLanding = \{ \.\.\.brut, \.\.\.marqueSure\(brut\.couleurs, brut\.polices\) \}/)
   })
 })
+
+describe('mise en page soirée', () => {
+  it('trois emplacements (fond principal, décor, table), mêmes identifiants que srv-site ; proposée d’abord pour une soirée', () => {
+    const m = miseEnPage('soiree')!
+    assert.deepEqual(m.emplacements.map((e) => e.id), ['fond', 'decor', 'table'])
+    assert.equal(m.emplacements.find((e) => e.principal)?.id, 'fond')
+    assert.equal(misesEnPagePour('soiree', 3)[0].id, 'soiree')
+  })
+  it('le moment fort en clair, à l’heure du lieu (jamais convertie) ; une date fausse ne donne rien', () => {
+    assert.equal(dateDuMoment('2026-12-31T23:59', 'fr'), '31 décembre 2026, 23:59')
+    assert.equal(dateDuMoment('2026-12-31T23:59', 'en'), '31 December 2026, 23:59')
+    assert.equal(dateDuMoment('2026-02-30T20:00', 'fr'), '')
+    assert.equal(dateDuMoment('demain', 'fr'), '')
+  })
+})
+

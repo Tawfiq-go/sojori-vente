@@ -8,8 +8,8 @@
  */
 import type { CSSProperties } from 'react'
 import '@/app/mise-en-page.css'
-import { commandeAllumee, panneauCommande } from '@/lib/site/commande'
-import { imagesDesEmplacements, miseEnPage } from '@/lib/site/miseEnPage'
+import { commandeAllumee, montantMad, panneauCommande } from '@/lib/site/commande'
+import { dateDuMoment, imagesDesEmplacements, miseEnPage } from '@/lib/site/miseEnPage'
 import { prixServiceRemise } from '@/lib/site/jetons'
 import { cibleDeLOffre, couleurValeurSurVoile, lienWhatsappOffre, secondBoutonUtile } from '@/lib/site/offre'
 import { lien } from '@/lib/site/route'
@@ -82,6 +82,26 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
       : typeof cible === 'string' && cible.startsWith('/')
         ? lien(ctx.base, ctx.langue, ctx.defaut, cible.slice(1))
         : undefined
+  // Soirée : les formules lisibles (prix du catalogue, jamais remisé), chacune menant au panneau avec SA formule choisie.
+  const lang = ctx.langue === 'ar' || ctx.langue === 'en' ? ctx.langue : 'fr'
+  const formules = (mep.formules ?? []).flatMap((f, indice) => {
+    const lu = offre.formulesLues?.[indice]
+    if (!lu) return []
+    return [
+      {
+        indice,
+        nom: t(lu.nom, ctx.langue, ctx.defaut) || f.service.nom,
+        prixCentimes: lu.prixCentimes,
+        prix: typeof lu.prixCentimes === 'number' ? montantMad(lu.prixCentimes, lu.devise ?? 'MAD', lang) : undefined,
+        points: (f.points ?? []).map((p) => t(p, ctx.langue, ctx.defaut)).filter(Boolean),
+        badge: t(f.badge, ctx.langue, ctx.defaut) || undefined,
+        lien: commande && lu.commandable ? `#reserver-f${indice}` : lienBouton,
+        commandable: lu.commandable,
+      },
+    ]
+  })
+  const lieu = t(mep.evenement?.lieu, ctx.langue, ctx.defaut)
+  const moment = mep.evenement?.quand ? dateDuMoment(mep.evenement.quand, lang) : ''
   return (
     <section className="section offre offre--mise-en-page" data-section={s.id} id={s.id}>
       <LandingMiseEnPage
@@ -102,6 +122,27 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
           programme: mep.programme?.map((p) => ({ heure: p.heure, quoi: t(p.quoi, ctx.langue, ctx.defaut) })).filter((p) => p.quoi),
           atouts: mep.atouts?.map((a) => t(a, ctx.langue, ctx.defaut)).filter(Boolean),
           images: imagesDesEmplacements(mep.emplacements, ctx.site.medias, offre.serviceLu?.image),
+          lieuDate: [lieu, moment].filter(Boolean).join(' · ') || undefined,
+          momentUtc: offre.momentUtc,
+          decompte: {
+            j: mot('decompteJours', ctx.langue),
+            h: mot('decompteHeures', ctx.langue),
+            m: mot('decompteMinutes', ctx.langue),
+            s: mot('decompteSecondes', ctx.langue),
+            fin: mot('soireeMoment', ctx.langue),
+          },
+          palette: mep.palette?.map((c) => ({ nom: t(c.nom, ctx.langue, ctx.defaut), couleur: c.couleur })).filter((c) => c.nom),
+          sections: mep.sections
+            ?.map((x) => ({ titre: t(x.titre, ctx.langue, ctx.defaut), points: x.points.map((p) => t(p, ctx.langue, ctx.defaut)).filter(Boolean) }))
+            .filter((x) => x.titre && x.points.length),
+          formules,
+          libelles: {
+            formules: mot('soireeFormules', ctx.langue),
+            voirFormules: mot('soireeVoirFormules', ctx.langue),
+            programme: mot('soireeProgramme', ctx.langue),
+            choisir: mot('soireeChoisir', ctx.langue),
+            ambiance: mot('soireeAmbiance', ctx.langue),
+          },
         }}
       />
       {commande && ctx.pageId && (
@@ -113,6 +154,7 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
             devise={offre.serviceLu?.devise ?? 'MAD'}
             prixCentimes={offre.serviceLu?.prixCentimes}
             prixOffreCentimes={typeof offre.serviceLu?.prixCentimes === 'number' && offre.remise ? prixServiceRemise(offre.serviceLu.prixCentimes, offre.remise.pourcent, offre.remise.arrondi) : undefined}
+            formules={formules.some((f) => f.commandable) ? formules.filter((f) => f.commandable).map((f) => ({ indice: f.indice, nom: f.nom, prixCentimes: f.prixCentimes })) : undefined}
           />
         </div>
       )}

@@ -163,6 +163,42 @@ const DONNEES: Record<string, DonneesLanding> = {
     conditions: 'Annulation gratuite jusqu’à 24 h avant.',
     images: { lieu: '/maquettes/2025_08_DSC00522.webp', detail: '/maquettes/2025_08_DSC00543.webp' },
   },
+  soiree: {
+    marque: 'Nommos',
+    couleurs: { accent: '#c9a36b', doux: '#e2d6c0', ...sable },
+    polices: { titre: 'Cormorant Garamond', texte: 'Inter' },
+    titre: 'The Midnight Ritual',
+    accroche: 'Un dîner, des rythmes, le passage à 2027.',
+    lieuDate: 'Marrakech · 31 décembre 2026, 23:59',
+    momentUtc: '2026-12-31T22:59:00.000Z',
+    decompte: { j: 'jours', h: 'heures', m: 'min', s: 'sec', fin: 'C’est le moment' },
+    bouton: 'Réserver une table',
+    lien: '#formules',
+    palette: [
+      { nom: 'Brun profond', couleur: '#3a2618' },
+      { nom: 'Bronze', couleur: '#b08d57' },
+      { nom: 'Ivoire', couleur: '#f3ece0' },
+    ],
+    sections: [
+      { titre: 'Le décor', points: ['Les arches et les suspensions tressées, habillées de bronze.', 'Un cercle lumineux 2027 pour la photo de minuit.'] },
+      { titre: 'L’accueil', points: ['Accueil à table, réservations nominatives.', 'Une équipe en noir, détail bronze.'] },
+      { titre: 'Dress code', points: ['Chic méditerranéen.'] },
+    ],
+    programme: [
+      { heure: '20:00', quoi: 'Accueil, DJ lounge' },
+      { heure: '21:45', quoi: 'Intervention live' },
+      { heure: '23:00', quoi: 'Dessert et montée d’ambiance' },
+      { heure: '00:00', quoi: 'Le cercle s’embrase' },
+    ],
+    formules: [
+      { indice: 0, nom: 'Entrée', prix: '800 MAD', badge: 'Avant minuit', points: ['1 consommation', 'Buffet et animations'], lien: '#formules' },
+      { indice: 1, nom: 'Table standard', prix: '5 000 MAD', points: ['4 personnes', '1 bouteille'], lien: '#formules' },
+      { indice: 2, nom: 'Table VIP', prix: '10 000 MAD', badge: 'Le plus exclusif', points: ['6 personnes face à la scène', '1 magnum'], lien: '#formules' },
+    ],
+    libelles: { formules: 'Les formules', voirFormules: 'Voir les formules', programme: 'La nuit, heure par heure', choisir: 'Choisir', ambiance: 'L’ambiance' },
+    conditions: 'Programme indicatif : artistes et horaires à confirmer.',
+    images: { fond: '/maquettes/2025_08_DSC00899.webp', decor: '/maquettes/2025_08_DSC00858.webp' },
+  },
 }
 
 type Props = { searchParams: Promise<{ modele?: string; images?: string; mode?: string }> }
