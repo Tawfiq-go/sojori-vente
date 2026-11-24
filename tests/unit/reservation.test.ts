@@ -99,8 +99,8 @@ describe('création : tout refus est net, jamais une réservation devinée', () 
   })
   it('appelle POST /api/v1/guest/reservations (une seule fois, sans barre en trop)', async () => {
     const vus: string[] = []
-    await creer(c, 'https://api.test/', (async (u: any, init: any) => {
-      vus.push(`${init.method} ${u}`)
+    await creer(c, 'https://api.test/', (async (u: RequestInfo | URL, init?: RequestInit) => {
+      vus.push(`${init?.method} ${String(u)}`)
       return new Response('{}', { status: 500 })
     }) as typeof fetch)
     assert.deepEqual(vus, ['POST https://api.test/api/v1/guest/reservations'])
