@@ -31,6 +31,11 @@ const MOTS = {
   cmdRetenue: { fr: 'Vos places sont retenues jusqu’à', en: 'Your places are held until', ar: 'أماكنك محجوزة حتى' },
   cmdTotal: { fr: 'Total', en: 'Total', ar: 'المجموع' },
   cmdPayer: { fr: 'Payer', en: 'Pay', ar: 'ادفع' },
+  cmdRetourEchecTitre: { fr: 'Le paiement n’a pas abouti', en: 'The payment did not go through', ar: 'لم تكتمل عملية الدفع' },
+  cmdRetourEchec: { fr: 'Votre réservation n’est pas confirmée. Vous pouvez réessayer.', en: 'Your booking is not confirmed. You can try again.', ar: 'حجزك غير مؤكد. يمكنك المحاولة مرة أخرى.' },
+  cmdRetourRefaire: { fr: 'Votre réservation n’est pas confirmée. Choisissez à nouveau vos places.', en: 'Your booking is not confirmed. Please choose your places again.', ar: 'حجزك غير مؤكد. اختر أماكنك من جديد.' },
+  cmdRetourOk: { fr: 'Merci. Votre paiement est en cours de confirmation.', en: 'Thank you. Your payment is being confirmed.', ar: 'شكرًا. يجري تأكيد دفعتك.' },
+  cmdReessayer: { fr: 'Réessayer le paiement', en: 'Try the payment again', ar: 'أعد محاولة الدفع' },
   cmdPaiementIndispo: {
     fr: 'Le paiement en ligne n’est pas encore ouvert : votre réservation n’est pas confirmée. Écrivez-nous pour la finaliser.',
     en: 'Online payment is not open yet: your booking is not confirmed. Message us to complete it.',

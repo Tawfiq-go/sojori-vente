@@ -74,6 +74,37 @@ export function totalFormules(formules: ReadonlyArray<{ id?: string; prixCentime
   return total
 }
 
+/* ── Le retour de la banque : `?retour=ok|fail` (srv-paiement). Une INDICATION de la page d'arrivée, jamais une preuve de paiement. ── */
+
+/** La commande gardée dans l'onglet pendant le passage chez la banque (rien d'autre : ni nom, ni e-mail). */
+export type CommandeGardee = { commandeId: string; numero: string; totalCentimes: number; devise: string; retenueJusquA: string | null; jeton: string }
+
+export const cleCommande = (slug: string, pageId: string): string => `sojori-commande:${slug}:${pageId}`
+
+export const retourBanque = (recherche: string): 'ok' | 'fail' | null => {
+  const v = new URLSearchParams(recherche).get('retour')
+  return v === 'ok' || v === 'fail' ? v : null
+}
+
+/** L'adresse de cette page sans paramètre ni ancre : là où la banque ramène le visiteur. Seulement en https. */
+export const adresseRetour = (l: { protocol: string; origin: string; pathname: string }): string | undefined => (l.protocol === 'https:' ? `${l.origin}${l.pathname}` : undefined)
+
+/** La commande relue dans l'onglet, si elle a bien la forme attendue. */
+export function lireCommandeGardee(brut: string | null): CommandeGardee | null {
+  try {
+    const c = JSON.parse(brut || 'null') as CommandeGardee | null
+    if (!c || typeof c !== 'object' || !ID.test(String(c.commandeId)) || typeof c.jeton !== 'string' || typeof c.numero !== 'string') return null
+    if (!Number.isFinite(c.totalCentimes) || typeof c.devise !== 'string') return null
+    const retenueJusquA = typeof c.retenueJusquA === 'string' && !Number.isNaN(Date.parse(c.retenueJusquA)) ? c.retenueJusquA : null
+    return { commandeId: c.commandeId, numero: c.numero, totalCentimes: c.totalCentimes, devise: c.devise, retenueJusquA, jeton: c.jeton }
+  } catch {
+    return null
+  }
+}
+
+/** Peut-on encore payer cette commande ? Ses places sont retenues jusqu'à une heure : passée, il faut refaire la réservation. */
+export const encoreRetenue = (c: CommandeGardee, maintenant: number = Date.now()): boolean => c.retenueJusquA !== null && Date.parse(c.retenueJusquA) > maintenant
+
 const SLUG = /^[a-z0-9-]{3,40}$/
 const PAGE = /^[A-Za-z0-9_-]{1,80}$/
 const ID = /^[a-f0-9]{24}$/i

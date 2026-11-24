@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import http from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { after, before, beforeEach, describe, it } from 'node:test'
-import { codeErreur, commandeAllumee, corpsFormules, dateCourte, dateDuLien, dateEvenement, datesAChoisir, geste, ipDuVisiteur, lienOuvrable, limiteur, montantMad, panneauApercu, panneauCommande, premiereDateLibre, quandPeriodique, raisonFermee, relayer, totalFormules } from '../../lib/site/commande.ts'
+import { adresseRetour, cleCommande, codeErreur, commandeAllumee, corpsFormules, dateCourte, dateDuLien, dateEvenement, datesAChoisir, encoreRetenue, geste, ipDuVisiteur, lienOuvrable, limiteur, lireCommandeGardee, montantMad, panneauApercu, panneauCommande, premiereDateLibre, quandPeriodique, raisonFermee, relayer, retourBanque, totalFormules } from '../../lib/site/commande.ts'
 
 const ID = 'ab'.repeat(12)
 const prestationEnCours = { etat: 'en_cours', service: { forme: 'prestation' }, serviceLu: { commandable: true } }
@@ -279,4 +279,28 @@ describe('événement : fermé, aperçu, plusieurs formules', () => {
     assert.match(dateCourte('2026-11-29', 'fr'), /dim.*29.*nov/)
     assert.equal(dateCourte('x', 'fr'), '')
   })
+})
+
+describe('retour de la banque', () => {
+  const c = { commandeId: ID, numero: 'C-1', totalCentimes: 108000, devise: 'MAD', retenueJusquA: '2026-11-29T12:15:00.000Z', jeton: 'j' }
+  it('seuls ok et fail sont lus', () => {
+    assert.equal(retourBanque('?paiementId=x&retour=fail'), 'fail')
+    assert.equal(retourBanque('?retour=ok'), 'ok')
+    for (const r of ['', '?retour=', '?retour=paye', '?autre=ok']) assert.equal(retourBanque(r), null, r)
+  })
+  it('l’adresse de retour : cette page, sans paramètre ni ancre, en https seulement', () => {
+    assert.equal(adresseRetour(new URL('https://nommos.sites.sojori.com/en/brunch?a=1#reserver')), 'https://nommos.sites.sojori.com/en/brunch')
+    assert.equal(adresseRetour(new URL('http://localhost:3009/brunch')), undefined)
+  })
+  it('la commande gardée : relue si elle a sa forme, rien d’autre n’est repris', () => {
+    assert.deepEqual(lireCommandeGardee(JSON.stringify({ ...c, email: 'a@b.c' })), c)
+    assert.equal(lireCommandeGardee(JSON.stringify({ ...c, retenueJusquA: 'demain' }))?.retenueJusquA, null)
+    for (const v of [null, '', '{', '[]', '42', JSON.stringify({ ...c, commandeId: 'x' }), JSON.stringify({ ...c, jeton: 1 }), JSON.stringify({ ...c, totalCentimes: 'x' })]) assert.equal(lireCommandeGardee(v), null, String(v))
+  })
+  it('on ne réessaie que tant que les places sont retenues', () => {
+    assert.equal(encoreRetenue(c, Date.parse('2026-11-29T12:14:59Z')), true)
+    assert.equal(encoreRetenue(c, Date.parse('2026-11-29T12:15:00Z')), false)
+    assert.equal(encoreRetenue({ ...c, retenueJusquA: null }), false)
+  })
+  it('une clé par site et par page', () => assert.notEqual(cleCommande('a', 'p1'), cleCommande('a', 'p2')))
 })

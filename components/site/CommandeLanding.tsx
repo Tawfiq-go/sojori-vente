@@ -6,7 +6,7 @@
  * y applique la remise de la landing. Le paiement s'ouvre sur le lien que srv-site rend (https seulement). Voir lib/site/commande.ts.
  */
 import { type FormEvent, useEffect, useState } from 'react'
-import { codeErreur, corpsFormules, dateDuLien, dateEvenement, lienOuvrable, montantMad, premiereDateLibre, totalFormules } from '@/lib/site/commande'
+import { adresseRetour, cleCommande, codeErreur, corpsFormules, dateDuLien, dateEvenement, encoreRetenue, lienOuvrable, lireCommandeGardee, montantMad, premiereDateLibre, retourBanque, totalFormules } from '@/lib/site/commande'
 import { mot } from '@/lib/site/texte'
 import type { Langue } from '@/lib/site/types'
 
@@ -76,6 +76,8 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
   const [occupe, setOccupe] = useState(false)
   const [erreur, setErreur] = useState('')
   const [commande, setCommande] = useState<Commande | null>(null)
+  // Retour de la banque : `fail` (paiement non abouti, on peut réessayer) ou `ok` (confirmation en cours : seule la banque confirme).
+  const [retour, setRetour] = useState<'ok' | 'fail' | null>(null)
   const dir = langue === 'ar' ? 'rtl' : 'ltr'
 
   const dire = (code: unknown) => setErreur(mot(`cmdErreur_${codeErreur(code)}` as never, langue))
@@ -124,6 +126,29 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
     return () => window.removeEventListener('hashchange', lire)
   }, [evenement?.dates])
 
+  // Le visiteur revient de la banque : on relit la commande gardée dans l'onglet, puis l'adresse redevient propre (recharger ne rejoue rien).
+  useEffect(() => {
+    if (apercu) return
+    const r = retourBanque(window.location.search)
+    if (!r) return
+    let brut: string | null = null
+    try {
+      brut = window.sessionStorage.getItem(cleCommande(slug, pageId))
+      if (r === 'ok') window.sessionStorage.removeItem(cleCommande(slug, pageId))
+    } catch {
+      // Stockage refusé par le navigateur : le message s'affiche quand même, sans la commande.
+    }
+    const gardee = lireCommandeGardee(brut)
+    setRetour(r)
+    if (gardee && (r === 'ok' || encoreRetenue(gardee))) setCommande(gardee)
+    window.history.replaceState(null, '', window.location.pathname)
+  }, [apercu, slug, pageId])
+
+  // Le panneau change de hauteur (formulaire puis récapitulatif) : on y amène le visiteur une fois le message affiché, jamais avant.
+  useEffect(() => {
+    if (retour) document.querySelector('.offre__commande')?.scrollIntoView({ block: 'center' })
+  }, [retour])
+
   async function choisirDate(v: string) {
     setDate(v)
     setCreneau('')
@@ -152,6 +177,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
     })
     setOccupe(false)
     if (!r.ok) return dire(r.donnees?.error)
+    setRetour(null)
     setCommande(r.donnees.data as Commande)
   }
 
@@ -159,14 +185,27 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
     if (!commande || occupe) return
     setOccupe(true)
     setErreur('')
-    const r = await appeler(api(slug, pageId, `commande/${commande.commandeId}/paiement`), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jeton: commande.jeton }) })
+    const r = await appeler(api(slug, pageId, `commande/${commande.commandeId}/paiement`), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jeton: commande.jeton, retour: adresseRetour(window.location) }) })
     setOccupe(false)
     const lien = r.donnees?.data?.lienPaiement
     if (!r.ok || !lienOuvrable(lien)) return dire(r.donnees?.error ?? 'paiement_indisponible')
+    try {
+      const { commandeId, numero, totalCentimes, devise: monnaie, retenueJusquA, jeton } = commande
+      window.sessionStorage.setItem(cleCommande(slug, pageId), JSON.stringify({ commandeId, numero, totalCentimes, devise: monnaie, retenueJusquA, jeton }))
+    } catch {
+      // Sans stockage, le paiement s'ouvre quand même ; au retour, le message s'affiche sans la commande.
+    }
     window.location.assign(lien)
   }
 
   const heure = commande?.retenueJusquA ? new Date(commande.retenueJusquA).toLocaleTimeString(langue === 'ar' ? 'ar-MA' : langue, { hour: '2-digit', minute: '2-digit' }) : ''
+
+  const alerteEchec = (suite: string) => (
+    <div role="alert" className="offre__commande-erreur" data-commande="retour-echec">
+      <strong>{mot('cmdRetourEchecTitre', langue)}</strong>
+      <p>{suite}</p>
+    </div>
+  )
 
   if (commande)
     return (
@@ -175,12 +214,19 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
         <p>
           <strong>{commande.numero}</strong>
         </p>
+        {retour === 'fail' && alerteEchec(mot('cmdRetourEchec', langue))}
+        {retour === 'ok' && (
+          <p role="status" data-commande="retour-ok">
+            {mot('cmdRetourOk', langue)}
+          </p>
+        )}
         <p className="offre__commande-total">
           {mot('cmdTotal', langue)} : <strong>{montantMad(commande.totalCentimes, commande.devise, langue)}</strong>
         </p>
         {commande.statut === 'validee' ? (
           <p data-commande="sur-place">{mot('cmdSurPlaceConfirme', langue)}</p>
         ) : (
+          retour !== 'ok' &&
           heure && (
             <p>
               {mot('cmdRetenue', langue)} {heure}
@@ -192,11 +238,20 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
             {erreur}
           </p>
         )}
-        {commande.statut !== 'validee' && (
+        {commande.statut !== 'validee' && retour !== 'ok' && (
           <button type="button" className="bouton" onClick={payer} disabled={occupe}>
-            {occupe ? mot('cmdEnCours', langue) : mot('cmdPayer', langue)}
+            {occupe ? mot('cmdEnCours', langue) : mot(retour === 'fail' ? 'cmdReessayer' : 'cmdPayer', langue)}
           </button>
         )}
+      </div>
+    )
+
+  // Payé, mais l'onglet n'a plus la commande : le message seul, jamais un formulaire qui inviterait à payer deux fois.
+  if (retour === 'ok')
+    return (
+      <div className="offre__commande" dir={dir} data-commande="retour-ok">
+        <h2>{mot(evenement ? 'cmdTitreEvenement' : 'cmdTitre', langue)}</h2>
+        <p role="status">{mot('cmdRetourOk', langue)}</p>
       </div>
     )
 
@@ -205,6 +260,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
   return (
     <form className="offre__commande" dir={dir} onSubmit={reserver} data-commande="formulaire">
       <h2>{mot(evenement ? 'cmdTitreEvenement' : 'cmdTitre', langue)}</h2>
+      {retour === 'fail' && alerteEchec(mot('cmdRetourRefaire', langue))}
       {compteurs && formules && (
         <fieldset data-commande="compteurs">
           <legend>{mot('cmdPlaces', langue)}</legend>
