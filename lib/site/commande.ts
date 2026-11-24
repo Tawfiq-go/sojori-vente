@@ -31,6 +31,49 @@ export function panneauCommande(
   )
 }
 
+/**
+ * En APERÇU, le panneau d'un événement se montre (dates, formules, champs) mais ne réserve jamais : le propriétaire voit la page telle
+ * qu'elle sera, brouillon compris. Jamais pour un événement terminé, ni sans événement lu.
+ */
+export function panneauApercu(offre: { service?: { forme?: string }; evenementLu?: { statut: string } } | undefined, apercu: boolean): boolean {
+  return apercu && offre?.service?.forme === 'evenement' && offre.evenementLu !== undefined && offre.evenementLu.statut !== 'termine'
+}
+
+/**
+ * Pourquoi un événement ne se réserve pas (public) : fermé par le propriétaire, plus aucune date, ou complet. `null` s'il se réserve, si
+ * l'événement n'est pas lu, ou en aperçu. La page le dit au lieu de mener le visiteur ailleurs.
+ */
+export function raisonFermee(
+  e: { statut: string; reservable: boolean; restantes: number; repetition?: unknown; prochaines?: ReadonlyArray<unknown> } | undefined,
+  apercu: boolean,
+): 'evtFerme' | 'evtTermine' | 'soireeComplet' | null {
+  if (!e || apercu || e.reservable) return null
+  if (e.statut === 'termine') return 'evtTermine'
+  if (e.statut !== 'en_vente') return 'evtFerme'
+  if (e.prochaines && e.prochaines.length === 0) return 'evtTermine'
+  return 'soireeComplet'
+}
+
+/** Ce qui part au serveur pour un choix de formules d'événement : une seule formule = l'écriture d'avant ; plusieurs = `formules`. */
+export function corpsFormules(quantites: Readonly<Record<string, number>>): { formule: string; quantite: number } | { formules: Array<{ id: string; quantite: number }> } | null {
+  const choix = Object.entries(quantites).filter(([, n]) => n > 0)
+  if (choix.length === 0) return null
+  if (choix.length === 1) return { formule: choix[0][0], quantite: choix[0][1] }
+  return { formules: choix.map(([id, quantite]) => ({ id, quantite })) }
+}
+
+/** Le total affiché avant l'envoi : les prix du catalogue fois les places (jamais envoyé ; le serveur recalcule). `null` si un prix manque. */
+export function totalFormules(formules: ReadonlyArray<{ id?: string; prixCentimes?: number }>, quantites: Readonly<Record<string, number>>): number | null {
+  let total = 0
+  for (const f of formules) {
+    const n = (f.id && quantites[f.id]) || 0
+    if (!n) continue
+    if (f.prixCentimes === undefined) return null
+    total += f.prixCentimes * n
+  }
+  return total
+}
+
 const SLUG = /^[a-z0-9-]{3,40}$/
 const PAGE = /^[A-Za-z0-9_-]{1,80}$/
 const ID = /^[a-f0-9]{24}$/i
@@ -165,3 +208,27 @@ export function datesAChoisir(e: { repetition?: { heure: string }; prochaines?: 
 
 /** La date proposée d'abord : la première qui a encore de la place (sinon aucune : rien n'est présélectionné sur une date complète). */
 export const premiereDateLibre = (dates: ReadonlyArray<{ date: string; restantes: number }> | undefined): string => dates?.find((d) => d.restantes > 0)?.date ?? ''
+
+/** La date désignée par un lien `#reserver-d2026-12-06` (carte de date de la page), si elle est proposée et qu'il y reste de la place. */
+export function dateDuLien(hash: string, dates: ReadonlyArray<{ date: string; restantes: number }> | undefined): string {
+  const m = /^#reserver-d(\d{4}-\d{2}-\d{2})$/.exec(hash)
+  return (m && dates?.find((d) => d.date === m[1] && d.restantes > 0)?.date) || ''
+}
+
+/**
+ * Quand a lieu un événement périodique, en clair : « Chaque dimanche · 12:00 - 16:00 ». Les noms de jours viennent de la langue du
+ * visiteur ; vide sans répétition. 2023-01-01 est un dimanche (jour 0).
+ */
+export function quandPeriodique(r: { jours: number[]; heure: string; heureFin: string | null } | undefined, langue: string, mots: { chaque: string; tous: string }): string {
+  if (!r) return ''
+  const loc = langue === 'ar' ? 'ar-MA' : langue
+  const nom = (j: number) => new Date(Date.UTC(2023, 0, 1 + j)).toLocaleDateString(loc, { timeZone: 'UTC', weekday: 'long' })
+  const jours = r.jours.length === 7 ? mots.tous : mots.chaque.replace('{jours}', new Intl.ListFormat(loc, { type: 'conjunction' }).format(r.jours.map(nom)))
+  return `${jours} · ${r.heure}${r.heureFin ? ` - ${r.heureFin}` : ''}`
+}
+
+/** Une date courte pour une carte (« dim. 29 nov. »), heure du lieu, sans conversion de fuseau. */
+export function dateCourte(date: string, langue: string): string {
+  const d = new Date(`${date}T00:00:00Z`)
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString(langue === 'ar' ? 'ar-MA' : langue, { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' })
+}

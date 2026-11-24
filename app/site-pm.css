@@ -1502,6 +1502,43 @@
 .site-pm .offre__commande-creneau input {
   min-height: 0;
 }
+.site-pm .offre__commande-compteur {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  font-size: 0.95rem;
+}
+.site-pm .offre__commande-compteur small {
+  display: block;
+  opacity: 0.8;
+}
+.site-pm .offre__commande-compteur div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.site-pm .offre__commande-compteur button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font: 600 20px/1 inherit;
+  font-size: 20px;
+  cursor: pointer;
+}
+.site-pm .offre__commande-compteur button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.site-pm .offre__commande-compteur output {
+  min-width: 1.6em;
+  text-align: center;
+  font-weight: 650;
+}
 .site-pm .offre__commande-erreur {
   margin: 0;
   color: #b42318;

@@ -8,7 +8,7 @@
  */
 import type { CSSProperties } from 'react'
 import '@/app/mise-en-page.css'
-import { commandeAllumee, datesAChoisir, montantMad, panneauCommande } from '@/lib/site/commande'
+import { commandeAllumee, dateCourte, datesAChoisir, montantMad, panneauApercu, panneauCommande, quandPeriodique, raisonFermee } from '@/lib/site/commande'
 import { dateDuMoment, imagesDesEmplacements, miseEnPage } from '@/lib/site/miseEnPage'
 import { prixServiceRemise } from '@/lib/site/jetons'
 import { cibleDeLOffre, couleurValeurSurVoile, lienWhatsappOffre, secondBoutonUtile } from '@/lib/site/offre'
@@ -71,11 +71,15 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
   const tx = (k: string) => t(c[k], ctx.langue, ctx.defaut) || undefined
   const theme = ctx.site.spec.theme
   const commande = panneauCommande(offre, ctx.site.apercu, commandeAllumee())
+  // L'aperçu montre le panneau d'un événement (brouillon compris) sans pouvoir réserver.
+  const enApercu = panneauApercu(offre, ctx.site.apercu)
+  const panneau = commande || enApercu
+  const fermee = raisonFermee(offre.evenementLu, ctx.site.apercu)
   const titre = tx('titre') || t(ctx.titrePage, ctx.langue, ctx.defaut)
   const valeur = tx('valeur')
   // Le bouton : le panneau de commande s'il existe, sinon la cible de l'offre (réservation du site, WhatsApp), comme le rendu classique.
   const cible = cibleDeLOffre(c.lien, offre.paiement)
-  const lienBouton = commande
+  const lienBouton = panneau
     ? '#reserver'
     : cible === '#whatsapp'
       ? lienWhatsappOffre(ctx.site.contact?.whatsapp, ctx.langue, titre, typeof c.code === 'string' ? c.code : undefined)
@@ -97,16 +101,17 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
         prix: typeof lu.prixCentimes === 'number' ? montantMad(lu.prixCentimes, lu.devise ?? 'MAD', lang) : undefined,
         points: [table, t(lu.description, ctx.langue, ctx.defaut)].filter(Boolean),
         badge: undefined,
-        lien: commande && lu.commandable ? `#reserver-f${indice}` : lienBouton,
-        commandable: lu.commandable,
+        lien: fermee ? undefined : panneau && (lu.commandable || enApercu) ? `#reserver-f${indice}` : lienBouton,
+        commandable: lu.commandable || enApercu,
         par: lu.par,
         id: lu.id,
+        unite: mot(lu.par === 'table' ? 'cmdPrixTable' : 'evtPar_personne', ctx.langue),
       },
     ]
   })
   // Périodique : les places se lisent date par date dans le panneau, jamais un seul nombre en tête de page.
-  const restantes = offre.evenementLu
-    ? offre.evenementLu.repetition && offre.evenementLu.reservable
+  const restantes = offre.evenementLu && !fermee
+    ? offre.evenementLu.repetition
       ? undefined
       : offre.evenementLu.restantes > 0
       ? mot('soireeRestantes', ctx.langue).replace('{n}', String(offre.evenementLu.restantes))
@@ -130,6 +135,8 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
     ]
   })
   const formules = evenement ? formulesEvenement : formulesPage
+  const dates = datesAChoisir(offre.evenementLu)
+  const quand = quandPeriodique(offre.evenementLu?.repetition, ctx.langue, { chaque: mot('evtChaque', ctx.langue), tous: mot('evtTousLesJours', ctx.langue) })
   const lieu = t(mep.evenement?.lieu, ctx.langue, ctx.defaut)
   const moment = mep.evenement?.quand ? dateDuMoment(mep.evenement.quand, lang) : ''
   return (
@@ -152,7 +159,16 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
           programme: mep.programme?.map((p) => ({ heure: p.heure, quoi: t(p.quoi, ctx.langue, ctx.defaut) })).filter((p) => p.quoi),
           atouts: mep.atouts?.map((a) => t(a, ctx.langue, ctx.defaut)).filter(Boolean),
           images: imagesDesEmplacements(mep.emplacements, ctx.site.medias, offre.serviceLu?.image),
-          lieuDate: [lieu, moment].filter(Boolean).join(' · ') || undefined,
+          lieuDate: [lieu, moment || quand].filter(Boolean).join(' · ') || undefined,
+          ...(fermee ? { ferme: mot(fermee, ctx.langue) } : {}),
+          dates: fermee
+            ? undefined
+            : dates?.slice(0, 6).map((x) => ({
+                cle: x.date,
+                nom: dateCourte(x.date, ctx.langue),
+                places: x.restantes < 1 ? mot('soireeComplet', ctx.langue) : mot('soireeRestantes', ctx.langue).replace('{n}', String(x.restantes)),
+                lien: x.restantes < 1 ? undefined : panneau ? `#reserver-d${x.date}` : lienBouton,
+              })),
           momentUtc: offre.momentUtc,
           ...(restantes ? { restant: restantes } : {}),
           decompte: {
@@ -170,13 +186,14 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
           libelles: {
             formules: mot('soireeFormules', ctx.langue),
             voirFormules: mot('soireeVoirFormules', ctx.langue),
-            programme: mot('soireeProgramme', ctx.langue),
+            programme: mot(m.id === 'soiree' ? 'soireeProgramme' : 'evtProgramme', ctx.langue),
+            dates: mot('evtDates', ctx.langue),
             choisir: mot('soireeChoisir', ctx.langue),
             ambiance: mot('soireeAmbiance', ctx.langue),
           },
         }}
       />
-      {commande && ctx.pageId && (
+      {panneau && ctx.pageId && (
         <div id="reserver" className="offre__commande-zone">
           <CommandeLanding
             slug={ctx.slug}
@@ -186,9 +203,10 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
             prixCentimes={offre.serviceLu?.prixCentimes}
             prixOffreCentimes={typeof offre.serviceLu?.prixCentimes === 'number' && offre.remise ? prixServiceRemise(offre.serviceLu.prixCentimes, offre.remise.pourcent, offre.remise.arrondi) : undefined}
             formules={formules.some((f) => f.commandable) ? formules.filter((f) => f.commandable).map((f) => ({ indice: f.indice, nom: f.nom, prixCentimes: f.prixCentimes, par: f.par, id: 'id' in f && typeof f.id === 'string' ? f.id : undefined })) : undefined}
+            apercu={enApercu}
             whatsapp={evenement}
             paiement={evenement ? offre.evenementLu?.paiement : undefined}
-            evenement={evenement && offre.evenementLu?.debut ? { debut: offre.evenementLu.debut, dates: datesAChoisir(offre.evenementLu) } : undefined}
+            evenement={evenement && offre.evenementLu?.debut ? { debut: offre.evenementLu.debut, dates } : undefined}
           />
         </div>
       )}

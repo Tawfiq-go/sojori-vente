@@ -90,6 +90,19 @@ export const MISES_EN_PAGE: readonly MiseEnPage[] = [
     ],
   },
   {
+    id: 'brunch',
+    nom: 'Brunch, journée',
+    description: 'Une page claire : la photo, les prochaines dates à choisir, les formules, le déroulé et une galerie.',
+    pour: ['brunch', 'piscine', 'restaurant'],
+    emplacements: [
+      { id: 'couverture', role: 'couverture', format: '4:5', principal: true },
+      { id: 'photo2', role: 'plat', format: '1:1' },
+      { id: 'photo3', role: 'ambiance', format: '1:1' },
+      { id: 'photo4', role: 'lieu', format: '1:1' },
+      { id: 'photo5', role: 'detail', format: '1:1' },
+    ],
+  },
+  {
     id: 'soiree',
     nom: 'Soirée, événement',
     description: 'Un premier écran sombre et le compte à rebours, l’ambiance, la nuit heure par heure, plusieurs formules à réserver.',

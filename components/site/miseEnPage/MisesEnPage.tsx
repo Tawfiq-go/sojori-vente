@@ -38,8 +38,12 @@ export type DonneesLanding = {
   palette?: Array<{ nom: string; couleur: string }>
   sections?: Array<{ titre: string; points: string[] }>
   /** Soirée : les formules (prix du catalogue déjà mis en forme, lien vers le panneau avec la formule choisie). */
-  formules?: Array<{ indice: number; nom: string; prix?: string; points: string[]; badge?: string; lien?: string }>
-  libelles?: { formules: string; voirFormules: string; programme: string; choisir: string; ambiance: string }
+  formules?: Array<{ indice: number; nom: string; prix?: string; unite?: string; points: string[]; badge?: string; lien?: string }>
+  /** Événement périodique : les prochaines dates (déjà en clair) et leurs places ; sans lien = complet. */
+  dates?: Array<{ cle: string; nom: string; places: string; lien?: string }>
+  /** Événement qui ne se réserve pas (désactivé, terminé, complet) : ce texte remplace les boutons. */
+  ferme?: string
+  libelles?: { formules: string; voirFormules: string; programme: string; choisir: string; ambiance: string; dates?: string }
 }
 
 type Props = { m: MiseEnPage; d: DonneesLanding; apercu: boolean }
@@ -372,9 +376,13 @@ function Soiree({ m, d, apercu }: Props) {
               </div>
             )}
             <div className="mep-actions mep-soiree__actions">
-              <a className="mep-bouton" href={d.lien ?? '#reserver'}>
-                {d.bouton}
-              </a>
+              {d.ferme ? (
+                <p className="mep-ferme">{d.ferme}</p>
+              ) : (
+                <a className="mep-bouton" href={d.lien ?? '#reserver'}>
+                  {d.bouton}
+                </a>
+              )}
               {d.formules && d.formules.length > 0 && lib && (
                 <a className="mep-bouton mep-soiree__second" href="#formules">
                   {lib.voirFormules}
@@ -471,6 +479,131 @@ function Soiree({ m, d, apercu }: Props) {
   )
 }
 
+/**
+ * Brunch, day pass : une page CLAIRE. La photo en arche, quand et où, les prochaines dates à choisir, les formules, le déroulé et une
+ * galerie. Sans photo : le motif de la marque dans l'arche, et la galerie disparaît au public.
+ */
+function Brunch({ m, d, apercu }: Props) {
+  const lib = d.libelles
+  const galerie = m.emplacements.slice(1).filter((e) => apercu || rendreEmplacement(d.images[e.id], apercu).type === 'photo')
+  const photo = rendreEmplacement(d.images.couverture, apercu).type !== 'aucun'
+  const action = d.ferme ? (
+    <p className="mep-ferme">{d.ferme}</p>
+  ) : (
+    <a className="mep-bouton" href={d.lien ?? '#reserver'}>
+      {d.bouton}
+    </a>
+  )
+  return (
+    <>
+      <section className="mep-brunch">
+        <header className="mep-brunch__hero">
+          <div className="mep-brunch__texte">
+            {(d.surtitre || d.marque) && <p className="mep-surtitre">{d.surtitre || d.marque}</p>}
+            <h1 className="mep-titre mep-brunch__titre">{d.titre}</h1>
+            {d.lieuDate && <p className="mep-brunch__quand">{d.lieuDate}</p>}
+            {d.accroche && <p className="mep-accroche">{d.accroche}</p>}
+            <Prix d={d} />
+            <div className="mep-actions">
+              {action}
+              {d.restant && <span className="mep-restant">{d.restant}</span>}
+            </div>
+          </div>
+          <div className="mep-brunch__arche">{photo ? <Photo e={empl(m, 'couverture')} d={d} apercu={apercu} /> : <div className="mep-motif mep-brunch__sans" />}</div>
+        </header>
+
+        {d.dates && d.dates.length > 0 && lib?.dates && (
+          <div className="mep-brunch__bloc">
+            <h2 className="mep-brunch__h2">{lib.dates}</h2>
+            <ul className="mep-brunch__dates">
+              {d.dates.map((x) => (
+                <li key={x.cle}>
+                  {x.lien ? (
+                    <a href={x.lien}>
+                      <strong>{x.nom}</strong>
+                      <span>{x.places}</span>
+                    </a>
+                  ) : (
+                    <div className="mep-brunch__pleine">
+                      <strong>{x.nom}</strong>
+                      <span>{x.places}</span>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {d.formules && d.formules.length > 0 && (
+          <div className="mep-brunch__bloc" id="formules">
+            {lib && <h2 className="mep-brunch__h2">{lib.formules}</h2>}
+            <div className="mep-brunch__formules">
+              {d.formules.map((f) => (
+                <article key={f.indice} className="mep-brunch__formule">
+                  {f.badge && <p className="mep-brunch__badge">{f.badge}</p>}
+                  <h3>{f.nom}</h3>
+                  {f.prix && (
+                    <p className="mep-brunch__prix">
+                      {f.prix} {f.unite && <span>{f.unite}</span>}
+                    </p>
+                  )}
+                  {f.points.length > 0 && (
+                    <ul>
+                      {f.points.map((p) => (
+                        <li key={p}>{p}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {f.lien && lib && (
+                    <a className="mep-bouton" href={f.lien}>
+                      {lib.choisir}
+                    </a>
+                  )}
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {((d.programme && d.programme.length > 0) || (d.atouts && d.atouts.length > 0)) && (
+          <div className="mep-brunch__bloc">
+            {d.programme && d.programme.length > 0 && (
+              <>
+                {lib && <h2 className="mep-brunch__h2">{lib.programme}</h2>}
+                <ol className="mep-frise mep-brunch__frise">
+                  {d.programme.map((p) => (
+                    <li key={`${p.heure}-${p.quoi}`}>
+                      <time>{p.heure}</time>
+                      <span>{p.quoi}</span>
+                    </li>
+                  ))}
+                </ol>
+              </>
+            )}
+            {d.atouts && d.atouts.length > 0 && (
+              <ul className="mep-atouts">
+                {d.atouts.map((a) => (
+                  <li key={a}>{a}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {galerie.length > 0 && (
+          <div className="mep-brunch__galerie">
+            {galerie.map((e) => (
+              <Photo key={e.id} e={e} d={d} apercu={apercu} className="mep-brunch__photo" />
+            ))}
+          </div>
+        )}
+      </section>
+      <Bas d={d} />
+    </>
+  )
+}
+
 const RENDUS: Record<string, (p: Props) => ReactNode> = {
   editorial: Editorial,
   diptyque: Diptyque,
@@ -478,6 +611,7 @@ const RENDUS: Record<string, (p: Props) => ReactNode> = {
   typographique: Typographique,
   carte_chef: CarteChef,
   day_pass: DayPass,
+  brunch: Brunch,
   soiree: Soiree,
 }
 

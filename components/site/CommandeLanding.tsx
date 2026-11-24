@@ -6,7 +6,7 @@
  * y applique la remise de la landing. Le paiement s'ouvre sur le lien que srv-site rend (https seulement). Voir lib/site/commande.ts.
  */
 import { type FormEvent, useEffect, useState } from 'react'
-import { codeErreur, dateEvenement, lienOuvrable, montantMad, premiereDateLibre } from '@/lib/site/commande'
+import { codeErreur, corpsFormules, dateDuLien, dateEvenement, lienOuvrable, montantMad, premiereDateLibre, totalFormules } from '@/lib/site/commande'
 import { mot } from '@/lib/site/texte'
 import type { Langue } from '@/lib/site/types'
 
@@ -27,6 +27,8 @@ type Props = {
    * seul l'INDICE part au serveur, qui retrouve la prestation dans la landing publiée. Un lien `#reserver-f<indice>` la présélectionne.
    */
   formules?: Array<{ indice: number; nom: string; prixCentimes?: number; par?: 'personne' | 'table'; id?: string }>
+  /** Aperçu du site : le panneau se montre, rien ne se réserve (bouton inactif, aucun appel). */
+  apercu?: boolean
   /** Événement : le téléphone se demande comme WhatsApp (facultatif, pour la confirmation et le suivi). */
   whatsapp?: boolean
   /**
@@ -53,7 +55,7 @@ async function appeler(url: string, init?: RequestInit): Promise<{ ok: boolean; 
   }
 }
 
-export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrincipal, prixOffreCentimes: offrePrincipal, devise, formules, whatsapp, paiement, evenement }: Props) {
+export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrincipal, prixOffreCentimes: offrePrincipal, devise, formules, apercu, whatsapp, paiement, evenement }: Props) {
   const surPlacePossible = paiement?.surPlace === true
   const cartePossible = paiement ? paiement.carte : true
   const [surPlace, setSurPlace] = useState(surPlacePossible && !cartePossible)
@@ -62,6 +64,10 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
   const [email, setEmail] = useState('')
   const [telephone, setTelephone] = useState('')
   const [quantite, setQuantite] = useState(1)
+  // Événement : un compteur par formule (2 adultes, 1 enfant) dans UNE réservation ; chaque formule désignée par son identifiant.
+  const compteurs = evenement !== undefined && formules !== undefined && formules.length > 0 && formules.every((f) => f.id !== undefined)
+  const premiere = formules?.[0]?.id
+  const [quantites, setQuantites] = useState<Record<string, number>>(compteurs && premiere ? { [premiere]: 1 } : {})
   const [date, setDate] = useState('')
   // Événement périodique : la date choisie (à part de `date`, qu'un changement de formule remet à zéro).
   const [dateChoisie, setDateChoisie] = useState(premiereDateLibre(evenement?.dates))
@@ -89,8 +95,12 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
       const m = /^#reserver-f([0-5])$/.exec(window.location.hash)
       if (!m) return
       const i = Number(m[1])
-      if (!formules.some((f) => f.indice === i)) return
+      const choisieParLien = formules.find((f) => f.indice === i)
+      if (!choisieParLien) return
       setFormule(i)
+      // Compteurs : la formule choisie compte au moins une place, les autres gardent les leurs.
+      const id = choisieParLien.id
+      if (id) setQuantites((q) => ({ ...q, [id]: Math.max(1, q[id] ?? 0) }))
       setCreneaux(null)
       setCreneau('')
       setDate('')
@@ -100,6 +110,19 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
     window.addEventListener('hashchange', lire)
     return () => window.removeEventListener('hashchange', lire)
   }, [formules])
+
+  // Une carte de date de la page mène à `#reserver-d<date>` : la date est choisie, le panneau vient à l'écran.
+  useEffect(() => {
+    const lire = () => {
+      const date = dateDuLien(window.location.hash, evenement?.dates)
+      if (!date) return
+      setDateChoisie(date)
+      document.getElementById('reserver')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+    lire()
+    window.addEventListener('hashchange', lire)
+    return () => window.removeEventListener('hashchange', lire)
+  }, [evenement?.dates])
 
   async function choisirDate(v: string) {
     setDate(v)
@@ -116,14 +139,16 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
 
   async function reserver(e: FormEvent) {
     e.preventDefault()
-    if (occupe) return
+    if (occupe || apercu) return
+    const choixFormules = compteurs ? corpsFormules(quantites) : null
+    if (compteurs && !choixFormules) return dire('VALIDATION')
     setOccupe(true)
     setErreur('')
     // Seulement qui, combien, quand : aucun prix, aucun identifiant de service, aucun propriétaire.
     const r = await appeler(api(slug, pageId, 'commande'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ client: { nom, email, ...(telephone ? { telephone } : {}) }, quantite, ...(evenement?.dates ? { date: dateChoisie } : date ? { date } : {}), ...(creneau ? { creneau } : {}), ...(choixEnvoye !== undefined ? { formule: choixEnvoye } : {}), ...(surPlace ? { paiement: 'sur_place' } : {}) }),
+      body: JSON.stringify({ client: { nom, email, ...(telephone ? { telephone } : {}) }, ...(choixFormules ?? { quantite }), ...(evenement?.dates ? { date: dateChoisie } : date ? { date } : {}), ...(creneau ? { creneau } : {}), ...(!compteurs && choixEnvoye !== undefined ? { formule: choixEnvoye } : {}), ...(surPlace ? { paiement: 'sur_place' } : {}) }),
     })
     setOccupe(false)
     if (!r.ok) return dire(r.donnees?.error)
@@ -175,11 +200,43 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
       </div>
     )
 
+  const total = compteurs ? totalFormules(formules ?? [], quantites) : null
   const unite = prixOffreCentimes !== undefined && prixCentimes !== undefined && prixOffreCentimes < prixCentimes ? prixOffreCentimes : prixCentimes
   return (
     <form className="offre__commande" dir={dir} onSubmit={reserver} data-commande="formulaire">
       <h2>{mot(evenement ? 'cmdTitreEvenement' : 'cmdTitre', langue)}</h2>
-      {formules && formules.length > 0 && (
+      {compteurs && formules && (
+        <fieldset data-commande="compteurs">
+          <legend>{mot('cmdPlaces', langue)}</legend>
+          {formules.map((f) => {
+            const id = f.id as string
+            const n = quantites[id] ?? 0
+            const poser = (v: number) => setQuantites((q) => ({ ...q, [id]: Math.max(0, Math.min(20, v)) }))
+            return (
+              <div key={id} className="offre__commande-compteur">
+                <span>
+                  {f.nom}
+                  {f.prixCentimes !== undefined && (
+                    <small>
+                      {montantMad(f.prixCentimes, devise, langue)} {mot(f.par === 'table' ? 'cmdPrixTable' : 'evtPar_personne', langue)}
+                    </small>
+                  )}
+                </span>
+                <div>
+                  <button type="button" onClick={() => poser(n - 1)} disabled={n < 1} aria-label={`${mot('cmdMoins', langue)} : ${f.nom}`}>
+                    −
+                  </button>
+                  <output aria-live="polite">{n}</output>
+                  <button type="button" onClick={() => poser(n + 1)} disabled={n > 19} aria-label={`${mot('cmdPlus', langue)} : ${f.nom}`}>
+                    +
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </fieldset>
+      )}
+      {!compteurs && formules && formules.length > 0 && (
         <fieldset className="offre__commande-formules">
           <legend>{mot('cmdFormule', langue)}</legend>
           {formules.map((f) => (
@@ -203,7 +260,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
           ))}
         </fieldset>
       )}
-      {unite !== undefined && (
+      {!compteurs && unite !== undefined && (
         <p className="offre__commande-prix">
           {prixOffreCentimes !== undefined && prixCentimes !== undefined && prixOffreCentimes < prixCentimes && <s>{montantMad(prixCentimes, devise, langue)}</s>} <strong>{montantMad(unite, devise, langue)}</strong> {mot(choisie?.par === 'table' ? 'cmdPrixTable' : 'cmdPrixUnite', langue)}
         </p>
@@ -243,10 +300,12 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
           ))}
         </fieldset>
       )}
-      <label>
-        {mot('cmdQuantite', langue)}
-        <input type="number" min={1} max={20} step={1} required value={quantite} onChange={(e) => setQuantite(Math.max(1, Math.min(20, Math.trunc(Number(e.target.value)) || 1)))} />
-      </label>
+      {!compteurs && (
+        <label>
+          {mot('cmdQuantite', langue)}
+          <input type="number" min={1} max={20} step={1} required value={quantite} onChange={(e) => setQuantite(Math.max(1, Math.min(20, Math.trunc(Number(e.target.value)) || 1)))} />
+        </label>
+      )}
       <label>
         {mot('cmdNom', langue)}
         <input type="text" required maxLength={120} autoComplete="name" value={nom} onChange={(e) => setNom(e.target.value)} />
@@ -278,7 +337,13 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
         </fieldset>
       )}
       {surPlacePossible && !cartePossible && <p className="offre__commande-note">{mot('cmdSurPlaceSeul', langue)}</p>}
-      <button type="submit" className="bouton" disabled={occupe}>
+      {compteurs && !!total && (
+        <p className="offre__commande-total" data-commande="total">
+          {mot('cmdTotal', langue)} : <strong>{montantMad(total, devise, langue)}</strong>
+        </p>
+      )}
+      {apercu && <p className="offre__commande-note">{mot('cmdApercu', langue)}</p>}
+      <button type="submit" className="bouton" disabled={occupe || apercu || (compteurs && !total)}>
         {occupe ? mot('cmdEnCours', langue) : mot('cmdEnvoyer', langue)}
       </button>
     </form>

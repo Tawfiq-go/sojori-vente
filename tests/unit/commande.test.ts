@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import http from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { after, before, beforeEach, describe, it } from 'node:test'
-import { codeErreur, commandeAllumee, dateEvenement, datesAChoisir, geste, ipDuVisiteur, lienOuvrable, limiteur, montantMad, panneauCommande, premiereDateLibre, relayer } from '../../lib/site/commande.ts'
+import { codeErreur, commandeAllumee, corpsFormules, dateCourte, dateDuLien, dateEvenement, datesAChoisir, geste, ipDuVisiteur, lienOuvrable, limiteur, montantMad, panneauApercu, panneauCommande, premiereDateLibre, quandPeriodique, raisonFermee, relayer, totalFormules } from '../../lib/site/commande.ts'
 
 const ID = 'ab'.repeat(12)
 const prestationEnCours = { etat: 'en_cours', service: { forme: 'prestation' }, serviceLu: { commandable: true } }
@@ -233,5 +233,50 @@ describe('événement périodique : les dates à choisir', () => {
     assert.equal(premiereDateLibre([{ date: '2026-12-06', restantes: 0 }]), '')
     assert.equal(premiereDateLibre(undefined), '')
     assert.deepEqual(datesAChoisir({ repetition: { heure: '12:00' } }), [])
+  })
+})
+
+describe('événement : fermé, aperçu, plusieurs formules', () => {
+  const e = { statut: 'en_vente', reservable: false, restantes: 80, prochaines: [{}] }
+  it('la raison se dit au public : désactivé, plus de date, complet ; réservable, non lu ou en aperçu : rien', () => {
+    assert.equal(raisonFermee({ ...e, statut: 'suspendu' }, false), 'evtFerme')
+    assert.equal(raisonFermee({ ...e, statut: 'termine' }, false), 'evtTermine')
+    assert.equal(raisonFermee({ ...e, prochaines: [] }, false), 'evtTermine')
+    assert.equal(raisonFermee(e, false), 'soireeComplet')
+    assert.equal(raisonFermee({ ...e, reservable: true }, false), null)
+    assert.equal(raisonFermee({ ...e, statut: 'suspendu' }, true), null)
+    assert.equal(raisonFermee(undefined, false), null)
+  })
+  it('aperçu : le panneau d’un événement se montre, brouillon compris ; jamais au public, ni pour une prestation, ni terminé, ni sans événement lu', () => {
+    const o = { service: { forme: 'evenement' }, evenementLu: { statut: 'brouillon' } }
+    assert.equal(panneauApercu(o, true), true)
+    assert.equal(panneauApercu(o, false), false)
+    assert.equal(panneauApercu({ ...o, service: { forme: 'prestation' } }, true), false)
+    assert.equal(panneauApercu({ ...o, evenementLu: { statut: 'termine' } }, true), false)
+    assert.equal(panneauApercu({ service: o.service }, true), false)
+  })
+  it('une formule : l’écriture d’avant ; plusieurs : `formules` ; aucune : rien ne part ; total = prix du catalogue × places', () => {
+    const A = 'a'.repeat(24)
+    const B = 'b'.repeat(24)
+    assert.deepEqual(corpsFormules({ [A]: 2, [B]: 0 }), { formule: A, quantite: 2 })
+    assert.deepEqual(corpsFormules({ [A]: 2, [B]: 1 }), { formules: [{ id: A, quantite: 2 }, { id: B, quantite: 1 }] })
+    assert.equal(corpsFormules({ [A]: 0 }), null)
+    assert.equal(corpsFormules({}), null)
+    const f = [{ id: A, prixCentimes: 69_000 }, { id: B, prixCentimes: 39_000 }]
+    assert.equal(totalFormules(f, { [A]: 2, [B]: 1 }), 177_000)
+    assert.equal(totalFormules([{ id: A }], { [A]: 1 }), null)
+    assert.equal(totalFormules(f, {}), 0)
+  })
+  it('une date choisie par lien doit être proposée et avoir de la place ; la répétition se dit en clair', () => {
+    const dates = [{ date: '2026-12-06', restantes: 3 }, { date: '2026-12-13', restantes: 0 }]
+    assert.equal(dateDuLien('#reserver-d2026-12-06', dates), '2026-12-06')
+    for (const h of ['#reserver-d2026-12-13', '#reserver-d2026-12-20', '#reserver-f0', '']) assert.equal(dateDuLien(h, dates), '', h)
+    assert.equal(dateDuLien('#reserver-d2026-12-06', undefined), '')
+    const mots = { chaque: 'Chaque {jours}', tous: 'Tous les jours' }
+    assert.equal(quandPeriodique({ jours: [0], heure: '12:00', heureFin: '16:00' }, 'fr', mots), 'Chaque dimanche · 12:00 - 16:00')
+    assert.equal(quandPeriodique({ jours: [0, 1, 2, 3, 4, 5, 6], heure: '10:00', heureFin: null }, 'fr', mots), 'Tous les jours · 10:00')
+    assert.equal(quandPeriodique(undefined, 'fr', mots), '')
+    assert.match(dateCourte('2026-11-29', 'fr'), /dim.*29.*nov/)
+    assert.equal(dateCourte('x', 'fr'), '')
   })
 })
