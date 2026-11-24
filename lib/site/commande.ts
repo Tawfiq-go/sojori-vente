@@ -74,6 +74,37 @@ export function totalFormules(formules: ReadonlyArray<{ id?: string; prixCentime
   return total
 }
 
+/* ── Le retour de la banque : `?retour=ok|fail` (srv-paiement). Une INDICATION de la page d'arrivée, jamais une preuve de paiement. ── */
+
+/** La commande gardée dans l'onglet pendant le passage chez la banque (rien d'autre : ni nom, ni e-mail). */
+export type CommandeGardee = { commandeId: string; numero: string; totalCentimes: number; devise: string; retenueJusquA: string | null; jeton: string }
+
+export const cleCommande = (slug: string, pageId: string): string => `sojori-commande:${slug}:${pageId}`
+
+export const retourBanque = (recherche: string): 'ok' | 'fail' | null => {
+  const v = new URLSearchParams(recherche).get('retour')
+  return v === 'ok' || v === 'fail' ? v : null
+}
+
+/** L'adresse de cette page sans paramètre ni ancre : là où la banque ramène le visiteur. Seulement en https. */
+export const adresseRetour = (l: { protocol: string; origin: string; pathname: string }): string | undefined => (l.protocol === 'https:' ? `${l.origin}${l.pathname}` : undefined)
+
+/** La commande relue dans l'onglet, si elle a bien la forme attendue. */
+export function lireCommandeGardee(brut: string | null): CommandeGardee | null {
+  try {
+    const c = JSON.parse(brut || 'null') as CommandeGardee | null
+    if (!c || typeof c !== 'object' || !ID.test(String(c.commandeId)) || typeof c.jeton !== 'string' || typeof c.numero !== 'string') return null
+    if (!Number.isFinite(c.totalCentimes) || typeof c.devise !== 'string') return null
+    const retenueJusquA = typeof c.retenueJusquA === 'string' && !Number.isNaN(Date.parse(c.retenueJusquA)) ? c.retenueJusquA : null
+    return { commandeId: c.commandeId, numero: c.numero, totalCentimes: c.totalCentimes, devise: c.devise, retenueJusquA, jeton: c.jeton }
+  } catch {
+    return null
+  }
+}
+
+/** Peut-on encore payer cette commande ? Ses places sont retenues jusqu'à une heure : passée, il faut refaire la réservation. */
+export const encoreRetenue = (c: CommandeGardee, maintenant: number = Date.now()): boolean => c.retenueJusquA !== null && Date.parse(c.retenueJusquA) > maintenant
+
 const SLUG = /^[a-z0-9-]{3,40}$/
 const PAGE = /^[A-Za-z0-9_-]{1,80}$/
 const ID = /^[a-f0-9]{24}$/i
@@ -231,4 +262,65 @@ export function quandPeriodique(r: { jours: number[]; heure: string; heureFin: s
 export function dateCourte(date: string, langue: string): string {
   const d = new Date(`${date}T00:00:00Z`)
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString(langue === 'ar' ? 'ar-MA' : langue, { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' })
+}
+
+/**
+ * La ligne de date d'une affiche : « Dès le 29 novembre 2026 • Tous les dimanches dès 12h ». Le début ne s'écrit que s'il est à venir ;
+ * les jours et l'heure viennent de l'événement, jamais d'un texte saisi. Vide sans répétition.
+ */
+export function quandAffiche(r: { jours: number[]; heure: string } | undefined, debut: string, aujourdHui: string, langue: string, mots: { des: string; tous: string; tousLesJours: string }): string {
+  if (!r) return ''
+  const loc = langue === 'ar' ? 'ar-MA' : langue
+  const jours = nomsDeJours(r.jours, loc).map((j) => (langue === 'fr' ? `${j}s` : j))
+  const [h, m] = r.heure.split(':')
+  const heure = langue === 'fr' ? `${Number(h)}h${m === '00' ? '' : m}` : r.heure
+  const tous = r.jours.length === 7 ? `${mots.tousLesJours} · ${heure}` : mots.tous.replace('{jours}', new Intl.ListFormat(loc, { type: 'conjunction' }).format(jours)).replace('{heure}', heure)
+  const jour = debut.slice(0, 10)
+  return jour > aujourdHui && dateLongue(jour, langue) ? `${mots.des.replace('{date}', dateLongue(jour, langue))} • ${tous}` : tous
+}
+
+/** L'indication sous le calendrier : « Uniquement le dimanche, jusqu'au 30 mai 2027 ». */
+export function indicationCalendrier(r: { jours: number[]; au: string | null } | undefined, langue: string, mots: { uniquement: string; jusquau: string }): string {
+  if (!r) return ''
+  const loc = langue === 'ar' ? 'ar-MA' : langue
+  const jours = r.jours.length === 7 ? '' : mots.uniquement.replace('{jours}', new Intl.ListFormat(loc, { type: 'conjunction' }).format(nomsDeJours(r.jours, loc)))
+  const fin = r.au && dateLongue(r.au, langue) ? mots.jusquau.replace('{date}', dateLongue(r.au, langue)) : ''
+  const phrase = [jours, fin].filter(Boolean).join(', ')
+  return phrase.charAt(0).toUpperCase() + phrase.slice(1)
+}
+
+/** 2023-01-01 est un dimanche (jour 0). */
+const nomsDeJours = (jours: readonly number[], loc: string): string[] => jours.map((j) => new Date(Date.UTC(2023, 0, 1 + j)).toLocaleDateString(loc, { timeZone: 'UTC', weekday: 'long' }))
+
+/** Une date sans heure, en toutes lettres, sans conversion de fuseau. */
+export function dateLongue(date: string, langue: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return ''
+  const d = new Date(`${date}T00:00:00Z`)
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString(langue === 'ar' ? 'ar-MA' : langue === 'en' ? 'en-GB' : langue, { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+/** Le choix de paiement désigné par un lien `#reserver-sur-place` ou `#reserver-carte`. */
+export const paiementDuLien = (hash: string): 'sur_place' | 'carte' | null => (hash === '#reserver-sur-place' ? 'sur_place' : hash === '#reserver-carte' ? 'carte' : null)
+
+/** Les semaines d'un mois (lundi d'abord) : `null` avant le premier jour, puis `AAAA-MM-JJ`. */
+export function joursDuMois(mois: string): Array<string | null> {
+  const m = /^(\d{4})-(\d{2})$/.exec(mois)
+  if (!m || Number(m[2]) < 1 || Number(m[2]) > 12) return []
+  const [a, n] = [Number(m[1]), Number(m[2])]
+  const avant = (new Date(Date.UTC(a, n - 1, 1)).getUTCDay() + 6) % 7
+  const total = new Date(Date.UTC(a, n, 0)).getUTCDate()
+  return [...Array.from({ length: avant }, () => null), ...Array.from({ length: total }, (_, i) => `${mois}-${String(i + 1).padStart(2, '0')}`)]
+}
+
+/** Le mois d'avant ou d'après (`AAAA-MM`). */
+export function moisVoisin(mois: string, pas: 1 | -1): string {
+  const [a, n] = mois.split('-').map(Number)
+  const d = new Date(Date.UTC(a, n - 1 + pas, 1))
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`
+}
+
+/** Le titre d'une affiche : le premier mot en grand, la suite en écriture (« BOHO » / « Sunday Brunch »). */
+export function titreAffiche(titre: string): { grand: string; ecriture: string } {
+  const mots = titre.trim().split(/\s+/)
+  return { grand: mots[0] ?? '', ecriture: mots.slice(1).join(' ') }
 }

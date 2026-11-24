@@ -8,7 +8,8 @@
  */
 import type { CSSProperties } from 'react'
 import '@/app/mise-en-page.css'
-import { commandeAllumee, dateCourte, datesAChoisir, montantMad, panneauApercu, panneauCommande, quandPeriodique, raisonFermee } from '@/lib/site/commande'
+import '@/app/mise-en-page-boheme.css'
+import { commandeAllumee, dateCourte, datesAChoisir, indicationCalendrier, montantMad, panneauApercu, panneauCommande, quandAffiche, quandPeriodique, raisonFermee } from '@/lib/site/commande'
 import { dateDuMoment, imagesDesEmplacements, miseEnPage } from '@/lib/site/miseEnPage'
 import { prixServiceRemise } from '@/lib/site/jetons'
 import { cibleDeLOffre, couleurValeurSurVoile, lienWhatsappOffre, secondBoutonUtile } from '@/lib/site/offre'
@@ -106,6 +107,8 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
         par: lu.par,
         id: lu.id,
         unite: mot(lu.par === 'table' ? 'cmdPrixTable' : 'evtPar_personne', ctx.langue),
+        prixNombre: typeof lu.prixCentimes === 'number' ? new Intl.NumberFormat(lang === 'ar' ? 'ar-MA' : lang, { maximumFractionDigits: 2 }).format(lu.prixCentimes / 100) : undefined,
+        devise: lu.devise ?? 'MAD',
       },
     ]
   })
@@ -138,6 +141,35 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
   const dates = datesAChoisir(offre.evenementLu)
   const quand = quandPeriodique(offre.evenementLu?.repetition, ctx.langue, { chaque: mot('evtChaque', ctx.langue), tous: mot('evtTousLesJours', ctx.langue) })
   const lieu = t(mep.evenement?.lieu, ctx.langue, ctx.defaut)
+  // Bohème : page complète. Son en-tête, son pied, et le panneau de commande DANS la page (bandeau).
+  const boheme = m.id === 'boheme'
+  const repetition = offre.evenementLu?.repetition
+  const affiche = boheme ? quandAffiche(repetition, offre.evenementLu?.debut ?? '', new Date().toISOString().slice(0, 10), ctx.langue, { des: mot('bohDes', ctx.langue), tous: mot('bohTous', ctx.langue), tousLesJours: mot('evtTousLesJours', ctx.langue) }) : ''
+  const modesPaiement = panneau && evenement ? offre.evenementLu?.paiement : undefined
+  const modes = [
+    ...(modesPaiement?.surPlace ? [{ id: 'sur_place' as const, badge: mot('bohSansBadge', ctx.langue), titre: mot('bohSansTitre', ctx.langue), texte: mot('bohSansTexte', ctx.langue), bouton: mot('bohSansBouton', ctx.langue), lien: '#reserver-sur-place' }] : []),
+    ...(modesPaiement?.carte ? [{ id: 'carte' as const, badge: mot('bohAvecBadge', ctx.langue), titre: mot('bohAvecTitre', ctx.langue), texte: mot('bohAvecTexte', ctx.langue), bouton: mot('bohAvecBouton', ctx.langue), lien: '#reserver-carte' }] : []),
+  ]
+  const legal = boheme ? ctx.site.spec.pages.find((p) => p.sections.some((x) => x.niveau === 'sojori' && x.type === 'legal')) : undefined
+  const logoSite = ctx.site.spec.identite.logo ? ctx.site.medias[ctx.site.spec.identite.logo]?.url : undefined
+  const chemin = ctx.site.spec.pages.find((p) => p.id === ctx.pageId)?.chemin ?? ''
+  const commandeLanding = panneau && ctx.pageId && (
+    <CommandeLanding
+      slug={ctx.slug}
+      pageId={ctx.pageId}
+      langue={ctx.langue}
+      devise={offre.serviceLu?.devise ?? 'MAD'}
+      prixCentimes={offre.serviceLu?.prixCentimes}
+      prixOffreCentimes={typeof offre.serviceLu?.prixCentimes === 'number' && offre.remise ? prixServiceRemise(offre.serviceLu.prixCentimes, offre.remise.pourcent, offre.remise.arrondi) : undefined}
+      formules={formules.some((f) => f.commandable) ? formules.filter((f) => f.commandable).map((f) => ({ indice: f.indice, nom: f.nom, prixCentimes: f.prixCentimes, par: f.par, id: 'id' in f && typeof f.id === 'string' ? f.id : undefined })) : undefined}
+      apercu={enApercu}
+      whatsapp={evenement}
+      paiement={evenement ? offre.evenementLu?.paiement : undefined}
+      evenement={evenement && offre.evenementLu?.debut ? { debut: offre.evenementLu.debut, dates } : undefined}
+      bandeau={boheme}
+      indication={boheme ? indicationCalendrier(repetition, ctx.langue, { uniquement: mot('bohUniquement', ctx.langue), jusquau: mot('bohJusquau', ctx.langue) }) : undefined}
+    />
+  )
   const moment = mep.evenement?.quand ? dateDuMoment(mep.evenement.quand, lang) : ''
   return (
     <section className="section offre offre--mise-en-page" data-section={s.id} id={s.id}>
@@ -151,7 +183,7 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
           surtitre: tx('surTitre'),
           titre,
           accroche: tx('accroche'),
-          prix: valeur ? { offre: valeur, unite: tx('valeurLibelle') } : undefined,
+          prix: valeur || (boheme && tx('valeurLibelle')) ? { offre: valeur, unite: tx('valeurLibelle') } : undefined,
           bouton: tx('bouton') || mot('reserver', ctx.langue),
           lien: lienBouton,
           conditions: tx('conditions'),
@@ -159,7 +191,32 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
           programme: mep.programme?.map((p) => ({ heure: p.heure, quoi: t(p.quoi, ctx.langue, ctx.defaut) })).filter((p) => p.quoi),
           atouts: mep.atouts?.map((a) => t(a, ctx.langue, ctx.defaut)).filter(Boolean),
           images: imagesDesEmplacements(mep.emplacements, ctx.site.medias, offre.serviceLu?.image),
-          lieuDate: [lieu, moment || quand].filter(Boolean).join(' · ') || undefined,
+          lieuDate: affiche || [lieu, moment || quand].filter(Boolean).join(' · ') || undefined,
+          ...(boheme
+            ? {
+                boheme: {
+                  logoSite,
+                  langues: ctx.site.spec.langues.actives.map((lg) => ({ code: lg, lien: lien(ctx.base, lg, ctx.defaut, chemin), actif: lg === ctx.langue })),
+                  ...(legal ? { mentions: { texte: mot('mentions', ctx.langue), lien: lien(ctx.base, ctx.langue, ctx.defaut, legal.chemin) } } : {}),
+                  annee: new Date().getFullYear(),
+                  modes,
+                  panneau: commandeLanding || undefined,
+                  mots: {
+                    experience: mot('bohExperience', ctx.langue),
+                    formules: mot('bohFormules', ctx.langue),
+                    reserver: mot('reserver', ctx.langue),
+                    reservation: mot('bohReservation', ctx.langue),
+                    choix: mot('bohChoix', ctx.langue),
+                    choisissez: mot('bohChoisissez', ctx.langue),
+                    galerie: mot('bohGalerie', ctx.langue),
+                    fermer: mot('bohFermer', ctx.langue),
+                    photoAvant: mot('bohPhotoAvant', ctx.langue),
+                    photoApres: mot('bohPhotoApres', ctx.langue),
+                    conditions: mot('offreConditions', ctx.langue),
+                  },
+                },
+              }
+            : {}),
           ...(fermee ? { ferme: mot(fermee, ctx.langue) } : {}),
           dates: fermee
             ? undefined
@@ -193,21 +250,9 @@ function OffreEnMiseEnPage({ s, ctx }: { s: Extract<Section, { niveau: 'biblioth
           },
         }}
       />
-      {panneau && ctx.pageId && (
+      {commandeLanding && !boheme && (
         <div id="reserver" className="offre__commande-zone">
-          <CommandeLanding
-            slug={ctx.slug}
-            pageId={ctx.pageId}
-            langue={ctx.langue}
-            devise={offre.serviceLu?.devise ?? 'MAD'}
-            prixCentimes={offre.serviceLu?.prixCentimes}
-            prixOffreCentimes={typeof offre.serviceLu?.prixCentimes === 'number' && offre.remise ? prixServiceRemise(offre.serviceLu.prixCentimes, offre.remise.pourcent, offre.remise.arrondi) : undefined}
-            formules={formules.some((f) => f.commandable) ? formules.filter((f) => f.commandable).map((f) => ({ indice: f.indice, nom: f.nom, prixCentimes: f.prixCentimes, par: f.par, id: 'id' in f && typeof f.id === 'string' ? f.id : undefined })) : undefined}
-            apercu={enApercu}
-            whatsapp={evenement}
-            paiement={evenement ? offre.evenementLu?.paiement : undefined}
-            evenement={evenement && offre.evenementLu?.debut ? { debut: offre.evenementLu.debut, dates } : undefined}
-          />
+          {commandeLanding}
         </div>
       )}
     </section>
