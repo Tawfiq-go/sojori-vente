@@ -30,10 +30,10 @@ type Valeurs = { checkIn?: string; checkOut?: string; adults?: string }
 
 /**
  * `demo` : brouillon du site (rien d'écrit nulle part). `ferme` : site publié, réservation en ligne pas encore ouverte (WhatsApp).
- * `ligne` : site publié dont le slug est dans `SITE_RESERVATION_LIGNE_SLUGS` (éteint par défaut) : réservation par carte.
+ * `ligne` : site publié dont le slug est dans `SITE_RESERVATION_LIGNE_SLUGS` ET type nommé dans `SITE_RESERVATION_LIGNE_TYPES` (éteint par défaut) : réservation par carte.
  */
-export function modeMoteur(site: SitePublic, slug = ''): 'demo' | 'ferme' | 'ligne' {
-  return choisirMode(Boolean(site.apercu), slug)
+export function modeMoteur(site: SitePublic, slug = '', typeId = ''): 'demo' | 'ferme' | 'ligne' {
+  return choisirMode(Boolean(site.apercu), slug, typeId)
 }
 
 export async function Parcours({
@@ -100,7 +100,7 @@ export async function Parcours({
   if (!etape) return <FicheType site={site} base={base} langue={langue} type={type} villa={villa} sejour={sejour} valeurs={valeurs} jours={jours} />
 
   const fiche = l(`${CHEMIN_RESERVER}/${type.id}${qs}`)
-  const mode = modeMoteur(site, slug)
+  const mode = modeMoteur(site, slug, type.id)
   const whatsapp = site.contact?.whatsapp
   const libre = Boolean(sejour && type.etat === 'libre' && type.devis)
   const nomSite = site.spec.identite.nom
