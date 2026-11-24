@@ -7,7 +7,7 @@
  * CMI du propriétaire. Aucune donnée de carte ne passe ici : le voyageur la saisit sur la page hébergée de CMI.
  *
  * ÉTEINT par défaut : un site n'accepte la réservation en ligne que si son identifiant (slug) est dans `SITE_RESERVATION_LIGNE_SLUGS`
- * (liste séparée par des virgules, lue côté serveur). Éteint = le moteur reste « WhatsApp » et la route répond 404.
+ * ET le type réservé dans `SITE_RESERVATION_LIGNE_TYPES` (listes séparées par des virgules, lues côté serveur ; types vide = aucun). Éteint = le moteur reste « WhatsApp » et la route répond 404.
  * Sans import (testé par `node --test`) ; seuls `creer` fait des appels réseau, par un `fetch` injectable.
  */
 
@@ -24,6 +24,24 @@ export function sitesEnLigne(env: Record<string, string | undefined> = process.e
 export const reservationEnLigne = (slug: string, env: Record<string, string | undefined> = process.env): boolean => sitesEnLigne(env).has(slug.toLowerCase())
 
 const ID = /^[a-f0-9]{24}(:[a-f0-9]{24})?$/i
+
+/**
+ * Les types de chambre (ou logements) dont la réservation en ligne est ouverte : `SITE_RESERVATION_LIGNE_TYPES`, identifiants
+ * séparés par des virgules, exactement ceux de l'adresse `reserver/<id>` (`<logement>` ou `<logement>:<type>`). VIDE par défaut =
+ * AUCUN : ouvrir un site n'ouvre aucun type tant qu'il n'est pas nommé ici (les autres restent en WhatsApp).
+ */
+export function typesEnLigne(env: Record<string, string | undefined> = process.env): Set<string> {
+  return new Set(
+    (env.SITE_RESERVATION_LIGNE_TYPES || '')
+      .split(',')
+      .map((v) => v.trim().toLowerCase())
+      .filter((v) => ID.test(v)),
+  )
+}
+
+/** Ce type de ce site se réserve-t-il en ligne ? Le site ET le type doivent être ouverts (jamais l'un sans l'autre). */
+export const typeEnLigne = (slug: string, typeId: string, env: Record<string, string | undefined> = process.env): boolean =>
+  reservationEnLigne(slug, env) && typesEnLigne(env).has(String(typeId).trim().toLowerCase())
 const DATE = /^\d{4}-\d{2}-\d{2}$/
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/
 const TEL = /^\+?[0-9 ().-]{6,24}$/
@@ -151,10 +169,10 @@ export async function creer(corps: ReturnType<typeof corpsReservation>, base: st
   return { ok: false, statut, code }
 }
 
-/** Le mode du moteur d'un site : brouillon = `demo`, site publié ouvert (liste serveur) = `ligne`, sinon `ferme` (WhatsApp). */
-export function choisirMode(apercu: boolean, slug: string, env: Record<string, string | undefined> = process.env): 'demo' | 'ferme' | 'ligne' {
+/** Le mode du moteur pour UN type : brouillon = `demo`, site publié ET type nommés (listes serveur) = `ligne`, sinon `ferme` (WhatsApp). */
+export function choisirMode(apercu: boolean, slug: string, typeId: string, env: Record<string, string | undefined> = process.env): 'demo' | 'ferme' | 'ligne' {
   if (apercu) return 'demo'
-  return slug && reservationEnLigne(slug, env) ? 'ligne' : 'ferme'
+  return slug && typeEnLigne(slug, typeId, env) ? 'ligne' : 'ferme'
 }
 
 type Sejour = { arrivee: string; depart: string; voyageurs: number; nuits: number }
@@ -176,6 +194,8 @@ export async function traiter(e: { slug: string; brut: string; ip: string; hote:
   const demande = lireDemande(e.brut)
   const sejour = demande ? d.sejour({ checkIn: demande.checkIn, checkOut: demande.checkOut, adults: String(demande.adults) }) : null
   const ids = demande ? d.ids(demande.typeId) : null
+  // Un type non nommé dans `SITE_RESERVATION_LIGNE_TYPES` ne se réserve pas en ligne, même sur un site ouvert : 404, aucun appel.
+  if (demande && !typeEnLigne(e.slug, demande.typeId, d.env)) return { statut: 404, corps: { success: false } }
   const hote = e.hote.trim().toLowerCase()
   if (!demande || !sejour || !ids || !/^[a-z0-9.-]{3,100}$/.test(hote)) return { statut: 400, corps: { success: false, code: 'VALIDATION' } }
   // Le type est un type de CE PM, libre pour ces dates, avec son devis relu à l'instant.
