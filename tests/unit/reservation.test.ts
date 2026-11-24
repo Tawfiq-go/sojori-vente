@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { choisirMode, codeDit, corpsReservation, creer, hotePaiementOk, lienOuvrable, lireDemande, reservationEnLigne, sitesEnLigne, traiter, type Deps } from '../../lib/site/reservation.ts'
+import { choisirMode, codeDit, corpsReservation, creer, hotePaiementOk, lienOuvrable, lireDemande, reservationEnLigne, sitesEnLigne, traiter, typeEnLigne, typesEnLigne, type Deps } from '../../lib/site/reservation.ts'
 
 const L = 'ab'.repeat(12)
 const R = 'cd'.repeat(12)
@@ -121,12 +121,27 @@ describe('création : tout refus est net, jamais une réservation devinée', () 
 
 describe('choisirMode : le mode du moteur d’un site', () => {
   it('brouillon = demo (même si le slug est ouvert) ; publié ouvert = ligne ; publié fermé = ferme (WhatsApp)', () => {
-    const env = { SITE_RESERVATION_LIGNE_SLUGS: 'nommos' }
-    assert.equal(choisirMode(true, 'nommos', env), 'demo')
-    assert.equal(choisirMode(false, 'nommos', env), 'ligne')
-    assert.equal(choisirMode(false, 'autre-site', env), 'ferme')
-    assert.equal(choisirMode(false, 'nommos', {}), 'ferme')
-    assert.equal(choisirMode(false, '', env), 'ferme')
+    const env = { SITE_RESERVATION_LIGNE_SLUGS: 'nommos', SITE_RESERVATION_LIGNE_TYPES: bon.typeId }
+    assert.equal(choisirMode(true, 'nommos', bon.typeId, env), 'demo')
+    assert.equal(choisirMode(false, 'nommos', bon.typeId, env), 'ligne')
+    assert.equal(choisirMode(false, 'autre-site', bon.typeId, env), 'ferme')
+    assert.equal(choisirMode(false, 'nommos', bon.typeId, {}), 'ferme')
+    assert.equal(choisirMode(false, '', bon.typeId, env), 'ferme')
+  })
+  it('un site ouvert SANS type nommé, ou un AUTRE type : tout reste en WhatsApp (ferme)', () => {
+    const autre = `${R}:${L}`
+    assert.equal(choisirMode(false, 'nommos', bon.typeId, { SITE_RESERVATION_LIGNE_SLUGS: 'nommos' }), 'ferme')
+    assert.equal(choisirMode(false, 'nommos', bon.typeId, { SITE_RESERVATION_LIGNE_SLUGS: 'nommos', SITE_RESERVATION_LIGNE_TYPES: '' }), 'ferme')
+    assert.equal(choisirMode(false, 'nommos', autre, { SITE_RESERVATION_LIGNE_SLUGS: 'nommos', SITE_RESERVATION_LIGNE_TYPES: bon.typeId }), 'ferme')
+    assert.equal(choisirMode(false, 'nommos', '', { SITE_RESERVATION_LIGNE_SLUGS: 'nommos', SITE_RESERVATION_LIGNE_TYPES: bon.typeId }), 'ferme')
+  })
+  it('type nommé mais site non ouvert : fermé (les deux listes sont nécessaires)', () => {
+    assert.equal(typeEnLigne('nommos', bon.typeId, { SITE_RESERVATION_LIGNE_TYPES: bon.typeId }), false)
+    assert.equal(choisirMode(false, 'nommos', bon.typeId, { SITE_RESERVATION_LIGNE_TYPES: bon.typeId }), 'ferme')
+  })
+  it('liste des types : espaces et casse tolérés, entrées invalides ignorées', () => {
+    assert.deepEqual([...typesEnLigne({ SITE_RESERVATION_LIGNE_TYPES: ` ${L.toUpperCase()} , villa15,,${bon.typeId},${L}:${R}:${R}` })].sort(), [L, bon.typeId].sort())
+    assert.equal(typesEnLigne({}).size, 0)
   })
 })
 
@@ -136,7 +151,7 @@ describe('route : toute la décision (traiter), lectures et création injectées
   const base = (over: Partial<Deps> = {}): { deps: Deps; appels: string[] } => {
     const appels: string[] = []
     const deps: Deps = {
-      env: { SITE_RESERVATION_LIGNE_SLUGS: 'nommos' },
+      env: { SITE_RESERVATION_LIGNE_SLUGS: 'nommos', SITE_RESERVATION_LIGNE_TYPES: bon.typeId },
       limite: () => false,
       sejour: () => sejourOk,
       ids: (id) => {
@@ -169,6 +184,18 @@ describe('route : toute la décision (traiter), lectures et création injectées
     assert.equal((await traiter(entree(), deps)).statut, 404)
     assert.equal((await traiter(entree(JSON.stringify(bon), 'autre-site'), base().deps)).statut, 404)
     assert.equal(appels.length, 0)
+  })
+  it('site ouvert mais type NON nommé (liste vide, autre type) : 404 et AUCUN appel (reste en WhatsApp)', async () => {
+    for (const types of ['', undefined, `${R}:${L}`]) {
+      const { deps, appels } = base({ env: { SITE_RESERVATION_LIGNE_SLUGS: 'nommos', ...(types === undefined ? {} : { SITE_RESERVATION_LIGNE_TYPES: types }) } })
+      let lu = 0
+      deps.type = async () => {
+        lu++
+        return libre
+      }
+      assert.equal((await traiter(entree(), deps)).statut, 404, String(types))
+      assert.equal(appels.length + lu, 0)
+    }
   })
   it('limite de débit : 429 sans lecture ni création', async () => {
     const { deps, appels } = base({ limite: () => true })
