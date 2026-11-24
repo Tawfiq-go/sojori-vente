@@ -91,21 +91,43 @@ export function corpsReservation(d: Demande, ids: { listingId: string; roomTypeI
   }
 }
 
-/** Les refus que la page sait dire (codes stables de srv-reservations), sinon le message générique. */
-export const ERREURS = ['MOTEUR_FERME', 'UNPAID_RESERVATION_EXISTS', 'DEVIS_PERIME', 'INDISPONIBLE'] as const
-export type CodeErreur = (typeof ERREURS)[number] | 'autre'
+/**
+ * Les refus que la page sait dire. Les codes de srv-reservations sont ramenés à quelques messages :
+ *  - prix : PRICE_CHANGED, NIGHTS_WITHOUT_PRICE → `PRIX_CHANGE` (rechargez, le prix a changé) ;
+ *  - dates : DATES_NOT_AVAILABLE, LISTING_UNAVAILABLE, RESERVATION_ALREADY_EXISTS, INDISPONIBLE → `INDISPONIBLE` ;
+ *  - une demande déjà en attente de paiement : UNPAID_RESERVATION_EXISTS ; vente fermée : MOTEUR_FERME ; prix indisponible : PRICING_UNAVAILABLE.
+ */
+export const ERREURS = ['MOTEUR_FERME', 'UNPAID_RESERVATION_EXISTS', 'PRIX_CHANGE', 'INDISPONIBLE', 'PRICING_UNAVAILABLE'] as const
+export type CodeErreur = (typeof ERREURS)[number] | 'VALIDATION' | 'TROP_DE_DEMANDES' | 'autre'
+const RAMENE: Record<string, CodeErreur> = {
+  PRICE_CHANGED: 'PRIX_CHANGE',
+  NIGHTS_WITHOUT_PRICE: 'PRIX_CHANGE',
+  DATES_NOT_AVAILABLE: 'INDISPONIBLE',
+  LISTING_UNAVAILABLE: 'INDISPONIBLE',
+  RESERVATION_ALREADY_EXISTS: 'INDISPONIBLE',
+}
+export function codeDit(c: unknown): CodeErreur {
+  const v = typeof c === 'string' ? (RAMENE[c] ?? c) : ''
+  return (ERREURS as readonly string[]).includes(v) ? (v as CodeErreur) : 'autre'
+}
 
-export type Resultat = { ok: true; paymentUrl: string; reservationNumber: string } | { ok: false; statut: number; code: CodeErreur }
-
-/** Un lien de paiement n'est suivi que s'il est en https (jamais un `javascript:` ni un schéma imprévu). */
-export function lienOuvrable(u: unknown): u is string {
+/** Hôtes où mène un lien de paiement : nos pages (sojori.com et sous-domaines) et la passerelle de la banque (cmi.co.ma). Jamais un autre hôte. */
+export function hotePaiementOk(u: unknown): u is string {
   if (typeof u !== 'string' || u.length > 2000) return false
   try {
-    return new URL(u).protocol === 'https:'
+    const url = new URL(u)
+    if (url.protocol !== 'https:' || url.username || url.password) return false
+    const h = url.hostname.toLowerCase()
+    return h === 'sojori.com' || h.endsWith('.sojori.com') || h === 'cmi.co.ma' || h.endsWith('.cmi.co.ma')
   } catch {
     return false
   }
 }
+
+export type Resultat = { ok: true; paymentUrl: string; reservationNumber: string } | { ok: false; statut: number; code: CodeErreur }
+
+/** Un lien de paiement n'est suivi que s'il est en https ET sur un hôte attendu (`hotePaiementOk`). */
+export const lienOuvrable = hotePaiementOk
 
 /** Crée la réservation chez srv-reservations. Tout échec est un refus net (aucune réservation devinée), sans détail technique. */
 export async function creer(corps: ReturnType<typeof corpsReservation>, base: string, fetchImpl: typeof fetch = fetch): Promise<Resultat> {
@@ -124,6 +146,42 @@ export async function creer(corps: ReturnType<typeof corpsReservation>, base: st
   if (r.ok && j?.success && lienOuvrable(j.data?.paymentUrl) && typeof j.data?.reservationNumber === 'string') {
     return { ok: true, paymentUrl: j.data.paymentUrl, reservationNumber: j.data.reservationNumber }
   }
-  const code = (ERREURS as readonly string[]).includes(j?.code ?? '') ? (j?.code as CodeErreur) : 'autre'
-  return { ok: false, statut: r.ok ? 502 : r.status === 403 || r.status === 409 ? r.status : 502, code }
+  const code = r.ok ? 'autre' : codeDit(j?.code)
+  const statut = code === 'MOTEUR_FERME' ? 403 : code === 'PRICING_UNAVAILABLE' ? 503 : code === 'autre' ? 502 : 409
+  return { ok: false, statut, code }
+}
+
+/** Le mode du moteur d'un site : brouillon = `demo`, site publié ouvert (liste serveur) = `ligne`, sinon `ferme` (WhatsApp). */
+export function choisirMode(apercu: boolean, slug: string, env: Record<string, string | undefined> = process.env): 'demo' | 'ferme' | 'ligne' {
+  if (apercu) return 'demo'
+  return slug && reservationEnLigne(slug, env) ? 'ligne' : 'ferme'
+}
+
+type Sejour = { arrivee: string; depart: string; voyageurs: number; nuits: number }
+export type Deps = {
+  env: Record<string, string | undefined>
+  limite: (ip: string) => boolean
+  sejour: (q: { checkIn?: string; checkOut?: string; adults?: string }) => Sejour | null
+  ids: (id: string) => { listingId: string; roomTypeId?: string } | null
+  type: (slug: string, id: string, sejour: Sejour, ip: string) => Promise<{ etat?: string; devis?: { detail?: Detail } } | null>
+  creer: (corps: ReturnType<typeof corpsReservation>) => Promise<Resultat>
+}
+export type Reponse = { statut: number; corps: Record<string, unknown> }
+
+/** Toute la décision de la route, sans réseau direct (les lectures et la création sont injectées : testable). */
+export async function traiter(e: { slug: string; brut: string; ip: string; hote: string }, d: Deps): Promise<Reponse> {
+  if (!/^[a-z0-9-]{3,40}$/.test(e.slug) || !reservationEnLigne(e.slug, d.env)) return { statut: 404, corps: { success: false } }
+  if (d.limite(e.ip)) return { statut: 429, corps: { success: false, code: 'TROP_DE_DEMANDES' } }
+  if (e.brut.length > CORPS_MAX) return { statut: 413, corps: { success: false, code: 'VALIDATION' } }
+  const demande = lireDemande(e.brut)
+  const sejour = demande ? d.sejour({ checkIn: demande.checkIn, checkOut: demande.checkOut, adults: String(demande.adults) }) : null
+  const ids = demande ? d.ids(demande.typeId) : null
+  const hote = e.hote.trim().toLowerCase()
+  if (!demande || !sejour || !ids || !/^[a-z0-9.-]{3,100}$/.test(hote)) return { statut: 400, corps: { success: false, code: 'VALIDATION' } }
+  // Le type est un type de CE PM, libre pour ces dates, avec son devis relu à l'instant.
+  const type = await d.type(e.slug, demande.typeId, sejour, e.ip)
+  if (!type || type.etat !== 'libre' || !type.devis?.detail) return { statut: 409, corps: { success: false, code: 'INDISPONIBLE' } }
+  const r = await d.creer(corpsReservation(demande, ids, type.devis.detail, e.slug, `https://${hote}`))
+  if (!r.ok) return { statut: r.statut, corps: { success: false, code: r.code } }
+  return { statut: 200, corps: { success: true, paymentUrl: r.paymentUrl, reservationNumber: r.reservationNumber } }
 }

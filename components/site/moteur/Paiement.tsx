@@ -6,7 +6,8 @@
  * `sessionStorage` du navigateur le temps de l'écran suivant, jamais dans l'adresse. Mode `ferme` (site publié,
  * réservation en ligne pas encore ouverte) : pas de formulaire, la demande part par WhatsApp au numéro du client.
  */
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { codeDit, hotePaiementOk } from '@/lib/site/reservation'
 import { mm } from '@/lib/site/moteur-mots'
 import type { Langue } from '@/lib/site/types'
 
@@ -37,6 +38,14 @@ export function Paiement({
 }) {
   const [envoi, setEnvoi] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
+  // Retour arrière depuis la page de paiement (page restaurée du cache) : le formulaire doit être de nouveau utilisable.
+  useEffect(() => {
+    const retourDeCache = (e: PageTransitionEvent) => {
+      if (e.persisted) setEnvoi(false)
+    }
+    window.addEventListener('pageshow', retourDeCache)
+    return () => window.removeEventListener('pageshow', retourDeCache)
+  }, [])
   if (mode === 'ferme') {
     return (
       <div className="moteur-paiement">
@@ -76,11 +85,11 @@ export function Paiement({
         }),
       })
       const j = (await r.json().catch(() => null)) as { success?: boolean; paymentUrl?: string; code?: string } | null
-      if (r.ok && j?.success && typeof j.paymentUrl === 'string' && j.paymentUrl.startsWith('https://')) {
+      if (r.ok && j?.success && hotePaiementOk(j.paymentUrl)) {
         window.location.assign(j.paymentUrl)
         return
       }
-      const cle = ['MOTEUR_FERME', 'UNPAID_RESERVATION_EXISTS', 'INDISPONIBLE', 'VALIDATION'].includes(j?.code ?? '') ? j?.code : 'autre'
+      const cle = j?.code === 'VALIDATION' || j?.code === 'TROP_DE_DEMANDES' ? j.code : codeDit(j?.code)
       setErreur(mm(`erreur_${cle}` as 'erreur_autre', langue))
     } catch {
       setErreur(mm('erreur_autre', langue))
