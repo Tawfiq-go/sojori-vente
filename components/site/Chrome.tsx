@@ -26,6 +26,7 @@ export function CadreSite({
   children,
   apres,
   moteur,
+  nu,
 }: {
   site: SitePublic
   /** '' sur le domaine du PM ; `/site-apercu/<jeton>/<slug>` dans l'aperçu ; `/site-pm/<slug>` sur sojori-vente. */
@@ -39,6 +40,8 @@ export function CadreSite({
   apres?: ReactNode
   /** La charte PROPRE du moteur (onglet « Moteur de réservation ») ; seulement la page de réservation la reçoit. */
   moteur?: SurchargeMoteur | null
+  /** Page complète (mise en page « seule ») : ni en-tête ni pied du site, elle porte les siens. */
+  nu?: boolean
 }) {
   const { defaut, actives } = site.spec.langues
   const legal = site.spec.pages.find((p) => p.sections.some((s) => s.niveau === 'sojori' && s.type === 'legal'))
@@ -67,7 +70,7 @@ export function CadreSite({
       )}
       {/* Pas de bandeau « Aperçu — non publié » (Tawfiq, 16/11/2026) : l'écran Site web du dashboard dit déjà
           « Brouillon — pas encore en ligne » au-dessus du cadre, et le bandeau masquait l'en-tête du site. */}
-      <header className="entete" data-bloc="entete">
+      {!nu && <header className="entete" data-bloc="entete">
         <a className="entete__nom" href={l(langue, '')} data-affichage={affichage}>
           {affichage !== 'nom' && logo && (
             <img src={logo.url} alt={affichage === 'logo' ? site.spec.identite.nom : ''} />
@@ -99,9 +102,9 @@ export function CadreSite({
             ))}
           </nav>
         )}
-      </header>
+      </header>}
       <main data-page={pageId ?? CHEMIN_RESERVER} data-chemin={chemin === '' ? 'accueil' : chemin}>{children}</main>
-      <footer className="pied" data-bloc="pied">
+      {!nu && <footer className="pied" data-bloc="pied">
         <div className="pied__colonnes">
           <div className="pied__col pied__col--marque">
             {logo && <img className="pied__logo" src={logo.url} alt={site.spec.identite.nom} loading="lazy" decoding="async" />}
@@ -153,7 +156,7 @@ export function CadreSite({
             </>
           )}
         </p>
-      </footer>
+      </footer>}
       {whatsapp && <WhatsappFlottant numero={whatsapp} langue={langue} />}
       {apres}
     </div>

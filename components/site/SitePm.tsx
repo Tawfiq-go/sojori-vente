@@ -4,6 +4,7 @@
  * débordent pas sur le reste de sojori-vente (pages logement, réservation).
  */
 import { pageAvecChampsDynamiques } from '@/lib/site/offreDonnees'
+import { miseEnPage } from '@/lib/site/miseEnPage'
 import { offreTerminee, themeDeLaPage } from '@/lib/site/offre'
 import type { Langue, Page, SitePublic } from '@/lib/site/types'
 import { AssistantSite } from './AssistantSite'
@@ -36,7 +37,9 @@ export async function SitePm({
   // Une landing a son design (accent, police, style) ; le cadre le lit dans le thème : site, en-tête et pied suivent.
   const vue: SitePublic = page.offre ? { ...site, spec: { ...site.spec, theme: themeDeLaPage(site.spec.theme, page.offre) } } : site
   // Une offre terminée n'a plus d'appel vers l'offre : on garde son message de fin et le reste de la page.
-  const sections = offreTerminee(page.offre, site.apercu) ? page.sections.filter((s) => !(s.niveau === 'bibliotheque' && s.type === 'appel')) : page.sections
+  // Une mise en page « seule » (bohème) est la page entière : sa section d'offre, sans le cadre du site ni les autres sections.
+  const seule = !offreTerminee(page.offre, site.apercu) && miseEnPage(page.offre?.miseEnPage?.id ?? '')?.seule === true && page.sections.some((s) => s.niveau === 'bibliotheque' && s.type === 'offre')
+  const sections = seule ? page.sections.filter((s) => s.niveau === 'bibliotheque' && s.type === 'offre') : offreTerminee(page.offre, site.apercu) ? page.sections.filter((s) => !(s.niveau === 'bibliotheque' && s.type === 'appel')) : page.sections
   return (
     <CadreSite
       site={vue}
@@ -44,6 +47,7 @@ export async function SitePm({
       langue={langue}
       chemin={page.chemin}
       pageId={page.id}
+      nu={seule}
       apres={
         site.spec.identite.assistant ? (
           <AssistantSite

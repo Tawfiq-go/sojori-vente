@@ -7,6 +7,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { type Emplacement, type MiseEnPage, couleurSure, libelleRole, marqueSure, rendreEmplacement, variante } from '@/lib/site/miseEnPage'
 import { Decompte } from '../Decompte'
+import { Boheme } from './Boheme'
 
 export type DonneesLanding = {
   marque: string
@@ -38,11 +39,21 @@ export type DonneesLanding = {
   palette?: Array<{ nom: string; couleur: string }>
   sections?: Array<{ titre: string; points: string[] }>
   /** Soirée : les formules (prix du catalogue déjà mis en forme, lien vers le panneau avec la formule choisie). */
-  formules?: Array<{ indice: number; nom: string; prix?: string; unite?: string; points: string[]; badge?: string; lien?: string }>
+  formules?: Array<{ indice: number; nom: string; prix?: string; unite?: string; points: string[]; badge?: string; lien?: string; prixNombre?: string; devise?: string }>
   /** Événement périodique : les prochaines dates (déjà en clair) et leurs places ; sans lien = complet. */
   dates?: Array<{ cle: string; nom: string; places: string; lien?: string }>
   /** Événement qui ne se réserve pas (désactivé, terminé, complet) : ce texte remplace les boutons. */
   ferme?: string
+  /** Bohème : le cadre propre à la page (logo, langues, pied), comment réserver, le panneau de commande et les mots. */
+  boheme?: {
+    logoSite?: string
+    langues: Array<{ code: string; lien: string; actif: boolean }>
+    mentions?: { texte: string; lien: string }
+    annee: number
+    modes: Array<{ id: 'sur_place' | 'carte'; badge: string; titre: string; texte: string; bouton: string; lien: string }>
+    panneau?: ReactNode
+    mots: Record<'experience' | 'formules' | 'reserver' | 'reservation' | 'choix' | 'choisissez' | 'galerie' | 'fermer' | 'photoAvant' | 'photoApres' | 'conditions', string>
+  }
   libelles?: { formules: string; voirFormules: string; programme: string; choisir: string; ambiance: string; dates?: string }
 }
 
@@ -612,6 +623,7 @@ const RENDUS: Record<string, (p: Props) => ReactNode> = {
   carte_chef: CarteChef,
   day_pass: DayPass,
   brunch: Brunch,
+  boheme: Boheme,
   soiree: Soiree,
 }
 

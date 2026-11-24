@@ -18,7 +18,7 @@ export type Format = (typeof FORMATS)[number]
 export type Emplacement = {
   id: string
   /** Ce que la photo doit montrer : le client et l'agent s'en servent pour choisir la bonne image. */
-  role: 'couverture' | 'ambiance' | 'detail' | 'plat' | 'portrait' | 'lieu'
+  role: 'couverture' | 'ambiance' | 'detail' | 'plat' | 'portrait' | 'lieu' | 'logo' | 'paiements'
   format: Format
   /** Obligatoire pour la variante AVEC images ; jamais pour publier (la variante sans image existe toujours). */
   principal?: boolean
@@ -32,6 +32,8 @@ export type MiseEnPage = {
   /** Les types de service pour lesquels elle est faite, du plus adapté au moins adapté. */
   pour: readonly TypeService[]
   emplacements: readonly Emplacement[]
+  /** Page COMPLÈTE : son propre en-tête et son propre pied ; le cadre du site et les autres sections ne s'affichent pas. */
+  seule?: boolean
 }
 
 export const MISES_EN_PAGE: readonly MiseEnPage[] = [
@@ -103,6 +105,22 @@ export const MISES_EN_PAGE: readonly MiseEnPage[] = [
     ],
   },
   {
+    id: 'boheme',
+    nom: 'Bohème, affiche',
+    description: 'Une affiche plein écran sur papier déchiré, le calendrier des dates, une photo par formule, une galerie de dix photos. Page complète, avec son propre cadre.',
+    pour: ['brunch', 'restaurant', 'piscine'],
+    seule: true,
+    emplacements: [
+      { id: 'couverture', role: 'couverture', format: '16:9', principal: true },
+      { id: 'logo', role: 'logo', format: '3:2' },
+      { id: 'formule1', role: 'plat', format: '3:2' },
+      { id: 'formule2', role: 'plat', format: '3:2' },
+      { id: 'formule3', role: 'plat', format: '3:2' },
+      ...Array.from({ length: 10 }, (_, i): Emplacement => ({ id: `photo${i + 1}`, role: i % 2 ? 'lieu' : 'plat', format: '1:1' })),
+      { id: 'paiements', role: 'paiements', format: '3:2' },
+    ],
+  },
+  {
     id: 'soiree',
     nom: 'Soirée, événement',
     description: 'Un premier écran sombre et le compte à rebours, l’ambiance, la nuit heure par heure, plusieurs formules à réserver.',
@@ -166,6 +184,8 @@ export const libelleRole: Record<Emplacement['role'], string> = {
   plat: 'Plat signature',
   portrait: 'Portrait',
   lieu: 'Photo du lieu',
+  logo: 'Logo',
+  paiements: 'Logos de paiement',
 }
 
 /**
