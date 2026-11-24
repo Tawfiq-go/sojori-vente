@@ -10,6 +10,7 @@
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { lireVilla } from '@/lib/site/logement'
+import { reservationEnLigne } from '@/lib/site/reservation'
 import { lireCalendrier, lireSejour, lireType, lireTypes, formaterPrix } from '@/lib/site/moteur'
 import { mm } from '@/lib/site/moteur-mots'
 import type { SurchargeMoteur } from '@/lib/site/moteur-theme'
@@ -27,9 +28,13 @@ import { Recapitulatif } from './Recapitulatif'
 
 type Valeurs = { checkIn?: string; checkOut?: string; adults?: string }
 
-/** `demo` : brouillon du site (rien d'écrit nulle part). `ferme` : site publié, réservation en ligne pas encore ouverte. */
-export function modeMoteur(site: SitePublic): 'demo' | 'ferme' {
-  return site.apercu ? 'demo' : 'ferme'
+/**
+ * `demo` : brouillon du site (rien d'écrit nulle part). `ferme` : site publié, réservation en ligne pas encore ouverte (WhatsApp).
+ * `ligne` : site publié dont le slug est dans `SITE_RESERVATION_LIGNE_SLUGS` (éteint par défaut) : réservation par carte.
+ */
+export function modeMoteur(site: SitePublic, slug = ''): 'demo' | 'ferme' | 'ligne' {
+  if (site.apercu) return 'demo'
+  return slug && reservationEnLigne(slug) ? 'ligne' : 'ferme'
 }
 
 export async function Parcours({
@@ -96,7 +101,7 @@ export async function Parcours({
   if (!etape) return <FicheType site={site} base={base} langue={langue} type={type} villa={villa} sejour={sejour} valeurs={valeurs} jours={jours} />
 
   const fiche = l(`${CHEMIN_RESERVER}/${type.id}${qs}`)
-  const mode = modeMoteur(site)
+  const mode = modeMoteur(site, slug)
   const whatsapp = site.contact?.whatsapp
   const libre = Boolean(sejour && type.etat === 'libre' && type.devis)
   const nomSite = site.spec.identite.nom
@@ -137,6 +142,7 @@ export async function Parcours({
             suite={l(`${CHEMIN_RESERVER}/${type.id}/confirmation${qs}`)}
             retour={fiche}
             lienWhatsapp={whatsapp ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}` : null}
+            ligne={mode === 'ligne' ? { slug, checkIn: sejour.arrivee, checkOut: sejour.depart, adults: sejour.voyageurs } : undefined}
           />
           {recap}
         </div>

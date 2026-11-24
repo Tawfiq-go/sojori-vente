@@ -22,17 +22,21 @@ export function Paiement({
   suite,
   retour,
   lienWhatsapp,
+  ligne,
 }: {
   langue: Langue
-  mode: 'demo' | 'ferme'
+  mode: 'demo' | 'ferme' | 'ligne'
   typeId: string
   total: string
   /** La page de confirmation (séjour compris, sans donnée personnelle). */
   suite: string
   retour: string
   lienWhatsapp: string | null
+  /** Mode `ligne` : de quoi créer la réservation (le serveur relit le prix, jamais envoyé d'ici). */
+  ligne?: { slug: string; checkIn: string; checkOut: string; adults: number }
 }) {
   const [envoi, setEnvoi] = useState(false)
+  const [erreur, setErreur] = useState<string | null>(null)
   if (mode === 'ferme') {
     return (
       <div className="moteur-paiement">
@@ -48,6 +52,41 @@ export function Paiement({
       </div>
     )
   }
+  async function payer(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (!ligne) return
+    const f = new FormData(e.currentTarget)
+    const lire = (k: string) => String(f.get(k) ?? '').trim()
+    setEnvoi(true)
+    setErreur(null)
+    try {
+      const r = await fetch(`/api/site-reservation/${encodeURIComponent(ligne.slug)}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          typeId,
+          checkIn: ligne.checkIn,
+          checkOut: ligne.checkOut,
+          adults: ligne.adults,
+          prenom: lire('prenom'),
+          nom: lire('nom'),
+          email: lire('email'),
+          telephone: lire('telephone'),
+          ...(lire('arrivee') ? { arrivee: lire('arrivee') } : {}),
+        }),
+      })
+      const j = (await r.json().catch(() => null)) as { success?: boolean; paymentUrl?: string; code?: string } | null
+      if (r.ok && j?.success && typeof j.paymentUrl === 'string' && j.paymentUrl.startsWith('https://')) {
+        window.location.assign(j.paymentUrl)
+        return
+      }
+      const cle = ['MOTEUR_FERME', 'UNPAID_RESERVATION_EXISTS', 'INDISPONIBLE', 'VALIDATION'].includes(j?.code ?? '') ? j?.code : 'autre'
+      setErreur(mm(`erreur_${cle}` as 'erreur_autre', langue))
+    } catch {
+      setErreur(mm('erreur_autre', langue))
+    }
+    setEnvoi(false)
+  }
   function valider(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const f = new FormData(e.currentTarget)
@@ -62,8 +101,9 @@ export function Paiement({
     }
     window.location.assign(suite)
   }
+  const enLigne = mode === 'ligne' && Boolean(ligne)
   return (
-    <form className="moteur-paiement" onSubmit={valider}>
+    <form className="moteur-paiement" onSubmit={enLigne ? payer : valider}>
       <section>
         <h2>{mm('coordonnees', langue)}</h2>
         <div className="moteur-champs">
@@ -95,12 +135,17 @@ export function Paiement({
           <span className="moteur-paiement__radio" aria-hidden="true" />
           <div>
             <strong>{mm('carte', langue)}</strong>
-            <p>{mm('demoCarte', langue)}</p>
+            <p>{enLigne ? mm('carteRedirection', langue) : mm('demoCarte', langue)}</p>
           </div>
         </div>
       </section>
+      {erreur && (
+        <p className="moteur-alerte" role="alert">
+          {erreur}
+        </p>
+      )}
       <button className="bouton" type="submit" disabled={envoi}>
-        {mm('confirmerPayer', langue, { p: total })}
+        {envoi && enLigne ? mm('enCours', langue) : enLigne ? `${mm('payerCarte', langue)} · ${total}` : mm('confirmerPayer', langue, { p: total })}
       </button>
       <p className="villa__note">{mm('conditions', langue)}</p>
       <p>
