@@ -27,6 +27,19 @@ export type Devis = {
   devise: string
   /** Prix moyen d'une nuit (sous-total / nuits). */
   parNuit: number
+  /** Le détail tel que srv-listing le rend : ce que srv-reservations re-vérifie à la création d'une réservation (jamais lu du navigateur). */
+  detail?: DetailPrix
+}
+
+export type DetailPrix = {
+  baseNights: number
+  basePrice: number
+  weekendNights: number
+  weekendPrice: number
+  subtotal: number
+  serviceFee: number
+  tax: number
+  total: number
 }
 
 export type TypeChambre = {
@@ -184,6 +197,16 @@ export async function evaluerType(slug: string, id: string, sejour: Sejour, maxV
       total,
       devise: typeof d.currency === 'string' ? d.currency : 'MAD',
       parNuit: Math.round(sousTotal / sejour.nuits),
+      detail: {
+        baseNights: nombre(d.baseNights) ?? 0,
+        basePrice: nombre(d.basePrice) ?? 0,
+        weekendNights: nombre(d.weekendNights) ?? 0,
+        weekendPrice: nombre(d.weekendPrice) ?? 0,
+        subtotal: sousTotal,
+        serviceFee: frais ?? 0,
+        tax: taxe ?? 0,
+        total,
+      },
     },
   }
 }
