@@ -10,7 +10,7 @@
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { lireVilla } from '@/lib/site/logement'
-import { reservationEnLigne } from '@/lib/site/reservation'
+import { choisirMode } from '@/lib/site/reservation'
 import { lireCalendrier, lireSejour, lireType, lireTypes, formaterPrix } from '@/lib/site/moteur'
 import { mm } from '@/lib/site/moteur-mots'
 import type { SurchargeMoteur } from '@/lib/site/moteur-theme'
@@ -33,8 +33,7 @@ type Valeurs = { checkIn?: string; checkOut?: string; adults?: string }
  * `ligne` : site publié dont le slug est dans `SITE_RESERVATION_LIGNE_SLUGS` (éteint par défaut) : réservation par carte.
  */
 export function modeMoteur(site: SitePublic, slug = ''): 'demo' | 'ferme' | 'ligne' {
-  if (site.apercu) return 'demo'
-  return slug && reservationEnLigne(slug) ? 'ligne' : 'ferme'
+  return choisirMode(Boolean(site.apercu), slug)
 }
 
 export async function Parcours({
