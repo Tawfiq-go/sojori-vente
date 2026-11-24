@@ -6,9 +6,10 @@
  * y applique la remise de la landing. Le paiement s'ouvre sur le lien que srv-site rend (https seulement). Voir lib/site/commande.ts.
  */
 import { type FormEvent, useEffect, useState } from 'react'
-import { adresseRetour, cleCommande, codeErreur, corpsFormules, dateDuLien, dateEvenement, encoreRetenue, lienOuvrable, lireCommandeGardee, montantMad, premiereDateLibre, retourBanque, totalFormules } from '@/lib/site/commande'
+import { adresseRetour, cleCommande, codeErreur, corpsFormules, dateDuLien, dateEvenement, encoreRetenue, lienOuvrable, lireCommandeGardee, montantMad, paiementDuLien, premiereDateLibre, retourBanque, totalFormules } from '@/lib/site/commande'
 import { mot } from '@/lib/site/texte'
 import type { Langue } from '@/lib/site/types'
+import { CalendrierDates } from './miseEnPage/CalendrierDates'
 
 type Creneau = { debut: string; fin?: string; restant: number | null; disponible: boolean }
 /** `jeton` : la preuve, rendue à la création, que cette commande est la nôtre ; le paiement l'exige (jamais l'identifiant seul). */
@@ -38,6 +39,10 @@ type Props = {
   paiement?: { carte: boolean; surPlace: boolean }
   /** Événement : sa date est FIXE (celle de Services) ; le panneau l'affiche au lieu de la demander, et ne cherche aucun créneau. */
   evenement?: { debut: string; /** Périodique : les dates ouvertes, une seule se réserve par commande. */ dates?: Array<{ date: string; debut: string; restantes: number }> }
+  /** Bohème : le panneau en bandeau (calendrier, compteurs, récapitulatif), puis les coordonnées. Événement périodique seulement. */
+  bandeau?: boolean
+  /** Bohème : la ligne sous le calendrier (« Uniquement le dimanche, jusqu'au 30 mai 2027 »). */
+  indication?: string
 }
 
 const api = (slug: string, pageId: string, suite: string) => `/api/site-commande/${encodeURIComponent(slug)}/${encodeURIComponent(pageId)}/${suite}`
@@ -55,7 +60,7 @@ async function appeler(url: string, init?: RequestInit): Promise<{ ok: boolean; 
   }
 }
 
-export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrincipal, prixOffreCentimes: offrePrincipal, devise, formules, apercu, whatsapp, paiement, evenement }: Props) {
+export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrincipal, prixOffreCentimes: offrePrincipal, devise, formules, apercu, whatsapp, paiement, evenement, bandeau, indication }: Props) {
   const surPlacePossible = paiement?.surPlace === true
   const cartePossible = paiement ? paiement.carte : true
   const [surPlace, setSurPlace] = useState(surPlacePossible && !cartePossible)
@@ -67,6 +72,7 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
   // Événement : un compteur par formule (2 adultes, 1 enfant) dans UNE réservation ; chaque formule désignée par son identifiant.
   const compteurs = evenement !== undefined && formules !== undefined && formules.length > 0 && formules.every((f) => f.id !== undefined)
   const premiere = formules?.[0]?.id
+  const enBandeau = bandeau === true && compteurs && evenement?.dates !== undefined
   const [quantites, setQuantites] = useState<Record<string, number>>(compteurs && premiere ? { [premiere]: 1 } : {})
   const [date, setDate] = useState('')
   // Événement périodique : la date choisie (à part de `date`, qu'un changement de formule remet à zéro).
@@ -77,6 +83,8 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
   const [erreur, setErreur] = useState('')
   const [commande, setCommande] = useState<Commande | null>(null)
   // Retour de la banque : `fail` (paiement non abouti, on peut réessayer) ou `ok` (confirmation en cours : seule la banque confirme).
+  // Bandeau : les places d'abord, les coordonnées ensuite (un seul envoi, au second bouton).
+  const [coordonnees, setCoordonnees] = useState(false)
   const [retour, setRetour] = useState<'ok' | 'fail' | null>(null)
   const dir = langue === 'ar' ? 'rtl' : 'ltr'
 
@@ -149,6 +157,19 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
     if (retour) document.querySelector('.offre__commande')?.scrollIntoView({ block: 'center' })
   }, [retour])
 
+  // « Réservation sans paiement » ou « avec paiement » (cartes de la page) : le mode est choisi, le panneau vient à l'écran.
+  useEffect(() => {
+    const lire = () => {
+      const mode = paiementDuLien(window.location.hash)
+      if (!mode || (mode === 'sur_place' ? !surPlacePossible : !cartePossible)) return
+      setSurPlace(mode === 'sur_place')
+      document.getElementById('reserver')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+    lire()
+    window.addEventListener('hashchange', lire)
+    return () => window.removeEventListener('hashchange', lire)
+  }, [surPlacePossible, cartePossible])
+
   async function choisirDate(v: string) {
     setDate(v)
     setCreneau('')
@@ -165,6 +186,12 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
   async function reserver(e: FormEvent) {
     e.preventDefault()
     if (occupe || apercu) return
+    if (enBandeau && !coordonnees) {
+      setErreur('')
+      if (!corpsFormules(quantites) || !dateChoisie) return dire('VALIDATION')
+      setCoordonnees(true)
+      return
+    }
     const choixFormules = compteurs ? corpsFormules(quantites) : null
     if (compteurs && !choixFormules) return dire('VALIDATION')
     setOccupe(true)
@@ -256,6 +283,104 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
     )
 
   const total = compteurs ? totalFormules(formules ?? [], quantites) : null
+  const alerte = erreur && (
+    <p role="alert" className="offre__commande-erreur">
+      {erreur}
+    </p>
+  )
+  const champs = (
+    <>
+      <label>
+        {mot('cmdNom', langue)}
+        <input type="text" required maxLength={120} autoComplete="name" value={nom} onChange={(e) => setNom(e.target.value)} />
+      </label>
+      <label>
+        {mot('cmdEmail', langue)}
+        <input type="email" required maxLength={254} autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </label>
+      <label>
+        {mot(whatsapp ? 'cmdWhatsapp' : 'cmdTel', langue)}
+        <input type="tel" maxLength={30} autoComplete="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)} />
+      </label>
+    </>
+  )
+  const modesPaiement = surPlacePossible && cartePossible && (
+    <fieldset className="offre__commande-formules">
+      <legend>{mot('cmdModePaiement', langue)}</legend>
+      <label className="offre__commande-creneau">
+        <input type="radio" name="paiement" checked={!surPlace} onChange={() => setSurPlace(false)} />
+        {mot('cmdPayerEnLigne', langue)}
+      </label>
+      <label className="offre__commande-creneau">
+        <input type="radio" name="paiement" checked={surPlace} onChange={() => setSurPlace(true)} />
+        {mot('cmdPayerSurPlace', langue)}
+      </label>
+    </fieldset>
+  )
+
+  if (enBandeau && formules)
+    return (
+      <form className="offre__commande offre__commande--bandeau" dir={dir} onSubmit={reserver} data-commande="formulaire">
+        <h2 className="mep-boheme__invisible">{mot('cmdTitreEvenement', langue)}</h2>
+        {retour === 'fail' && alerteEchec(mot('cmdRetourRefaire', langue))}
+        <div className="mep-boheme__champs">
+          <div className="mep-boheme__champ">
+            <span>{mot('cmdDate', langue)}</span>
+            <CalendrierDates dates={evenement?.dates ?? []} choisie={dateChoisie} onChoisir={setDateChoisie} langue={langue} indication={indication} />
+          </div>
+          {formules.map((f) => {
+            const id = f.id as string
+            const n = quantites[id] ?? 0
+            const poser = (v: number) => setQuantites((q) => ({ ...q, [id]: Math.max(0, Math.min(20, v)) }))
+            return (
+              <div key={id} className="mep-boheme__champ">
+                <span>{f.nom}</span>
+                <div className="mep-boheme__pas">
+                  <button type="button" onClick={() => poser(n - 1)} disabled={n < 1} aria-label={`${mot('cmdMoins', langue)} : ${f.nom}`}>
+                    −
+                  </button>
+                  <output aria-live="polite">{n}</output>
+                  <button type="button" onClick={() => poser(n + 1)} disabled={n > 19} aria-label={`${mot('cmdPlus', langue)} : ${f.nom}`}>
+                    +
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        {coordonnees && (
+          <div className="mep-boheme__coordonnees" data-commande="coordonnees">
+            <p>{mot('bohCoordonnees', langue)}</p>
+            <div>{champs}</div>
+            {modesPaiement}
+          </div>
+        )}
+        {alerte}
+        <div className="mep-boheme__bas">
+          <div>
+            <span>{mot('bohRecap', langue)}</span>
+            <p>
+              {formules
+                .filter((f) => (quantites[f.id as string] ?? 0) > 0)
+                .map((f) => `${quantites[f.id as string]} × ${f.nom}${f.prixCentimes !== undefined ? ` (${montantMad(f.prixCentimes, devise, langue)})` : ''}`)
+                .join(' + ')}
+            </p>
+          </div>
+          {!!total && (
+            <p className="mep-boheme__total" data-commande="total">
+              <span>{mot('cmdTotal', langue)}</span> <strong>{montantMad(total, devise, langue)}</strong>
+            </p>
+          )}
+          <button type="submit" className="mep-boheme__bouton mep-boheme__bouton--grand" disabled={occupe || apercu}>
+            {occupe ? mot('cmdEnCours', langue) : mot(coordonnees ? (surPlace ? 'cmdEnvoyer' : 'bohContinuer') : surPlace ? 'bohSansBouton' : 'bohAvecBouton', langue)}
+            <span className="mep-boheme__fleche" aria-hidden="true">
+              →
+            </span>
+          </button>
+        </div>
+      </form>
+    )
+
   const unite = prixOffreCentimes !== undefined && prixCentimes !== undefined && prixOffreCentimes < prixCentimes ? prixOffreCentimes : prixCentimes
   return (
     <form className="offre__commande" dir={dir} onSubmit={reserver} data-commande="formulaire">
@@ -362,36 +487,9 @@ export function CommandeLanding({ slug, pageId, langue, prixCentimes: prixPrinci
           <input type="number" min={1} max={20} step={1} required value={quantite} onChange={(e) => setQuantite(Math.max(1, Math.min(20, Math.trunc(Number(e.target.value)) || 1)))} />
         </label>
       )}
-      <label>
-        {mot('cmdNom', langue)}
-        <input type="text" required maxLength={120} autoComplete="name" value={nom} onChange={(e) => setNom(e.target.value)} />
-      </label>
-      <label>
-        {mot('cmdEmail', langue)}
-        <input type="email" required maxLength={254} autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      </label>
-      <label>
-        {mot(whatsapp ? 'cmdWhatsapp' : 'cmdTel', langue)}
-        <input type="tel" maxLength={30} autoComplete="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)} />
-      </label>
-      {erreur && (
-        <p role="alert" className="offre__commande-erreur">
-          {erreur}
-        </p>
-      )}
-      {surPlacePossible && cartePossible && (
-        <fieldset className="offre__commande-formules">
-          <legend>{mot('cmdModePaiement', langue)}</legend>
-          <label className="offre__commande-creneau">
-            <input type="radio" name="paiement" checked={!surPlace} onChange={() => setSurPlace(false)} />
-            {mot('cmdPayerEnLigne', langue)}
-          </label>
-          <label className="offre__commande-creneau">
-            <input type="radio" name="paiement" checked={surPlace} onChange={() => setSurPlace(true)} />
-            {mot('cmdPayerSurPlace', langue)}
-          </label>
-        </fieldset>
-      )}
+      {champs}
+      {alerte}
+      {modesPaiement}
       {surPlacePossible && !cartePossible && <p className="offre__commande-note">{mot('cmdSurPlaceSeul', langue)}</p>}
       {compteurs && !!total && (
         <p className="offre__commande-total" data-commande="total">
