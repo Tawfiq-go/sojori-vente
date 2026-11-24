@@ -8,8 +8,8 @@ const dip = miseEnPage('diptyque')!
 
 describe('mises en page : catalogue', () => {
   it('sept mises en page, identifiants uniques, au moins une par type de service, un emplacement principal quand il y a des photos', () => {
-    assert.equal(MISES_EN_PAGE.length, 7)
-    assert.equal(new Set(MISES_EN_PAGE.map((m) => m.id)).size, 7)
+    assert.equal(MISES_EN_PAGE.length, 8)
+    assert.equal(new Set(MISES_EN_PAGE.map((m) => m.id)).size, 8)
     for (const t of TYPES_SERVICE) assert.ok(misesEnPagePour(t).length > 0, t)
     for (const m of MISES_EN_PAGE) {
       if (m.emplacements.length) assert.equal(m.emplacements.filter((e) => e.principal).length, 1, m.id)
